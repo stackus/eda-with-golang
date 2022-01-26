@@ -23,12 +23,13 @@ var _ ports.StoreRepository = (*StoreRepository)(nil)
 func (r StoreRepository) FindStore(ctx context.Context, storeID string) (*domain.Store, error) {
 	const query = "SELECT name, location, participating FROM %s WHERE id = $1 LIMIT 1"
 
-	store := new(domain.Store)
-
+	store := &domain.Store{
+		ID: storeID,
+	}
 	var location string
 
 	row := r.db.QueryRowContext(ctx, r.fmtQuery(query), storeID)
-	err := row.Scan(&store.Name, location, &store.Participating)
+	err := row.Scan(&store.Name, &location, &store.Participating)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func (r StoreRepository) FindStore(ctx context.Context, storeID string) (*domain
 func (r StoreRepository) SaveStore(ctx context.Context, store *domain.Store) error {
 	const query = "INSERT INTO %s (id, name, location, participating) VALUES ($1, $2, $3, $4)"
 
-	_, err := r.db.ExecContext(ctx, r.fmtQuery(query), store.ID, store.Name, store.Location.String())
+	_, err := r.db.ExecContext(ctx, r.fmtQuery(query), store.ID, store.Name, store.Location.String(), store.Participating)
 
 	return err
 }
