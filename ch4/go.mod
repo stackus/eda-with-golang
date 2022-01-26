@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/cucumber/godog v0.12.3
 	github.com/go-chi/chi/v5 v5.0.7
+	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.3
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/kelseyhightower/envconfig v1.4.0
