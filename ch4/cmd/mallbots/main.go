@@ -55,7 +55,7 @@ func run() error {
 	}
 
 	// Mount general web resources
-	m.mux.Mount("/web/", http.StripPrefix("/web/", http.FileServer(http.FS(web.WebUI))))
+	m.mux.Mount("/", http.FileServer(http.FS(web.WebUI)))
 
 	fmt.Println("started mallbots application")
 	defer fmt.Println("stopped mallbots application")
