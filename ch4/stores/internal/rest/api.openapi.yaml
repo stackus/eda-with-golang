@@ -1,0 +1,20 @@
+openapiOptions:
+  method:
+    - method: stores.grpc.StoresService.CreateStore
+      option:
+        operationId: createStore
+        tags:
+          - Store
+        summary: Create a new store
+    - method: stores.grpc.StoresService.GetStore
+      option:
+        operationId: getStore
+        tags:
+          - Store
+        summary: Get store data
+    - method: stores.grpc.StoresService.EnableParticipation
+      option:
+        operationId: enableParticipation
+        tags:
+          - Store
+        summary: Enable store service participation

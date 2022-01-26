@@ -1,0 +1,12 @@
+type: google.api.Service
+config_version: 3
+http:
+  rules:
+    - selector: stores.grpc.StoresService.CreateStore
+      post: /api/stores
+      body: "*"
+    - selector: stores.grpc.StoresService.GetStore
+      get: /api/stores/{id}
+    - selector: stores.grpc.StoresService.EnableParticipation
+      post: /api/stores/{id}/enableParticipation
+      body: "*"

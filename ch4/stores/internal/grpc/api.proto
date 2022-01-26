@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package stores.grpc;
+
+import "messages.proto";
+
+service StoresService {
+  rpc CreateStore(CreateStoreRequest) returns (CreateStoreResponse) {};
+  rpc GetStore(GetStoreRequest) returns (GetStoreResponse) {};
+  rpc EnableParticipation(EnableParticipationRequest) returns (EnableParticipationResponse) {};
+}
+
+message CreateStoreRequest {
+  string name = 1;
+  string location = 2;
+}
+
+message CreateStoreResponse {
+  string id = 1;
+}
+
+message GetStoreRequest {
+  string id = 1;
+}
+
+message GetStoreResponse {
+  stores.proto.Store store = 1;
+}
+
+message EnableParticipationRequest {
+  string id = 1;
+}
+
+message EnableParticipationResponse {}
