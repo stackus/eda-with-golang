@@ -3,10 +3,13 @@ package grpc
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
+	"google.golang.org/grpc"
+
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/commands"
-	storespb "github.com/stackus/eda-with-golang/ch4/stores/internal/pb"
+	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/queries"
+	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
+	"github.com/stackus/eda-with-golang/ch4/stores/internal/proto/storespb"
 )
 
 type server struct {
@@ -16,8 +19,8 @@ type server struct {
 
 var _ storespb.StoresServiceServer = (*server)(nil)
 
-func Register(app application.App, mono monolith.Monolith) error {
-	storespb.RegisterStoresServiceServer(mono.RPC(), server{app: app})
+func Register(_ context.Context, app application.App, registrar grpc.ServiceRegistrar) error {
+	storespb.RegisterStoresServiceServer(registrar, server{app: app})
 	return nil
 }
 
@@ -36,11 +39,34 @@ func (s server) CreateStore(ctx context.Context, request *storespb.CreateStoreRe
 }
 
 func (s server) GetStore(ctx context.Context, request *storespb.GetStoreRequest) (*storespb.GetStoreResponse, error) {
-	// TODO implement me
-	panic("implement me")
+	store, err := s.app.GetStore(ctx, queries.GetStore{
+		ID: request.GetId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &storespb.GetStoreResponse{
+		Store: s.storeFromDomain(store),
+	}, nil
 }
 
 func (s server) EnableParticipation(ctx context.Context, request *storespb.EnableParticipationRequest) (*storespb.EnableParticipationResponse, error) {
-	// TODO implement me
-	panic("implement me")
+	err := s.app.EnableParticipation(ctx, commands.EnableParticipation{
+		ID: request.GetId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &storespb.EnableParticipationResponse{}, nil
+}
+
+func (s server) storeFromDomain(store *domain.Store) *storespb.Store {
+	return &storespb.Store{
+		Id:            store.ID,
+		Name:          store.Name,
+		Location:      store.Location.String(),
+		Participating: store.Participating,
+	}
 }

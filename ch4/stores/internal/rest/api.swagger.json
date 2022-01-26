@@ -24,7 +24,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/grpcCreateStoreResponse"
+              "$ref": "#/definitions/protoCreateStoreResponse"
             }
           },
           "default": {
@@ -40,7 +40,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/grpcCreateStoreRequest"
+              "$ref": "#/definitions/protoCreateStoreRequest"
             }
           }
         ],
@@ -57,7 +57,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/grpcGetStoreResponse"
+              "$ref": "#/definitions/protoGetStoreResponse"
             }
           },
           "default": {
@@ -88,7 +88,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/grpcEnableParticipationResponse"
+              "$ref": "#/definitions/protoEnableParticipationResponse"
             }
           },
           "default": {
@@ -121,7 +121,7 @@
     }
   },
   "definitions": {
-    "grpcCreateStoreRequest": {
+    "protoCreateStoreRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -132,7 +132,7 @@
         }
       }
     },
-    "grpcCreateStoreResponse": {
+    "protoCreateStoreResponse": {
       "type": "object",
       "properties": {
         "id": {
@@ -140,10 +140,10 @@
         }
       }
     },
-    "grpcEnableParticipationResponse": {
+    "protoEnableParticipationResponse": {
       "type": "object"
     },
-    "grpcGetStoreResponse": {
+    "protoGetStoreResponse": {
       "type": "object",
       "properties": {
         "store": {

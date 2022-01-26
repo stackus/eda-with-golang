@@ -37,7 +37,7 @@ func NewStoresServiceClient(cc grpc.ClientConnInterface) StoresServiceClient {
 
 func (c *storesServiceClient) CreateStore(ctx context.Context, in *CreateStoreRequest, opts ...grpc.CallOption) (*CreateStoreResponse, error) {
 	out := new(CreateStoreResponse)
-	err := c.cc.Invoke(ctx, "/stores.grpc.StoresService/CreateStore", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/stores.proto.StoresService/CreateStore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *storesServiceClient) CreateStore(ctx context.Context, in *CreateStoreRe
 
 func (c *storesServiceClient) GetStore(ctx context.Context, in *GetStoreRequest, opts ...grpc.CallOption) (*GetStoreResponse, error) {
 	out := new(GetStoreResponse)
-	err := c.cc.Invoke(ctx, "/stores.grpc.StoresService/GetStore", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/stores.proto.StoresService/GetStore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (c *storesServiceClient) GetStore(ctx context.Context, in *GetStoreRequest,
 
 func (c *storesServiceClient) EnableParticipation(ctx context.Context, in *EnableParticipationRequest, opts ...grpc.CallOption) (*EnableParticipationResponse, error) {
 	out := new(EnableParticipationResponse)
-	err := c.cc.Invoke(ctx, "/stores.grpc.StoresService/EnableParticipation", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/stores.proto.StoresService/EnableParticipation", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func _StoresService_CreateStore_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/stores.grpc.StoresService/CreateStore",
+		FullMethod: "/stores.proto.StoresService/CreateStore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StoresServiceServer).CreateStore(ctx, req.(*CreateStoreRequest))
@@ -126,7 +126,7 @@ func _StoresService_GetStore_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/stores.grpc.StoresService/GetStore",
+		FullMethod: "/stores.proto.StoresService/GetStore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StoresServiceServer).GetStore(ctx, req.(*GetStoreRequest))
@@ -144,7 +144,7 @@ func _StoresService_EnableParticipation_Handler(srv interface{}, ctx context.Con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/stores.grpc.StoresService/EnableParticipation",
+		FullMethod: "/stores.proto.StoresService/EnableParticipation",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StoresServiceServer).EnableParticipation(ctx, req.(*EnableParticipationRequest))
@@ -156,7 +156,7 @@ func _StoresService_EnableParticipation_Handler(srv interface{}, ctx context.Con
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var StoresService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "stores.grpc.StoresService",
+	ServiceName: "stores.proto.StoresService",
 	HandlerType: (*StoresServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

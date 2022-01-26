@@ -2,11 +2,11 @@ type: google.api.Service
 config_version: 3
 http:
   rules:
-    - selector: stores.grpc.StoresService.CreateStore
+    - selector: stores.proto.StoresService.CreateStore
       post: /api/stores
       body: "*"
-    - selector: stores.grpc.StoresService.GetStore
+    - selector: stores.proto.StoresService.GetStore
       get: /api/stores/{id}
-    - selector: stores.grpc.StoresService.EnableParticipation
+    - selector: stores.proto.StoresService.EnableParticipation
       post: /api/stores/{id}/enableParticipation
       body: "*"

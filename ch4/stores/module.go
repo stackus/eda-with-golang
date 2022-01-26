@@ -1,6 +1,8 @@
 package stores
 
 import (
+	"context"
+
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/grpc"
@@ -11,7 +13,7 @@ import (
 type Module struct {
 }
 
-func (m *Module) Startup(mono monolith.Monolith) error {
+func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// Startup Driven adapters
 	storeRepo := postgres.NewStoreRepository("store.stores", mono.DB())
 
@@ -19,10 +21,10 @@ func (m *Module) Startup(mono monolith.Monolith) error {
 	app := application.New(storeRepo)
 
 	// Setup Driver adapters
-	if err := grpc.Register(app, mono); err != nil {
+	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
 		return err
 	}
-	if err := rest.Register(app, mono); err != nil {
+	if err := rest.RegisterGateway(ctx, app, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
 		return err
 	}
 

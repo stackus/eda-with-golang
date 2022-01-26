@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package stores.grpc;
+package stores.proto;
 
 import "messages.proto";
 
@@ -24,7 +24,7 @@ message GetStoreRequest {
 }
 
 message GetStoreResponse {
-  stores.proto.Store store = 1;
+  Store store = 1;
 }
 
 message EnableParticipationRequest {

@@ -197,7 +197,7 @@ func RegisterStoresServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/stores.grpc.StoresService/CreateStore", runtime.WithHTTPPathPattern("/api/stores"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/stores.proto.StoresService/CreateStore", runtime.WithHTTPPathPattern("/api/stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -220,7 +220,7 @@ func RegisterStoresServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/stores.grpc.StoresService/GetStore", runtime.WithHTTPPathPattern("/api/stores/{id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/stores.proto.StoresService/GetStore", runtime.WithHTTPPathPattern("/api/stores/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -243,7 +243,7 @@ func RegisterStoresServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/stores.grpc.StoresService/EnableParticipation", runtime.WithHTTPPathPattern("/api/stores/{id}/enableParticipation"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/stores.proto.StoresService/EnableParticipation", runtime.WithHTTPPathPattern("/api/stores/{id}/enableParticipation"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -305,7 +305,7 @@ func RegisterStoresServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/stores.grpc.StoresService/CreateStore", runtime.WithHTTPPathPattern("/api/stores"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/stores.proto.StoresService/CreateStore", runtime.WithHTTPPathPattern("/api/stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -325,7 +325,7 @@ func RegisterStoresServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/stores.grpc.StoresService/GetStore", runtime.WithHTTPPathPattern("/api/stores/{id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/stores.proto.StoresService/GetStore", runtime.WithHTTPPathPattern("/api/stores/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -345,7 +345,7 @@ func RegisterStoresServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/stores.grpc.StoresService/EnableParticipation", runtime.WithHTTPPathPattern("/api/stores/{id}/enableParticipation"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/stores.proto.StoresService/EnableParticipation", runtime.WithHTTPPathPattern("/api/stores/{id}/enableParticipation"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
