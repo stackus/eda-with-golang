@@ -56,7 +56,7 @@ func (a *app) CancelFunc() context.CancelFunc {
 
 func (a *app) startupModules() error {
 	for _, module := range a.modules {
-		if err := module.Startup(a); err != nil {
+		if err := module.Startup(a.Context(), a); err != nil {
 			return err
 		}
 	}

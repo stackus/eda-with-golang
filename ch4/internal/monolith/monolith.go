@@ -22,5 +22,5 @@ type Monolith interface {
 }
 
 type Module interface {
-	Startup(Monolith) error
+	Startup(context.Context, Monolith) error
 }
