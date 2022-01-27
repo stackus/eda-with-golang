@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package basketpb;
+
+message Basket {
+  string id = 1;
+  repeated Item items = 2;
+}
+
+message Item {
+  string store_id = 1;
+  string product_id = 2;
+  string product_name = 3;
+  double product_price = 4;
+  int32 quantity = 5;
+}

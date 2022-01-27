@@ -16,9 +16,10 @@ type Module struct {
 func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// Startup Driven adapters
 	storeRepo := postgres.NewStoreRepository("store.stores", mono.DB())
+	offeringRepo := postgres.NewOfferingRepository("store.offerings", mono.DB())
 
 	// Startup application
-	app := application.New(storeRepo)
+	app := application.New(storeRepo, offeringRepo)
 
 	// Setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {

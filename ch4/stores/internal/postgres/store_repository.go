@@ -14,11 +14,11 @@ type StoreRepository struct {
 	db        *sql.DB
 }
 
+var _ ports.StoreRepository = (*StoreRepository)(nil)
+
 func NewStoreRepository(tableName string, db *sql.DB) StoreRepository {
 	return StoreRepository{tableName: tableName, db: db}
 }
-
-var _ ports.StoreRepository = (*StoreRepository)(nil)
 
 func (r StoreRepository) FindStore(ctx context.Context, storeID string) (*domain.Store, error) {
 	const query = "SELECT name, location, participating FROM %s WHERE id = $1 LIMIT 1"
@@ -28,8 +28,7 @@ func (r StoreRepository) FindStore(ctx context.Context, storeID string) (*domain
 	}
 	var location string
 
-	row := r.db.QueryRowContext(ctx, r.fmtQuery(query), storeID)
-	err := row.Scan(&store.Name, &location, &store.Participating)
+	err := r.db.QueryRowContext(ctx, r.table(query), storeID).Scan(&store.Name, &location, &store.Participating)
 	if err != nil {
 		return nil, err
 	}
@@ -39,10 +38,76 @@ func (r StoreRepository) FindStore(ctx context.Context, storeID string) (*domain
 	return store, nil
 }
 
+func (r StoreRepository) FindStores(ctx context.Context) (stores []*domain.Store, err error) {
+	const query = "SELECT id, name, location, participating FROM %s"
+
+	rows, err := r.db.QueryContext(ctx, r.table(query))
+	if err != nil {
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			// TODO logging
+		}
+	}(rows)
+
+	for rows.Next() {
+		store := &domain.Store{}
+		var location string
+		err := rows.Scan(&store.ID, &store.Name, &location, &store.Participating)
+		if err != nil {
+			return nil, err
+		}
+
+		store.Location = domain.NewLocation(location)
+		stores = append(stores, store)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return stores, nil
+}
+
+func (r StoreRepository) FindParticipatingStores(ctx context.Context) (stores []*domain.Store, err error) {
+	const query = "SELECT id, name, location, participating FROM %s WHERE participating is true"
+
+	rows, err := r.db.QueryContext(ctx, r.table(query))
+	if err != nil {
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			// TODO logging
+		}
+	}(rows)
+
+	for rows.Next() {
+		store := &domain.Store{}
+		var location string
+		err := rows.Scan(&store.ID, &store.Name, &location, &store.Participating)
+		if err != nil {
+			return nil, err
+		}
+
+		store.Location = domain.NewLocation(location)
+		stores = append(stores, store)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return stores, nil
+}
+
 func (r StoreRepository) SaveStore(ctx context.Context, store *domain.Store) error {
 	const query = "INSERT INTO %s (id, name, location, participating) VALUES ($1, $2, $3, $4)"
 
-	_, err := r.db.ExecContext(ctx, r.fmtQuery(query), store.ID, store.Name, store.Location.String(), store.Participating)
+	_, err := r.db.ExecContext(ctx, r.table(query), store.ID, store.Name, store.Location.String(), store.Participating)
 
 	return err
 }
@@ -50,11 +115,19 @@ func (r StoreRepository) SaveStore(ctx context.Context, store *domain.Store) err
 func (r StoreRepository) UpdateStore(ctx context.Context, store *domain.Store) error {
 	const query = "UPDATE %s SET name = $1, location = $2, participating = $3 WHERE id = $4"
 
-	_, err := r.db.ExecContext(ctx, r.fmtQuery(query), store.Name, store.Location.String(), store.Participating, store.ID)
+	_, err := r.db.ExecContext(ctx, r.table(query), store.Name, store.Location.String(), store.Participating, store.ID)
 
 	return err
 }
 
-func (r StoreRepository) fmtQuery(query string) string {
+func (r StoreRepository) DeleteStore(ctx context.Context, storeID string) error {
+	const query = "DELETE FROM %s WHERE id = $1 LIMIT 1"
+
+	_, err := r.db.ExecContext(ctx, r.table(query), storeID)
+
+	return err
+}
+
+func (r StoreRepository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
 }

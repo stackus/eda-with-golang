@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package storespb;
+
+import "storespb/messages.proto";
+
+service StoresService {
+  rpc CreateStore(CreateStoreRequest) returns (CreateStoreResponse) {};
+  rpc GetStore(GetStoreRequest) returns (GetStoreResponse) {};
+  rpc GetStores(GetStoresRequest) returns (GetStoresResponse) {};
+  rpc EnableParticipation(EnableParticipationRequest) returns (EnableParticipationResponse) {};
+  rpc DisableParticipation(DisableParticipationRequest) returns (DisableParticipationResponse) {};
+  rpc GetParticipatingStores(GetParticipatingStoresRequest) returns (GetParticipatingStoresResponse) {};
+  rpc AddOffering(AddOfferingRequest) returns (AddOfferingResponse) {};
+  rpc RemoveOffering(RemoveOfferingRequest) returns (RemoveOfferingResponse) {};
+  rpc GetStoreOfferings(GetStoreOfferingsRequest) returns (GetStoreOfferingsResponse) {};
+  rpc GetOffering(GetOfferingRequest) returns (GetOfferingResponse) {};
+}
+
+message CreateStoreRequest {
+  string name = 1;
+  string location = 2;
+}
+
+message CreateStoreResponse {
+  string id = 1;
+}
+
+message GetStoreRequest {
+  string id = 1;
+}
+
+message GetStoreResponse {
+  Store store = 1;
+}
+
+message GetStoresRequest {}
+
+message GetStoresResponse {
+  repeated Store stores = 1;
+}
+
+message EnableParticipationRequest {
+  string id = 1;
+}
+
+message EnableParticipationResponse {}
+
+message DisableParticipationRequest {
+  string id = 1;
+}
+
+message DisableParticipationResponse {}
+
+message GetParticipatingStoresRequest {}
+
+message GetParticipatingStoresResponse {
+  repeated Store stores = 1;
+}
+
+message AddOfferingRequest {
+  string store_id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+}
+
+message AddOfferingResponse {
+  string id = 1;
+}
+
+message RemoveOfferingRequest {
+  string id = 1;
+  string store_id = 2;
+}
+
+message RemoveOfferingResponse {}
+
+message GetStoreOfferingsRequest {
+  string store_id = 1;
+}
+
+message GetStoreOfferingsResponse {
+  repeated Offering offerings = 1;
+}
+
+message GetOfferingRequest {
+  string id = 1;
+  string store_id = 2;
+}
+
+message GetOfferingResponse {
+  Offering offering = 1;
+}

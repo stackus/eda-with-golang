@@ -1,5 +1,16 @@
 package domain
 
+import (
+	"fmt"
+)
+
+var (
+	ErrStoreNameIsBlank               = fmt.Errorf("the store name cannot be blank")
+	ErrStoreLocationIsBlank           = fmt.Errorf("the store location cannot be blank")
+	ErrStoreIsAlreadyParticipating    = fmt.Errorf("the store is already participating")
+	ErrStoreIsAlreadyNotParticipating = fmt.Errorf("the store is already not participating")
+)
+
 type Store struct {
 	ID            string
 	Name          string
@@ -8,12 +19,12 @@ type Store struct {
 }
 
 func CreateStore(id, name string, location Location) (store *Store, err error) {
-	if err = StoreNameCannotBeBlank(name); err != nil {
-		return
+	if name == "" {
+		return nil, ErrStoreNameIsBlank
 	}
 
-	if err = StoreLocationCannotBeBlank(location); err != nil {
-		return
+	if location == "" {
+		return nil, ErrStoreLocationIsBlank
 	}
 
 	store = &Store{
@@ -22,17 +33,25 @@ func CreateStore(id, name string, location Location) (store *Store, err error) {
 		Location: location,
 	}
 
-	// TODO create StoreCreated integration event
-
 	return
 }
 
 func (s *Store) EnableParticipation() (err error) {
-	if err = StoreMustNotBeParticipating(s.Participating); err != nil {
-		return err
+	if s.Participating {
+		return ErrStoreIsAlreadyParticipating
 	}
 
 	s.Participating = true
 
-	return nil
+	return
+}
+
+func (s *Store) DisableParticipation() (err error) {
+	if !s.Participating {
+		return ErrStoreIsAlreadyNotParticipating
+	}
+
+	s.Participating = false
+
+	return
 }

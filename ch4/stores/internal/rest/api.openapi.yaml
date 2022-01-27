@@ -1,20 +1,57 @@
 openapiOptions:
+  file:
+    - file: "storespb/messages.proto"
+      option:
+        info:
+          title: Store Management
+          version: "1.0.0"
+        basePath: /
   method:
-    - method: stores.proto.StoresService.CreateStore
+    - method: storespb.StoresService.CreateStore
       option:
         operationId: createStore
         tags:
           - Store
         summary: Create a new store
-    - method: stores.proto.StoresService.GetStore
+    - method: storespb.StoresService.GetStores
       option:
-        operationId: getStore
+        operationId: getStores
         tags:
           - Store
-        summary: Get store data
-    - method: stores.proto.StoresService.EnableParticipation
+        summary: Get a list of stores
+    - method: storespb.StoresService.EnableParticipation
       option:
         operationId: enableParticipation
         tags:
-          - Store
+          - Participation
         summary: Enable store service participation
+    - method: storespb.StoresService.DisableParticipation
+      option:
+        operationId: disableParticipation
+        tags:
+          - Participation
+        summary: Disable store service participation
+    - method: storespb.StoresService.GetParticipatingStores
+      option:
+        operationId: getParticipatingStores
+        tags:
+          - Participation
+        summary: Get a list of participating stores
+    - method: storespb.StoresService.AddOffering
+      option:
+        operationId: addOffering
+        tags:
+          - Offering
+        summary: Add a store offering
+    - method: storespb.StoresService.RemoveOffering
+      option:
+        operationId: removeOffering
+        tags:
+          - Offering
+        summary: Remove a store offering
+    - method: storespb.StoresService.GetStoreOfferings
+      option:
+        operationId: getStoreOffering
+        tags:
+          - Offering
+        summary: Get a list of store offerings

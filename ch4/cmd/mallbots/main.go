@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	"github.com/stackus/eda-with-golang/ch4/basket"
 	"github.com/stackus/eda-with-golang/ch4/internal/config"
 	"github.com/stackus/eda-with-golang/ch4/internal/egress"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
@@ -26,9 +27,10 @@ func main() {
 	}
 }
 
-func run() error {
+func run() (err error) {
+	var cfg config.AppConfig
 	// parse config/env/...
-	cfg, err := config.InitConfig()
+	cfg, err = config.InitConfig()
 	if err != nil {
 		return err
 	}
@@ -40,6 +42,12 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			return
+		}
+	}(m.db)
 
 	m.rpc = initRpc(cfg.Rpc)
 	m.mux = initMux(cfg.Web)
@@ -47,6 +55,7 @@ func run() error {
 
 	// init modules
 	m.modules = []monolith.Module{
+		&basket.Module{},
 		&stores.Module{},
 	}
 

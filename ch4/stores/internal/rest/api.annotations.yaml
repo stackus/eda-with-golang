@@ -2,11 +2,22 @@ type: google.api.Service
 config_version: 3
 http:
   rules:
-    - selector: stores.proto.StoresService.CreateStore
+    - selector: storespb.StoresService.CreateStore
       post: /api/stores
       body: "*"
-    - selector: stores.proto.StoresService.GetStore
-      get: /api/stores/{id}
-    - selector: stores.proto.StoresService.EnableParticipation
-      post: /api/stores/{id}/enableParticipation
+    - selector: storespb.StoresService.GetStores
+      get: /api/stores
+    - selector: storespb.StoresService.EnableParticipation
+      post: /api/stores/{id}/participating
       body: "*"
+    - selector: storespb.StoresService.DisableParticipation
+      delete: /api/stores/{id}/participating
+    - selector: storespb.StoresService.GetParticipatingStores
+      get: /api/stores/participating
+    - selector: storespb.StoresService.AddOffering
+      post: /api/stores/{store_id}/offerings
+      body: "*"
+    - selector: storespb.StoresService.RemoveOffering
+      delete: /api/stores/{store_id}/offerings/{id}
+    - selector: storespb.StoresService.GetStoreOfferings
+      get: /api/stores/{store_id}/offerings

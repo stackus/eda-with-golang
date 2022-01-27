@@ -1,0 +1,360 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "basketpb/messages.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "BasketService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/basket": {
+      "post": {
+        "summary": "Start a new shopping basket",
+        "operationId": "createBasket",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/basketpbStartBasketResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/basketpbStartBasketRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Basket"
+        ]
+      }
+    },
+    "/api/basket/{id}": {
+      "get": {
+        "summary": "Get a basket",
+        "operationId": "getBasket",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/basketpbGetBasketResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Basket"
+        ]
+      },
+      "delete": {
+        "summary": "Cancel a shopping basket",
+        "operationId": "cancelBasket",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/basketpbCancelBasketResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Basket"
+        ]
+      }
+    },
+    "/api/basket/{id}/addItem": {
+      "post": {
+        "summary": "Add or add quantity to an item in the shopping basket",
+        "operationId": "addItem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/basketpbAddItemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "storeId": {
+                  "type": "string"
+                },
+                "productId": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Basket",
+          "Item"
+        ]
+      }
+    },
+    "/api/basket/{id}/checkout": {
+      "post": {
+        "summary": "Checkout with a shopping basket",
+        "operationId": "checkoutBasket",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/basketpbCheckoutBasketResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cardToken": {
+                  "type": "string"
+                },
+                "smsNumber": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Basket"
+        ]
+      }
+    },
+    "/api/basket/{id}/removeItem": {
+      "post": {
+        "summary": "Remove or remove quantity to an item in the shopping basket",
+        "operationId": "removeItem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/basketpbRemoveItemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "storeId": {
+                  "type": "string"
+                },
+                "productId": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Basket",
+          "Item"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "basketpbAddItemResponse": {
+      "type": "object"
+    },
+    "basketpbBasket": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/basketpbItem"
+          }
+        }
+      }
+    },
+    "basketpbCancelBasketResponse": {
+      "type": "object"
+    },
+    "basketpbCheckoutBasketResponse": {
+      "type": "object"
+    },
+    "basketpbGetBasketResponse": {
+      "type": "object",
+      "properties": {
+        "basket": {
+          "$ref": "#/definitions/basketpbBasket"
+        }
+      }
+    },
+    "basketpbItem": {
+      "type": "object",
+      "properties": {
+        "storeId": {
+          "type": "string"
+        },
+        "productId": {
+          "type": "string"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "productPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "basketpbRemoveItemResponse": {
+      "type": "object"
+    },
+    "basketpbStartBasketRequest": {
+      "type": "object"
+    },
+    "basketpbStartBasketResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

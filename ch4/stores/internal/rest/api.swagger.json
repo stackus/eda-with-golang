@@ -1,14 +1,15 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "messages.proto",
-    "version": "version not set"
+    "title": "Store Management",
+    "version": "1.0.0"
   },
   "tags": [
     {
       "name": "StoresService"
     }
   ],
+  "basePath": "/",
   "consumes": [
     "application/json"
   ],
@@ -17,6 +18,27 @@
   ],
   "paths": {
     "/api/stores": {
+      "get": {
+        "summary": "Get a list of stores",
+        "operationId": "getStores",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbGetStoresResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      },
       "post": {
         "summary": "Create a new store",
         "operationId": "createStore",
@@ -24,7 +46,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/protoCreateStoreResponse"
+              "$ref": "#/definitions/storespbCreateStoreResponse"
             }
           },
           "default": {
@@ -40,7 +62,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/protoCreateStoreRequest"
+              "$ref": "#/definitions/storespbCreateStoreRequest"
             }
           }
         ],
@@ -49,15 +71,39 @@
         ]
       }
     },
-    "/api/stores/{id}": {
+    "/api/stores/participating": {
       "get": {
-        "summary": "Get store data",
-        "operationId": "getStore",
+        "summary": "Get a list of participating stores",
+        "operationId": "getParticipatingStores",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/protoGetStoreResponse"
+              "$ref": "#/definitions/storespbGetParticipatingStoresResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Store",
+          "Participation"
+        ]
+      }
+    },
+    "/api/stores/{id}/participating": {
+      "delete": {
+        "summary": "Disable store service participation",
+        "operationId": "enableParticipation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbDisableParticipationResponse"
             }
           },
           "default": {
@@ -76,11 +122,10 @@
           }
         ],
         "tags": [
-          "Store"
+          "Store",
+          "Participation"
         ]
-      }
-    },
-    "/api/stores/{id}/enableParticipation": {
+      },
       "post": {
         "summary": "Enable store service participation",
         "operationId": "enableParticipation",
@@ -88,7 +133,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/protoEnableParticipationResponse"
+              "$ref": "#/definitions/storespbEnableParticipationResponse"
             }
           },
           "default": {
@@ -115,59 +160,130 @@
           }
         ],
         "tags": [
-          "Store"
+          "Store",
+          "Participation"
+        ]
+      }
+    },
+    "/api/stores/{storeId}/offerings": {
+      "get": {
+        "summary": "Get a list of store offerings",
+        "operationId": "getStoreOffering",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbGetStoreOfferingsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Offering"
+        ]
+      },
+      "post": {
+        "summary": "Add a store offering",
+        "operationId": "addOffering",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbAddOfferingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Offering"
+        ]
+      }
+    },
+    "/api/stores/{storeId}/offerings/{id}": {
+      "delete": {
+        "summary": "Remove a store offering",
+        "operationId": "removeOffering",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbRemoveOfferingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Offering"
         ]
       }
     }
   },
   "definitions": {
-    "protoCreateStoreRequest": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "location": {
-          "type": "string"
-        }
-      }
-    },
-    "protoCreateStoreResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        }
-      }
-    },
-    "protoEnableParticipationResponse": {
-      "type": "object"
-    },
-    "protoGetStoreResponse": {
-      "type": "object",
-      "properties": {
-        "store": {
-          "$ref": "#/definitions/protoStore"
-        }
-      }
-    },
-    "protoStore": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "location": {
-          "type": "string"
-        },
-        "participating": {
-          "type": "boolean"
-        }
-      }
-    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -192,6 +308,129 @@
           "items": {
             "$ref": "#/definitions/protobufAny"
           }
+        }
+      }
+    },
+    "storespbAddOfferingResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "storespbCreateStoreRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        }
+      }
+    },
+    "storespbCreateStoreResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "storespbDisableParticipationResponse": {
+      "type": "object"
+    },
+    "storespbEnableParticipationResponse": {
+      "type": "object"
+    },
+    "storespbGetOfferingResponse": {
+      "type": "object",
+      "properties": {
+        "offering": {
+          "$ref": "#/definitions/storespbOffering"
+        }
+      }
+    },
+    "storespbGetParticipatingStoresResponse": {
+      "type": "object",
+      "properties": {
+        "stores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/storespbStore"
+          }
+        }
+      }
+    },
+    "storespbGetStoreOfferingsResponse": {
+      "type": "object",
+      "properties": {
+        "offerings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/storespbOffering"
+          }
+        }
+      }
+    },
+    "storespbGetStoreResponse": {
+      "type": "object",
+      "properties": {
+        "store": {
+          "$ref": "#/definitions/storespbStore"
+        }
+      }
+    },
+    "storespbGetStoresResponse": {
+      "type": "object",
+      "properties": {
+        "stores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/storespbStore"
+          }
+        }
+      }
+    },
+    "storespbOffering": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "storeId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "storespbRemoveOfferingResponse": {
+      "type": "object"
+    },
+    "storespbStore": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "participating": {
+          "type": "boolean"
         }
       }
     }

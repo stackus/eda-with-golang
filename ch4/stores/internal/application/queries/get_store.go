@@ -19,6 +19,6 @@ func NewGetStoreHandler(repo ports.StoreRepository) GetStoreHandler {
 	return GetStoreHandler{repo: repo}
 }
 
-func (h GetStoreHandler) Handle(ctx context.Context, query GetStore) (*domain.Store, error) {
+func (h GetStoreHandler) GetStore(ctx context.Context, query GetStore) (*domain.Store, error) {
 	return h.repo.FindStore(ctx, query.ID)
 }

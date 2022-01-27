@@ -9,49 +9,63 @@ import (
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
 )
 
-type App interface {
-	CreateStore(ctx context.Context, cmd commands.CreateStore) (string, error)
-	EnableParticipation(ctx context.Context, cmd commands.EnableParticipation) error
+type (
+	App interface {
+		Commands
+		Queries
+	}
+	Commands interface {
+		CreateStore(ctx context.Context, cmd commands.CreateStore) error
+		EnableParticipation(ctx context.Context, cmd commands.EnableParticipation) error
+		DisableParticipation(ctx context.Context, cmd commands.DisableParticipation) error
+		AddOffering(ctx context.Context, cmd commands.AddOffering) error
+		RemoveOffering(ctx context.Context, cmd commands.RemoveOffering) error
+	}
+	Queries interface {
+		GetStore(ctx context.Context, query queries.GetStore) (*domain.Store, error)
+		GetStores(ctx context.Context, query queries.GetStores) ([]*domain.Store, error)
+		GetParticipatingStores(ctx context.Context, query queries.GetParticipatingStores) ([]*domain.Store, error)
+		GetStoreOfferings(ctx context.Context, query queries.GetStoreOfferings) ([]*domain.Offering, error)
+		GetOffering(ctx context.Context, query queries.GetOffering) (*domain.Offering, error)
+	}
 
-	GetStore(ctx context.Context, query queries.GetStore) (*domain.Store, error)
-}
-
-type Application struct {
-	c Commands
-	q Queries
-}
-
-type Commands struct {
-	createStore         commands.CreateStoreHandler
-	enableParticipation commands.EnableParticipationHandler
-}
-
-type Queries struct {
-	getStore queries.GetStoreHandler
-}
+	Application struct {
+		appCommands
+		appQueries
+	}
+	appCommands struct {
+		commands.CreateStoreHandler
+		commands.EnableParticipationHandler
+		commands.DisableParticipationHandler
+		commands.AddOfferingHandler
+		commands.RemoveOfferingHandler
+	}
+	appQueries struct {
+		queries.GetStoreHandler
+		queries.GetStoresHandler
+		queries.GetParticipatingStoresHandler
+		queries.GetStoreOfferingsHandler
+		queries.GetOfferingHandler
+	}
+)
 
 var _ App = (*Application)(nil)
 
-func New(storeRepo ports.StoreRepository) *Application {
+func New(storeRepo ports.StoreRepository, offeringRepo ports.OfferingRepository) *Application {
 	return &Application{
-		c: Commands{
-			createStore:         commands.NewCreateStoreHandler(storeRepo),
-			enableParticipation: commands.NewEnableParticipationHandler(storeRepo),
+		appCommands: appCommands{
+			CreateStoreHandler:          commands.NewCreateStoreHandler(storeRepo),
+			EnableParticipationHandler:  commands.NewEnableParticipationHandler(storeRepo),
+			DisableParticipationHandler: commands.NewDisableParticipationHandler(storeRepo),
+			AddOfferingHandler:          commands.NewAddOfferingHandler(storeRepo, offeringRepo),
+			RemoveOfferingHandler:       commands.NewRemoveOfferingHandler(storeRepo, offeringRepo),
 		},
-		q: Queries{
-			getStore: queries.NewGetStoreHandler(storeRepo),
+		appQueries: appQueries{
+			GetStoreHandler:               queries.NewGetStoreHandler(storeRepo),
+			GetStoresHandler:              queries.NewGetStoresHandler(storeRepo),
+			GetParticipatingStoresHandler: queries.NewGetParticipatingStoresHandler(storeRepo),
+			GetStoreOfferingsHandler:      queries.NewGetStoreOfferingsHandler(offeringRepo),
+			GetOfferingHandler:            queries.NewGetOfferingHandler(offeringRepo),
 		},
 	}
-}
-
-func (a Application) CreateStore(ctx context.Context, cmd commands.CreateStore) (string, error) {
-	return a.c.createStore.Handle(ctx, cmd)
-}
-
-func (a Application) EnableParticipation(ctx context.Context, cmd commands.EnableParticipation) error {
-	return a.c.enableParticipation.Handle(ctx, cmd)
-}
-
-func (a Application) GetStore(ctx context.Context, query queries.GetStore) (*domain.Store, error) {
-	return a.q.getStore.Handle(ctx, query)
 }
