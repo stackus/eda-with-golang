@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 
+	"github.com/stackus/errors"
 	"google.golang.org/grpc"
 
 	"github.com/stackus/eda-with-golang/ch4/stores/storespb"
@@ -21,13 +22,13 @@ func NewProductRepository(conn *grpc.ClientConn) ProductRepository {
 	return ProductRepository{client: storespb.NewStoresServiceClient(conn)}
 }
 
-func (r ProductRepository) FindProduct(ctx context.Context, storeID, productID string) (*domain.Product, error) {
+func (r ProductRepository) Find(ctx context.Context, storeID, productID string) (*domain.Product, error) {
 	resp, err := r.client.GetOffering(ctx, &storespb.GetOfferingRequest{
 		Id:      productID,
 		StoreId: storeID,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "requesting product")
 	}
 
 	return r.productToDomain(resp.Offering), nil

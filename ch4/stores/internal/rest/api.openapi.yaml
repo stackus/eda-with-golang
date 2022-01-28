@@ -19,6 +19,12 @@ openapiOptions:
         tags:
           - Store
         summary: Get a list of stores
+    - method: storespb.StoresService.GetStore
+      option:
+        operationId: getStore
+        tags:
+          - Store
+        summary: Get a store
     - method: storespb.StoresService.EnableParticipation
       option:
         operationId: enableParticipation
@@ -43,6 +49,12 @@ openapiOptions:
         tags:
           - Offering
         summary: Add a store offering
+    - method: storespb.StoresService.GetOffering
+      option:
+        operationId: getOffering
+        tags:
+          - Offering
+        summary: Get a store offering
     - method: storespb.StoresService.RemoveOffering
       option:
         operationId: removeOffering

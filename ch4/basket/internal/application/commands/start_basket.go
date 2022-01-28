@@ -22,5 +22,5 @@ func NewStartBasketHandler(repo ports.BasketRepository) StartBasketHandler {
 func (h StartBasketHandler) StartBasket(ctx context.Context, cmd StartBasket) error {
 	basket := domain.StartBasket(cmd.ID)
 
-	return h.repo.SaveBasket(ctx, basket)
+	return h.repo.Save(ctx, basket)
 }

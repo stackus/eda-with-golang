@@ -16,10 +16,10 @@
     "application/json"
   ],
   "paths": {
-    "/api/basket": {
+    "/api/baskets": {
       "post": {
         "summary": "Start a new shopping basket",
-        "operationId": "createBasket",
+        "operationId": "startBasket",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -49,7 +49,7 @@
         ]
       }
     },
-    "/api/basket/{id}": {
+    "/api/baskets/{id}": {
       "get": {
         "summary": "Get a basket",
         "operationId": "getBasket",
@@ -109,7 +109,7 @@
         ]
       }
     },
-    "/api/basket/{id}/addItem": {
+    "/api/baskets/{id}/addItem": {
       "post": {
         "summary": "Add or add quantity to an item in the shopping basket",
         "operationId": "addItem",
@@ -156,12 +156,11 @@
           }
         ],
         "tags": [
-          "Basket",
           "Item"
         ]
       }
     },
-    "/api/basket/{id}/checkout": {
+    "/api/baskets/{id}/checkout": {
       "post": {
         "summary": "Checkout with a shopping basket",
         "operationId": "checkoutBasket",
@@ -208,7 +207,7 @@
         ]
       }
     },
-    "/api/basket/{id}/removeItem": {
+    "/api/baskets/{id}/removeItem": {
       "post": {
         "summary": "Remove or remove quantity to an item in the shopping basket",
         "operationId": "removeItem",
@@ -255,7 +254,6 @@
           }
         ],
         "tags": [
-          "Basket",
           "Item"
         ]
       }

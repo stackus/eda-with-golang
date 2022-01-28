@@ -20,5 +20,5 @@ func NewGetBasketHandler(repo ports.BasketRepository) GetBasketHandler {
 }
 
 func (h GetBasketHandler) GetBasket(ctx context.Context, query GetBasket) (*domain.Basket, error) {
-	return h.repo.FindBasket(ctx, query.ID)
+	return h.repo.Find(ctx, query.ID)
 }

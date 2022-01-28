@@ -1,0 +1,188 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "orderingpb/messages.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "OrderingService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/ordering": {
+      "post": {
+        "summary": "Start a new shopping order",
+        "operationId": "createOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderingpbCreateOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/orderingpbCreateOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Order"
+        ]
+      }
+    },
+    "/api/ordering/{id}": {
+      "get": {
+        "summary": "Get a order",
+        "operationId": "getOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderingpbGetOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Order"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "orderingpbCreateOrderRequest": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/orderingpbItem"
+          }
+        },
+        "cardToken": {
+          "type": "string"
+        },
+        "smsNumber": {
+          "type": "string"
+        }
+      }
+    },
+    "orderingpbCreateOrderResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "orderingpbGetOrderResponse": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/orderingpbOrder"
+        }
+      }
+    },
+    "orderingpbItem": {
+      "type": "object",
+      "properties": {
+        "storeId": {
+          "type": "string"
+        },
+        "productId": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "orderingpbOrder": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/orderingpbItem"
+          }
+        },
+        "cardToken": {
+          "type": "string"
+        },
+        "smsNumber": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

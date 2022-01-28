@@ -19,5 +19,5 @@ func NewGetStoresHandler(repo ports.StoreRepository) GetStoresHandler {
 }
 
 func (h GetStoresHandler) GetStores(ctx context.Context, _ GetStores) ([]*domain.Store, error) {
-	return h.repo.FindStores(ctx)
+	return h.repo.FindAll(ctx)
 }

@@ -19,7 +19,7 @@ func NewEnableParticipationHandler(repo ports.StoreRepository) EnableParticipati
 }
 
 func (h EnableParticipationHandler) EnableParticipation(ctx context.Context, cmd EnableParticipation) error {
-	store, err := h.repo.FindStore(ctx, cmd.ID)
+	store, err := h.repo.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -29,5 +29,5 @@ func (h EnableParticipationHandler) EnableParticipation(ctx context.Context, cmd
 		return err
 	}
 
-	return h.repo.UpdateStore(ctx, store)
+	return h.repo.Update(ctx, store)
 }

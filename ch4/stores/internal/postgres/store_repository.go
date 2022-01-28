@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/stackus/errors"
+
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/ports"
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
 )
@@ -20,7 +22,7 @@ func NewStoreRepository(tableName string, db *sql.DB) StoreRepository {
 	return StoreRepository{tableName: tableName, db: db}
 }
 
-func (r StoreRepository) FindStore(ctx context.Context, storeID string) (*domain.Store, error) {
+func (r StoreRepository) Find(ctx context.Context, storeID string) (*domain.Store, error) {
 	const query = "SELECT name, location, participating FROM %s WHERE id = $1 LIMIT 1"
 
 	store := &domain.Store{
@@ -30,7 +32,7 @@ func (r StoreRepository) FindStore(ctx context.Context, storeID string) (*domain
 
 	err := r.db.QueryRowContext(ctx, r.table(query), storeID).Scan(&store.Name, &location, &store.Participating)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "scanning store")
 	}
 
 	store.Location = domain.NewLocation(location)
@@ -38,17 +40,17 @@ func (r StoreRepository) FindStore(ctx context.Context, storeID string) (*domain
 	return store, nil
 }
 
-func (r StoreRepository) FindStores(ctx context.Context) (stores []*domain.Store, err error) {
+func (r StoreRepository) FindAll(ctx context.Context) (stores []*domain.Store, err error) {
 	const query = "SELECT id, name, location, participating FROM %s"
 
 	rows, err := r.db.QueryContext(ctx, r.table(query))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "querying stores")
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			// TODO logging
+			err = errors.Wrap(err, "closing store rows")
 		}
 	}(rows)
 
@@ -57,7 +59,7 @@ func (r StoreRepository) FindStores(ctx context.Context) (stores []*domain.Store
 		var location string
 		err := rows.Scan(&store.ID, &store.Name, &location, &store.Participating)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "scanning store")
 		}
 
 		store.Location = domain.NewLocation(location)
@@ -65,7 +67,7 @@ func (r StoreRepository) FindStores(ctx context.Context) (stores []*domain.Store
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "finishing store rows")
 	}
 
 	return stores, nil
@@ -76,12 +78,12 @@ func (r StoreRepository) FindParticipatingStores(ctx context.Context) (stores []
 
 	rows, err := r.db.QueryContext(ctx, r.table(query))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "querying participating stores")
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			// TODO logging
+			err = errors.Wrap(err, "closing participating store rows")
 		}
 	}(rows)
 
@@ -90,7 +92,7 @@ func (r StoreRepository) FindParticipatingStores(ctx context.Context) (stores []
 		var location string
 		err := rows.Scan(&store.ID, &store.Name, &location, &store.Participating)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "scanning participating store")
 		}
 
 		store.Location = domain.NewLocation(location)
@@ -98,34 +100,34 @@ func (r StoreRepository) FindParticipatingStores(ctx context.Context) (stores []
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "finishing participating store rows")
 	}
 
 	return stores, nil
 }
 
-func (r StoreRepository) SaveStore(ctx context.Context, store *domain.Store) error {
+func (r StoreRepository) Save(ctx context.Context, store *domain.Store) error {
 	const query = "INSERT INTO %s (id, name, location, participating) VALUES ($1, $2, $3, $4)"
 
 	_, err := r.db.ExecContext(ctx, r.table(query), store.ID, store.Name, store.Location.String(), store.Participating)
 
-	return err
+	return errors.Wrap(err, "inserting store")
 }
 
-func (r StoreRepository) UpdateStore(ctx context.Context, store *domain.Store) error {
+func (r StoreRepository) Update(ctx context.Context, store *domain.Store) error {
 	const query = "UPDATE %s SET name = $1, location = $2, participating = $3 WHERE id = $4"
 
 	_, err := r.db.ExecContext(ctx, r.table(query), store.Name, store.Location.String(), store.Participating, store.ID)
 
-	return err
+	return errors.Wrap(err, "updating store")
 }
 
-func (r StoreRepository) DeleteStore(ctx context.Context, storeID string) error {
+func (r StoreRepository) Delete(ctx context.Context, storeID string) error {
 	const query = "DELETE FROM %s WHERE id = $1 LIMIT 1"
 
 	_, err := r.db.ExecContext(ctx, r.table(query), storeID)
 
-	return err
+	return errors.Wrap(err, "deleting store")
 }
 
 func (r StoreRepository) table(query string) string {

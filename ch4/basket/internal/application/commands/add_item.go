@@ -26,13 +26,12 @@ func NewAddItemHandler(basketRepo ports.BasketRepository, productRepo ports.Prod
 }
 
 func (h AddItemHandler) AddItem(ctx context.Context, cmd AddItem) error {
-	// get product data from the store module
-	product, err := h.productRepo.FindProduct(ctx, cmd.ProductID, cmd.StoreID)
+	product, err := h.productRepo.Find(ctx, cmd.StoreID, cmd.ProductID)
 	if err != nil {
 		return err
 	}
 
-	basket, err := h.basketRepo.FindBasket(ctx, cmd.ID)
+	basket, err := h.basketRepo.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -42,5 +41,5 @@ func (h AddItemHandler) AddItem(ctx context.Context, cmd AddItem) error {
 		return err
 	}
 
-	return h.basketRepo.UpdateBasket(ctx, basket)
+	return h.basketRepo.Update(ctx, basket)
 }

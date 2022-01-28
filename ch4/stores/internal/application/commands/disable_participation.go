@@ -19,7 +19,7 @@ func NewDisableParticipationHandler(repo ports.StoreRepository) DisableParticipa
 }
 
 func (h DisableParticipationHandler) DisableParticipation(ctx context.Context, cmd DisableParticipation) error {
-	store, err := h.repo.FindStore(ctx, cmd.ID)
+	store, err := h.repo.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -29,5 +29,5 @@ func (h DisableParticipationHandler) DisableParticipation(ctx context.Context, c
 		return err
 	}
 
-	return h.repo.UpdateStore(ctx, store)
+	return h.repo.Update(ctx, store)
 }

@@ -51,7 +51,7 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(storeRepo ports.StoreRepository, offeringRepo ports.OfferingRepository) *Application {
+func New(storeRepo ports.StoreRepository, participatingStoreRepo ports.ParticipatingStoreRepository, offeringRepo ports.OfferingRepository) *Application {
 	return &Application{
 		appCommands: appCommands{
 			CreateStoreHandler:          commands.NewCreateStoreHandler(storeRepo),
@@ -63,7 +63,7 @@ func New(storeRepo ports.StoreRepository, offeringRepo ports.OfferingRepository)
 		appQueries: appQueries{
 			GetStoreHandler:               queries.NewGetStoreHandler(storeRepo),
 			GetStoresHandler:              queries.NewGetStoresHandler(storeRepo),
-			GetParticipatingStoresHandler: queries.NewGetParticipatingStoresHandler(storeRepo),
+			GetParticipatingStoresHandler: queries.NewGetParticipatingStoresHandler(participatingStoreRepo),
 			GetStoreOfferingsHandler:      queries.NewGetStoreOfferingsHandler(offeringRepo),
 			GetOfferingHandler:            queries.NewGetOfferingHandler(offeringRepo),
 		},

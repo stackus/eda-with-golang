@@ -1,8 +1,15 @@
 openapiOptions:
+  file:
+    - file: "basketspb/messages.proto"
+      option:
+        info:
+          title: Shopping Baskets
+          version: "1.0.0"
+        basePath: /
   method:
     - method: basketpb.BasketService.StartBasket
       option:
-        operationId: createBasket
+        operationId: startBasket
         tags:
           - Basket
         summary: Start a new shopping basket
@@ -28,13 +35,11 @@ openapiOptions:
       option:
         operationId: addItem
         tags:
-          - Basket
           - Item
         summary: Add or add quantity to an item in the shopping basket
     - method: basketpb.BasketService.RemoveItem
       option:
         operationId: removeItem
         tags:
-          - Basket
           - Item
         summary: Remove or remove quantity to an item in the shopping basket

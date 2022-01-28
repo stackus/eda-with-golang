@@ -21,7 +21,7 @@ func NewCheckoutBasketHandler(repo ports.BasketRepository) CheckoutBasketHandler
 }
 
 func (h CheckoutBasketHandler) CheckoutBasket(ctx context.Context, cmd CheckoutBasket) error {
-	basket, err := h.repo.FindBasket(ctx, cmd.ID)
+	basket, err := h.repo.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -31,5 +31,5 @@ func (h CheckoutBasketHandler) CheckoutBasket(ctx context.Context, cmd CheckoutB
 		return err
 	}
 
-	return h.repo.UpdateBasket(ctx, basket)
+	return h.repo.Update(ctx, basket)
 }

@@ -24,7 +24,7 @@ func NewRemoveOfferingHandler(storeRepo ports.StoreRepository, offeringRepo port
 }
 
 func (h RemoveOfferingHandler) RemoveOffering(ctx context.Context, cmd RemoveOffering) error {
-	_, err := h.storeRepo.FindStore(ctx, cmd.StoreID)
+	_, err := h.storeRepo.Find(ctx, cmd.StoreID)
 	if err != nil {
 		return err
 	}

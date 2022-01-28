@@ -29,7 +29,7 @@ func (h CreateStoreHandler) CreateStore(ctx context.Context, cmd CreateStore) er
 		return err
 	}
 
-	err = h.repo.SaveStore(ctx, store)
+	err = h.repo.Save(ctx, store)
 
 	return err
 }

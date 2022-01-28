@@ -7,6 +7,8 @@ http:
       body: "*"
     - selector: storespb.StoresService.GetStores
       get: /api/stores
+    - selector: storespb.StoresService.GetStore
+      get: /api/stores/{id}
     - selector: storespb.StoresService.EnableParticipation
       post: /api/stores/{id}/participating
       body: "*"
@@ -17,6 +19,8 @@ http:
     - selector: storespb.StoresService.AddOffering
       post: /api/stores/{store_id}/offerings
       body: "*"
+    - selector: storespb.StoresService.GetOffering
+      get: /api/stores/{store_id}/offerings/{id}
     - selector: storespb.StoresService.RemoveOffering
       delete: /api/stores/{store_id}/offerings/{id}
     - selector: storespb.StoresService.GetStoreOfferings

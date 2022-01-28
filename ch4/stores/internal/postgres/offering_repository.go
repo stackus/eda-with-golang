@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/stackus/errors"
+
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/ports"
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
 )
@@ -30,7 +32,7 @@ func (r OfferingRepository) FindOffering(ctx context.Context, id, storeID string
 
 	err := r.db.QueryRowContext(ctx, r.table(query), id, storeID).Scan(&offering.Name, &offering.Description, &offering.Price)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "scanning offering")
 	}
 
 	return offering, nil
@@ -41,7 +43,7 @@ func (r OfferingRepository) AddOffering(ctx context.Context, offering *domain.Of
 
 	_, err := r.db.ExecContext(ctx, r.table(query), offering.ID, offering.StoreID, offering.Name, offering.Description, offering.Price)
 
-	return err
+	return errors.Wrap(err, "inserting offering")
 }
 
 func (r OfferingRepository) RemoveOffering(ctx context.Context, id, storeID string) error {
@@ -49,7 +51,7 @@ func (r OfferingRepository) RemoveOffering(ctx context.Context, id, storeID stri
 
 	_, err := r.db.ExecContext(ctx, r.table(query), id, storeID)
 
-	return err
+	return errors.Wrap(err, "deleting offering")
 }
 
 func (r OfferingRepository) GetStoreOfferings(ctx context.Context, storeID string) ([]*domain.Offering, error) {
@@ -57,14 +59,14 @@ func (r OfferingRepository) GetStoreOfferings(ctx context.Context, storeID strin
 
 	offerings := make([]*domain.Offering, 0)
 
-	rows, err := r.db.QueryContext(ctx, r.table(query))
+	rows, err := r.db.QueryContext(ctx, r.table(query), storeID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "querying store offerings")
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			// TODO logging
+			err = errors.Wrap(err, "closing store offering rows")
 		}
 	}(rows)
 
@@ -74,14 +76,14 @@ func (r OfferingRepository) GetStoreOfferings(ctx context.Context, storeID strin
 		}
 		err := rows.Scan(&offering.ID, &offering.Name, &offering.Description, &offering.Price)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "scanning offering")
 		}
 
 		offerings = append(offerings, offering)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "finishing offering rows")
 	}
 
 	return offerings, nil

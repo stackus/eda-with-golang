@@ -90,15 +90,45 @@
           }
         },
         "tags": [
-          "Store",
           "Participation"
+        ]
+      }
+    },
+    "/api/stores/{id}": {
+      "get": {
+        "summary": "Get a store",
+        "operationId": "getStore",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbGetStoreResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Store"
         ]
       }
     },
     "/api/stores/{id}/participating": {
       "delete": {
         "summary": "Disable store service participation",
-        "operationId": "enableParticipation",
+        "operationId": "disableParticipation",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -122,7 +152,6 @@
           }
         ],
         "tags": [
-          "Store",
           "Participation"
         ]
       },
@@ -160,7 +189,6 @@
           }
         ],
         "tags": [
-          "Store",
           "Participation"
         ]
       }
@@ -246,6 +274,41 @@
       }
     },
     "/api/stores/{storeId}/offerings/{id}": {
+      "get": {
+        "summary": "Get a store offering",
+        "operationId": "getOffering",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbGetOfferingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Offering"
+        ]
+      },
       "delete": {
         "summary": "Remove a store offering",
         "operationId": "removeOffering",

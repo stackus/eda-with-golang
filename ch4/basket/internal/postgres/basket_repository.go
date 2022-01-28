@@ -21,7 +21,7 @@ func NewBasketRepository(tableName string, db *sql.DB) BasketRepository {
 	return BasketRepository{tableName: tableName, db: db}
 }
 
-func (r BasketRepository) FindBasket(ctx context.Context, basketID string) (*domain.Basket, error) {
+func (r BasketRepository) Find(ctx context.Context, basketID string) (*domain.Basket, error) {
 	const query = "SELECT items, card_token, sms_number, status FROM %s WHERE id = $1 LIMIT 1"
 
 	basket := &domain.Basket{
@@ -48,7 +48,7 @@ func (r BasketRepository) FindBasket(ctx context.Context, basketID string) (*dom
 	return basket, nil
 }
 
-func (r BasketRepository) SaveBasket(ctx context.Context, basket *domain.Basket) error {
+func (r BasketRepository) Save(ctx context.Context, basket *domain.Basket) error {
 	const query = "INSERT INTO %s (id, items, card_token, sms_number, status) VALUES ($1, $2, $3, $4, $5)"
 
 	items, err := json.Marshal(basket.Items)
@@ -61,7 +61,7 @@ func (r BasketRepository) SaveBasket(ctx context.Context, basket *domain.Basket)
 	return err
 }
 
-func (r BasketRepository) UpdateBasket(ctx context.Context, basket *domain.Basket) error {
+func (r BasketRepository) Update(ctx context.Context, basket *domain.Basket) error {
 	const query = "UPDATE %s SET items = $1, card_token = $2, sms_number = $3, status = $4  WHERE id = $5"
 
 	items, err := json.Marshal(basket.Items)

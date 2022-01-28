@@ -14,14 +14,15 @@ type Module struct {
 }
 
 func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
-	// Startup Driven adapters
+	// setup Driven adapters
 	storeRepo := postgres.NewStoreRepository("store.stores", mono.DB())
+	participatingStoreRepo := postgres.NewParticipatingStoreRepository("store.stores", mono.DB())
 	offeringRepo := postgres.NewOfferingRepository("store.offerings", mono.DB())
 
-	// Startup application
-	app := application.New(storeRepo, offeringRepo)
+	// setup application
+	app := application.New(storeRepo, participatingStoreRepo, offeringRepo)
 
-	// Setup Driver adapters
+	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
 		return err
 	}

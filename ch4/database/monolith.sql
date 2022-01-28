@@ -33,6 +33,26 @@ GRANT USAGE ON SCHEMA basket TO mallbots_user;
 GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA basket TO mallbots_user;
 
 --
+-- ordering
+--
+
+CREATE SCHEMA ordering;
+
+CREATE TABLE ordering.orders
+(
+  id text NOT NULL,
+  items text NOT NULL,
+  card_token text NOT NULL,
+  sms_number text NOT NULL,
+  status     text NOT NULL,
+  PRIMARY KEY (id)
+);
+
+GRANT USAGE ON SCHEMA ordering TO mallbots_user;
+GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA ordering TO mallbots_user;
+
+
+--
 -- stores
 --
 

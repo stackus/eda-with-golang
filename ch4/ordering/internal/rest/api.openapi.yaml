@@ -1,0 +1,38 @@
+openapiOptions:
+  method:
+    - method: orderingpb.OrderingService.CreateOrder
+      option:
+        operationId: createOrder
+        tags:
+          - Order
+        summary: Start a new shopping order
+    - method: orderingpb.OrderingService.GetOrder
+      option:
+        operationId: getOrder
+        tags:
+          - Order
+        summary: Get a order
+#    - method: orderingpb.OrderingService.CancelOrder
+#      option:
+#        operationId: cancelOrder
+#        tags:
+#          - Order
+#        summary: Cancel a shopping order
+#    - method: orderingpb.OrderingService.CheckoutOrder
+#      option:
+#        operationId: checkoutOrder
+#        tags:
+#          - Order
+#        summary: Checkout with a shopping order
+#    - method: orderingpb.OrderingService.AddItem
+#      option:
+#        operationId: addItem
+#        tags:
+#          - Item
+#        summary: Add or add quantity to an item in the shopping order
+#    - method: orderingpb.OrderingService.RemoveItem
+#      option:
+#        operationId: removeItem
+#        tags:
+#          - Item
+#        summary: Remove or remove quantity to an item in the shopping order

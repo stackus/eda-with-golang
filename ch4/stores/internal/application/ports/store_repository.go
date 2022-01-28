@@ -7,10 +7,9 @@ import (
 )
 
 type StoreRepository interface {
-	SaveStore(ctx context.Context, store *domain.Store) error
-	UpdateStore(ctx context.Context, store *domain.Store) error
-	DeleteStore(ctx context.Context, storeID string) error
-	FindStore(ctx context.Context, storeID string) (*domain.Store, error)
-	FindStores(ctx context.Context) ([]*domain.Store, error)
-	FindParticipatingStores(ctx context.Context) ([]*domain.Store, error)
+	Save(ctx context.Context, store *domain.Store) error
+	Update(ctx context.Context, store *domain.Store) error
+	Delete(ctx context.Context, storeID string) error
+	Find(ctx context.Context, storeID string) (*domain.Store, error)
+	FindAll(ctx context.Context) ([]*domain.Store, error)
 }

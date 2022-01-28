@@ -11,13 +11,13 @@ type GetParticipatingStores struct {
 }
 
 type GetParticipatingStoresHandler struct {
-	repo ports.StoreRepository
+	repo ports.ParticipatingStoreRepository
 }
 
-func NewGetParticipatingStoresHandler(repo ports.StoreRepository) GetParticipatingStoresHandler {
+func NewGetParticipatingStoresHandler(repo ports.ParticipatingStoreRepository) GetParticipatingStoresHandler {
 	return GetParticipatingStoresHandler{repo: repo}
 }
 
-func (h GetParticipatingStoresHandler) GetParticipatingStores(ctx context.Context, query GetParticipatingStores) ([]*domain.Store, error) {
-	return h.repo.FindParticipatingStores(ctx)
+func (h GetParticipatingStoresHandler) GetParticipatingStores(ctx context.Context, _ GetParticipatingStores) ([]*domain.Store, error) {
+	return h.repo.FindAll(ctx)
 }

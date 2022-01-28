@@ -17,6 +17,7 @@ import (
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
 	"github.com/stackus/eda-with-golang/ch4/internal/rpc"
 	"github.com/stackus/eda-with-golang/ch4/internal/web"
+	"github.com/stackus/eda-with-golang/ch4/ordering"
 	"github.com/stackus/eda-with-golang/ch4/stores"
 )
 
@@ -57,6 +58,7 @@ func run() (err error) {
 	m.modules = []monolith.Module{
 		&basket.Module{},
 		&stores.Module{},
+		&ordering.Module{},
 	}
 
 	if err = m.startupModules(); err != nil {

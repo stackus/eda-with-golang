@@ -19,7 +19,7 @@ func NewCancelBasketHandler(repo ports.BasketRepository) CancelBasketHandler {
 }
 
 func (h CancelBasketHandler) CancelBasket(ctx context.Context, cmd CancelBasket) error {
-	basket, err := h.repo.FindBasket(ctx, cmd.ID)
+	basket, err := h.repo.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -29,5 +29,5 @@ func (h CancelBasketHandler) CancelBasket(ctx context.Context, cmd CancelBasket)
 		return err
 	}
 
-	return h.repo.UpdateBasket(ctx, basket)
+	return h.repo.Update(ctx, basket)
 }

@@ -15,8 +15,8 @@ import (
 )
 
 func RegisterGateway(ctx context.Context, _ application.App, mux *chi.Mux, grpcAddr string) error {
-	const storeAPIRoot = "/api/stores"
-	const storeUIRoot = "/stores-ui/"
+	const apiRoot = "/api/stores"
+	const specRoot = "/stores-spec/"
 
 	gateway := runtime.NewServeMux()
 	err := storespb.RegisterStoresServiceHandlerFromEndpoint(ctx, gateway, grpcAddr, []grpc.DialOption{
@@ -26,10 +26,10 @@ func RegisterGateway(ctx context.Context, _ application.App, mux *chi.Mux, grpcA
 		return err
 	}
 
-	// mount the stores GRPC gateway
-	mux.Mount(storeAPIRoot, gateway)
-	// mount the stores GRPC-Gateway swagger UI
-	mux.Mount(storeUIRoot, http.StripPrefix(storeUIRoot, http.FileServer(http.FS(swaggerUI))))
+	// mount the GRPC gateway
+	mux.Mount(apiRoot, gateway)
+	// mount the swagger specifications
+	mux.Mount(specRoot, http.StripPrefix(specRoot, http.FileServer(http.FS(swaggerUI))))
 
 	return nil
 }

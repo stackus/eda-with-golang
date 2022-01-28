@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package orderingpb;
+
+import "orderingpb/messages.proto";
+
+service OrderingService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {};
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse) {};
+}
+
+message CreateOrderRequest {
+  repeated Item items = 1;
+  string card_token = 2;
+  string sms_number = 3;
+}
+
+message CreateOrderResponse {
+  string id = 1;
+}
+
+message GetOrderRequest {
+  string id = 1;
+}
+
+message GetOrderResponse {
+  Order order = 1;
+}

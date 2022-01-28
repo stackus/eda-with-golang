@@ -20,5 +20,5 @@ func NewGetStoreHandler(repo ports.StoreRepository) GetStoreHandler {
 }
 
 func (h GetStoreHandler) GetStore(ctx context.Context, query GetStore) (*domain.Store, error) {
-	return h.repo.FindStore(ctx, query.ID)
+	return h.repo.Find(ctx, query.ID)
 }

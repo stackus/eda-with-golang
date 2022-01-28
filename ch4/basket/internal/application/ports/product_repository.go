@@ -7,5 +7,5 @@ import (
 )
 
 type ProductRepository interface {
-	FindProduct(ctx context.Context, storeID, productID string) (*domain.Product, error)
+	Find(ctx context.Context, storeID, productID string) (*domain.Product, error)
 }

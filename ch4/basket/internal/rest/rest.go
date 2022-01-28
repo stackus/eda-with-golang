@@ -14,8 +14,8 @@ import (
 )
 
 func RegisterGateway(ctx context.Context, _ application.App, mux *chi.Mux, grpcAddr string) error {
-	const storeAPIRoot = "/api/basket"
-	const storeUIRoot = "/basket-ui/"
+	const apiRoot = "/api/baskets"
+	const specRoot = "/baskets-spec/"
 
 	gateway := runtime.NewServeMux()
 	err := basketpb.RegisterBasketServiceHandlerFromEndpoint(ctx, gateway, grpcAddr, []grpc.DialOption{
@@ -25,10 +25,10 @@ func RegisterGateway(ctx context.Context, _ application.App, mux *chi.Mux, grpcA
 		return err
 	}
 
-	// mount the basket GRPC gateway
-	mux.Mount(storeAPIRoot, gateway)
-	// mount the basket GRPC-Gateway swagger UI
-	mux.Mount(storeUIRoot, http.StripPrefix(storeUIRoot, http.FileServer(http.FS(swaggerUI))))
+	// mount the GRPC gateway
+	mux.Mount(apiRoot, gateway)
+	// mount the swagger specification
+	mux.Mount(specRoot, http.StripPrefix(specRoot, http.FileServer(http.FS(swaggerUI))))
 
 	return nil
 }
