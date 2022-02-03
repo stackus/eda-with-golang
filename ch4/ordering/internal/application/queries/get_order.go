@@ -5,7 +5,6 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application/ports"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/domain"
 )
 
@@ -14,10 +13,10 @@ type GetOrder struct {
 }
 
 type GetOrderHandler struct {
-	repo ports.OrderRepository
+	repo domain.OrderRepository
 }
 
-func NewGetOrderHandler(repo ports.OrderRepository) GetOrderHandler {
+func NewGetOrderHandler(repo domain.OrderRepository) GetOrderHandler {
 	return GetOrderHandler{repo: repo}
 }
 

@@ -10,13 +10,15 @@ import (
 type WaitFunc func(ctx context.Context) error
 
 type Waiter interface {
-	Wait(fns ...WaitFunc) error
+	Add(fns ...WaitFunc)
+	Wait() error
 	Context() context.Context
 	CancelFunc() context.CancelFunc
 }
 
 type waiter struct {
 	ctx    context.Context
+	fns    []WaitFunc
 	cancel context.CancelFunc
 }
 
@@ -35,22 +37,28 @@ func New(options ...EgressOption) Waiter {
 		option(cfg)
 	}
 
-	w := waiter{}
+	w := waiter{
+		fns: []WaitFunc{},
+	}
 	w.ctx, w.cancel = context.WithCancel(cfg.parentCtx)
 	if cfg.catchSignals {
-		w.ctx, _ = signal.NotifyContext(w.ctx, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+		w.ctx, w.cancel = signal.NotifyContext(w.ctx, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	}
 
 	return w
 }
 
-func (w waiter) Wait(fns ...WaitFunc) (err error) {
+func (w waiter) Add(fns ...WaitFunc) {
+	w.fns = append(w.fns, fns...)
+}
+
+func (w waiter) Wait() (err error) {
 	errc := make(chan error)
-	for _, fn := range fns {
+	for _, fn := range w.fns {
 		fn := fn
 		go func() { errc <- fn(w.ctx) }()
 	}
-	for range fns {
+	for range w.fns {
 		if err != nil {
 			<-errc
 		} else {

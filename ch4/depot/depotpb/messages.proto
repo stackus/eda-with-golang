@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package depotpb;
+
+message OrderItem {
+  string product_id = 1;
+  string store_id = 2;
+  int32 quantity = 3;
+}
+
+message ShoppingList {
+  string id = 1;
+  string order_id = 2;
+  repeated Stop stops = 3;
+  string assigned_bot_id = 4;
+  string status = 5;
+}
+
+message Stop {
+  string store_id = 1;
+  string store_name = 2;
+  string store_location = 3;
+  repeated Item items = 4;
+}
+
+message Item {
+  string id = 1;
+  string name = 2;
+  int32 quantity = 3;
+}

@@ -16,9 +16,7 @@ type Monolith interface {
 	DB() *sql.DB
 	Mux() *chi.Mux
 	RPC() *grpc.Server
-	Wait(...egress.WaitFunc) error
-	Context() context.Context
-	CancelFunc() context.CancelFunc
+	Waiter() egress.Waiter
 }
 
 type Module interface {

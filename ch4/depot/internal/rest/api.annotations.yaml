@@ -1,0 +1,10 @@
+type: google.api.Service
+config_version: 3
+http:
+  rules:
+    - selector: depotpb.DepotService.SubmitOrder
+      post: /api/depot/orders
+      body: "*"
+    - selector: depotpb.DepotService.CancelOrder
+      post: /api/depot/orders/{id}
+      body: "*"

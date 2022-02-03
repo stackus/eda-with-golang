@@ -1,0 +1,21 @@
+openapiOptions:
+  file:
+    - file: "depotpb/messages.proto"
+      option:
+        info:
+          title: Depot
+          version: "1.0.0"
+        basePath: /
+  method:
+    - method: depotpb.DepotService.SubmitOrder
+      option:
+        operationId: submitOrder
+        tags:
+          - Order
+        summary: Submit an order for pickup
+    - method: depotpb.DepotService.CancelOrder
+      option:
+        operationId: cancelOrder
+        tags:
+          - Order
+        summary: Cancel an order

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application/commands"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application/ports"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application/queries"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/domain"
 )
@@ -35,7 +34,7 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(orderRepo ports.OrderRepository) *Application {
+func New(orderRepo domain.OrderRepository) *Application {
 	return &Application{
 		appCommands: appCommands{
 			CreateOrderHandler: commands.NewCreateOrderHandler(orderRepo),

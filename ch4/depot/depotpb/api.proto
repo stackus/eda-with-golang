@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package depotpb;
+
+import "depotpb/messages.proto";
+
+service DepotService {
+  rpc SubmitOrder(SubmitOrderRequest) returns (SubmitOrderResponse) {}
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {}
+  rpc SelectShoppingList(SelectShoppingListRequest) returns (SelectShoppingListResponse) {}
+}
+
+message SubmitOrderRequest {
+  string order_id = 1;
+  repeated OrderItem items = 2;
+}
+
+message SubmitOrderResponse {
+  string id = 1;
+}
+
+message CancelOrderRequest {
+  string id = 1;
+}
+
+message CancelOrderResponse {}
+
+message SelectShoppingListRequest {
+  string bot_id = 1;
+  string shopping_list_id = 2;
+}

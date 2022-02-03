@@ -42,21 +42,13 @@ func (a *app) RPC() *grpc.Server {
 	return a.rpc
 }
 
-func (a *app) Wait(fns ...egress.WaitFunc) error {
-	return a.waiter.Wait(fns...)
-}
-
-func (a *app) Context() context.Context {
-	return a.waiter.Context()
-}
-
-func (a *app) CancelFunc() context.CancelFunc {
-	return a.waiter.CancelFunc()
+func (a *app) Waiter() egress.Waiter {
+	return a.waiter
 }
 
 func (a *app) startupModules() error {
 	for _, module := range a.modules {
-		if err := module.Startup(a.Context(), a); err != nil {
+		if err := module.Startup(a.Waiter().Context(), a); err != nil {
 			return err
 		}
 	}

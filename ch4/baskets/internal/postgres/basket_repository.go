@@ -1,0 +1,99 @@
+package postgres
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+
+	"github.com/stackus/eda-with-golang/ch4/baskets/internal/domain"
+)
+
+type BasketRepository struct {
+	tableName string
+	db        *sql.DB
+}
+
+var _ domain.BasketRepository = (*BasketRepository)(nil)
+
+func NewBasketRepository(tableName string, db *sql.DB) BasketRepository {
+	return BasketRepository{tableName: tableName, db: db}
+}
+
+func (r BasketRepository) Find(ctx context.Context, basketID string) (*domain.Basket, error) {
+	const query = "SELECT items, card_token, sms_number, status FROM %s WHERE id = $1 LIMIT 1"
+
+	basket := &domain.Basket{
+		ID: basketID,
+	}
+	var items []byte
+	var status string
+
+	err := r.db.QueryRowContext(ctx, r.table(query), basketID).Scan(&items, &basket.CardToken, &basket.SmsNumber, &status)
+	if err != nil {
+		return nil, err
+	}
+
+	basket.Status, err = r.statusToDomain(status)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(items, &basket.Items)
+	if err != nil {
+		return nil, err
+	}
+
+	return basket, nil
+}
+
+func (r BasketRepository) Save(ctx context.Context, basket *domain.Basket) error {
+	const query = "INSERT INTO %s (id, items, card_token, sms_number, status) VALUES ($1, $2, $3, $4, $5)"
+
+	items, err := json.Marshal(basket.Items)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID, items, basket.CardToken, basket.SmsNumber, basket.Status.String())
+
+	return err
+}
+
+func (r BasketRepository) Update(ctx context.Context, basket *domain.Basket) error {
+	const query = "UPDATE %s SET items = $1, card_token = $2, sms_number = $3, status = $4  WHERE id = $5"
+
+	items, err := json.Marshal(basket.Items)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, r.table(query), items, basket.CardToken, basket.SmsNumber, basket.Status.String(), basket.ID)
+
+	return err
+}
+
+func (r BasketRepository) DeleteBasket(ctx context.Context, basketID string) error {
+	const query = "DELETE FROM %s WHERE id = $1 LIMIT 1"
+
+	_, err := r.db.ExecContext(ctx, r.table(query), basketID)
+
+	return err
+}
+
+func (r BasketRepository) table(query string) string {
+	return fmt.Sprintf(query, r.tableName)
+}
+
+func (r BasketRepository) statusToDomain(status string) (domain.BasketStatus, error) {
+	switch status {
+	case domain.BasketOpen.String():
+		return domain.BasketOpen, nil
+	case domain.BasketCancelled.String():
+		return domain.BasketCancelled, nil
+	case domain.BasketCheckedOut.String():
+		return domain.BasketCheckedOut, nil
+	default:
+		return domain.BasketUnknown, fmt.Errorf("unknown basket status: %s", status)
+	}
+}

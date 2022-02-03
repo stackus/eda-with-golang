@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/stackus/eda-with-golang/ch4/basket"
+	"github.com/stackus/eda-with-golang/ch4/baskets"
 	"github.com/stackus/eda-with-golang/ch4/internal/config"
 	"github.com/stackus/eda-with-golang/ch4/internal/egress"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
@@ -56,7 +56,7 @@ func run() (err error) {
 
 	// init modules
 	m.modules = []monolith.Module{
-		&basket.Module{},
+		&baskets.Module{},
 		&stores.Module{},
 		&ordering.Module{},
 	}
@@ -71,10 +71,12 @@ func run() (err error) {
 	fmt.Println("started mallbots application")
 	defer fmt.Println("stopped mallbots application")
 
-	return m.waiter.Wait(
+	m.waiter.Add(
 		m.waitForWeb,
 		m.waitForRPC,
 	)
+
+	return m.waiter.Wait()
 }
 
 func initRpc(_ rpc.RpcConfig) *grpc.Server {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application/ports"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/domain"
 )
 
@@ -17,7 +16,7 @@ type OrderRepository struct {
 	db        *sql.DB
 }
 
-var _ ports.OrderRepository = (*OrderRepository)(nil)
+var _ domain.OrderRepository = (*OrderRepository)(nil)
 
 func NewOrderRepository(tableName string, db *sql.DB) OrderRepository {
 	return OrderRepository{
