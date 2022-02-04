@@ -28,10 +28,10 @@ type StoresServiceClient interface {
 	EnableParticipation(ctx context.Context, in *EnableParticipationRequest, opts ...grpc.CallOption) (*EnableParticipationResponse, error)
 	DisableParticipation(ctx context.Context, in *DisableParticipationRequest, opts ...grpc.CallOption) (*DisableParticipationResponse, error)
 	GetParticipatingStores(ctx context.Context, in *GetParticipatingStoresRequest, opts ...grpc.CallOption) (*GetParticipatingStoresResponse, error)
-	AddOffering(ctx context.Context, in *AddOfferingRequest, opts ...grpc.CallOption) (*AddOfferingResponse, error)
-	RemoveOffering(ctx context.Context, in *RemoveOfferingRequest, opts ...grpc.CallOption) (*RemoveOfferingResponse, error)
-	GetStoreOfferings(ctx context.Context, in *GetStoreOfferingsRequest, opts ...grpc.CallOption) (*GetStoreOfferingsResponse, error)
-	GetOffering(ctx context.Context, in *GetOfferingRequest, opts ...grpc.CallOption) (*GetOfferingResponse, error)
+	AddProduct(ctx context.Context, in *AddProductRequest, opts ...grpc.CallOption) (*AddProductResponse, error)
+	RemoveProduct(ctx context.Context, in *RemoveProductRequest, opts ...grpc.CallOption) (*RemoveProductResponse, error)
+	GetCatalog(ctx context.Context, in *GetCatalogRequest, opts ...grpc.CallOption) (*GetCatalogResponse, error)
+	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 }
 
 type storesServiceClient struct {
@@ -96,36 +96,36 @@ func (c *storesServiceClient) GetParticipatingStores(ctx context.Context, in *Ge
 	return out, nil
 }
 
-func (c *storesServiceClient) AddOffering(ctx context.Context, in *AddOfferingRequest, opts ...grpc.CallOption) (*AddOfferingResponse, error) {
-	out := new(AddOfferingResponse)
-	err := c.cc.Invoke(ctx, "/storespb.StoresService/AddOffering", in, out, opts...)
+func (c *storesServiceClient) AddProduct(ctx context.Context, in *AddProductRequest, opts ...grpc.CallOption) (*AddProductResponse, error) {
+	out := new(AddProductResponse)
+	err := c.cc.Invoke(ctx, "/storespb.StoresService/AddProduct", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *storesServiceClient) RemoveOffering(ctx context.Context, in *RemoveOfferingRequest, opts ...grpc.CallOption) (*RemoveOfferingResponse, error) {
-	out := new(RemoveOfferingResponse)
-	err := c.cc.Invoke(ctx, "/storespb.StoresService/RemoveOffering", in, out, opts...)
+func (c *storesServiceClient) RemoveProduct(ctx context.Context, in *RemoveProductRequest, opts ...grpc.CallOption) (*RemoveProductResponse, error) {
+	out := new(RemoveProductResponse)
+	err := c.cc.Invoke(ctx, "/storespb.StoresService/RemoveProduct", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *storesServiceClient) GetStoreOfferings(ctx context.Context, in *GetStoreOfferingsRequest, opts ...grpc.CallOption) (*GetStoreOfferingsResponse, error) {
-	out := new(GetStoreOfferingsResponse)
-	err := c.cc.Invoke(ctx, "/storespb.StoresService/GetStoreOfferings", in, out, opts...)
+func (c *storesServiceClient) GetCatalog(ctx context.Context, in *GetCatalogRequest, opts ...grpc.CallOption) (*GetCatalogResponse, error) {
+	out := new(GetCatalogResponse)
+	err := c.cc.Invoke(ctx, "/storespb.StoresService/GetCatalog", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *storesServiceClient) GetOffering(ctx context.Context, in *GetOfferingRequest, opts ...grpc.CallOption) (*GetOfferingResponse, error) {
-	out := new(GetOfferingResponse)
-	err := c.cc.Invoke(ctx, "/storespb.StoresService/GetOffering", in, out, opts...)
+func (c *storesServiceClient) GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error) {
+	out := new(GetProductResponse)
+	err := c.cc.Invoke(ctx, "/storespb.StoresService/GetProduct", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -142,10 +142,10 @@ type StoresServiceServer interface {
 	EnableParticipation(context.Context, *EnableParticipationRequest) (*EnableParticipationResponse, error)
 	DisableParticipation(context.Context, *DisableParticipationRequest) (*DisableParticipationResponse, error)
 	GetParticipatingStores(context.Context, *GetParticipatingStoresRequest) (*GetParticipatingStoresResponse, error)
-	AddOffering(context.Context, *AddOfferingRequest) (*AddOfferingResponse, error)
-	RemoveOffering(context.Context, *RemoveOfferingRequest) (*RemoveOfferingResponse, error)
-	GetStoreOfferings(context.Context, *GetStoreOfferingsRequest) (*GetStoreOfferingsResponse, error)
-	GetOffering(context.Context, *GetOfferingRequest) (*GetOfferingResponse, error)
+	AddProduct(context.Context, *AddProductRequest) (*AddProductResponse, error)
+	RemoveProduct(context.Context, *RemoveProductRequest) (*RemoveProductResponse, error)
+	GetCatalog(context.Context, *GetCatalogRequest) (*GetCatalogResponse, error)
+	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	mustEmbedUnimplementedStoresServiceServer()
 }
 
@@ -171,17 +171,17 @@ func (UnimplementedStoresServiceServer) DisableParticipation(context.Context, *D
 func (UnimplementedStoresServiceServer) GetParticipatingStores(context.Context, *GetParticipatingStoresRequest) (*GetParticipatingStoresResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetParticipatingStores not implemented")
 }
-func (UnimplementedStoresServiceServer) AddOffering(context.Context, *AddOfferingRequest) (*AddOfferingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddOffering not implemented")
+func (UnimplementedStoresServiceServer) AddProduct(context.Context, *AddProductRequest) (*AddProductResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddProduct not implemented")
 }
-func (UnimplementedStoresServiceServer) RemoveOffering(context.Context, *RemoveOfferingRequest) (*RemoveOfferingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveOffering not implemented")
+func (UnimplementedStoresServiceServer) RemoveProduct(context.Context, *RemoveProductRequest) (*RemoveProductResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveProduct not implemented")
 }
-func (UnimplementedStoresServiceServer) GetStoreOfferings(context.Context, *GetStoreOfferingsRequest) (*GetStoreOfferingsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStoreOfferings not implemented")
+func (UnimplementedStoresServiceServer) GetCatalog(context.Context, *GetCatalogRequest) (*GetCatalogResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCatalog not implemented")
 }
-func (UnimplementedStoresServiceServer) GetOffering(context.Context, *GetOfferingRequest) (*GetOfferingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetOffering not implemented")
+func (UnimplementedStoresServiceServer) GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProduct not implemented")
 }
 func (UnimplementedStoresServiceServer) mustEmbedUnimplementedStoresServiceServer() {}
 
@@ -304,74 +304,74 @@ func _StoresService_GetParticipatingStores_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StoresService_AddOffering_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddOfferingRequest)
+func _StoresService_AddProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddProductRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StoresServiceServer).AddOffering(ctx, in)
+		return srv.(StoresServiceServer).AddProduct(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/storespb.StoresService/AddOffering",
+		FullMethod: "/storespb.StoresService/AddProduct",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StoresServiceServer).AddOffering(ctx, req.(*AddOfferingRequest))
+		return srv.(StoresServiceServer).AddProduct(ctx, req.(*AddProductRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StoresService_RemoveOffering_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveOfferingRequest)
+func _StoresService_RemoveProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveProductRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StoresServiceServer).RemoveOffering(ctx, in)
+		return srv.(StoresServiceServer).RemoveProduct(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/storespb.StoresService/RemoveOffering",
+		FullMethod: "/storespb.StoresService/RemoveProduct",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StoresServiceServer).RemoveOffering(ctx, req.(*RemoveOfferingRequest))
+		return srv.(StoresServiceServer).RemoveProduct(ctx, req.(*RemoveProductRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StoresService_GetStoreOfferings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetStoreOfferingsRequest)
+func _StoresService_GetCatalog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCatalogRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StoresServiceServer).GetStoreOfferings(ctx, in)
+		return srv.(StoresServiceServer).GetCatalog(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/storespb.StoresService/GetStoreOfferings",
+		FullMethod: "/storespb.StoresService/GetCatalog",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StoresServiceServer).GetStoreOfferings(ctx, req.(*GetStoreOfferingsRequest))
+		return srv.(StoresServiceServer).GetCatalog(ctx, req.(*GetCatalogRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StoresService_GetOffering_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetOfferingRequest)
+func _StoresService_GetProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProductRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StoresServiceServer).GetOffering(ctx, in)
+		return srv.(StoresServiceServer).GetProduct(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/storespb.StoresService/GetOffering",
+		FullMethod: "/storespb.StoresService/GetProduct",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StoresServiceServer).GetOffering(ctx, req.(*GetOfferingRequest))
+		return srv.(StoresServiceServer).GetProduct(ctx, req.(*GetProductRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -408,20 +408,20 @@ var StoresService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _StoresService_GetParticipatingStores_Handler,
 		},
 		{
-			MethodName: "AddOffering",
-			Handler:    _StoresService_AddOffering_Handler,
+			MethodName: "AddProduct",
+			Handler:    _StoresService_AddProduct_Handler,
 		},
 		{
-			MethodName: "RemoveOffering",
-			Handler:    _StoresService_RemoveOffering_Handler,
+			MethodName: "RemoveProduct",
+			Handler:    _StoresService_RemoveProduct_Handler,
 		},
 		{
-			MethodName: "GetStoreOfferings",
-			Handler:    _StoresService_GetStoreOfferings_Handler,
+			MethodName: "GetCatalog",
+			Handler:    _StoresService_GetCatalog_Handler,
 		},
 		{
-			MethodName: "GetOffering",
-			Handler:    _StoresService_GetOffering_Handler,
+			MethodName: "GetProduct",
+			Handler:    _StoresService_GetProduct_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

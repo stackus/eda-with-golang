@@ -5,8 +5,9 @@ import (
 )
 
 var (
-	ErrBasketCannotBeCancelled  = fmt.Errorf("the basket cannot be cancelled")
+	ErrBasketHasNoItems         = fmt.Errorf("the basket has no items")
 	ErrBasketCannotBeModified   = fmt.Errorf("the basket cannot be modified")
+	ErrBasketCannotBeCancelled  = fmt.Errorf("the basket cannot be cancelled")
 	ErrQuantityCannotBeNegative = fmt.Errorf("the item quantity cannot be negative")
 	ErrCardTokenCannotBeBlank   = fmt.Errorf("the card token cannot be blank")
 	ErrSmsNumberCannotBeBlank   = fmt.Errorf("the sms number cannot be blank")
@@ -70,6 +71,10 @@ func (b *Basket) Cancel() error {
 func (b *Basket) Checkout(cardToken, smsNumber string) error {
 	if !b.IsOpen() {
 		return ErrBasketCannotBeModified
+	}
+
+	if len(b.Items) == 0 {
+		return ErrBasketHasNoItems
 	}
 
 	if cardToken == "" {

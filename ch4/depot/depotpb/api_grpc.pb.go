@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type DepotServiceClient interface {
 	SubmitOrder(ctx context.Context, in *SubmitOrderRequest, opts ...grpc.CallOption) (*SubmitOrderResponse, error)
 	CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*CancelOrderResponse, error)
+	SelectShoppingList(ctx context.Context, in *SelectShoppingListRequest, opts ...grpc.CallOption) (*SelectShoppingListResponse, error)
 }
 
 type depotServiceClient struct {
@@ -52,12 +53,22 @@ func (c *depotServiceClient) CancelOrder(ctx context.Context, in *CancelOrderReq
 	return out, nil
 }
 
+func (c *depotServiceClient) SelectShoppingList(ctx context.Context, in *SelectShoppingListRequest, opts ...grpc.CallOption) (*SelectShoppingListResponse, error) {
+	out := new(SelectShoppingListResponse)
+	err := c.cc.Invoke(ctx, "/depotpb.DepotService/SelectShoppingList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DepotServiceServer is the server API for DepotService service.
 // All implementations must embed UnimplementedDepotServiceServer
 // for forward compatibility
 type DepotServiceServer interface {
 	SubmitOrder(context.Context, *SubmitOrderRequest) (*SubmitOrderResponse, error)
 	CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error)
+	SelectShoppingList(context.Context, *SelectShoppingListRequest) (*SelectShoppingListResponse, error)
 	mustEmbedUnimplementedDepotServiceServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedDepotServiceServer) SubmitOrder(context.Context, *SubmitOrder
 }
 func (UnimplementedDepotServiceServer) CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelOrder not implemented")
+}
+func (UnimplementedDepotServiceServer) SelectShoppingList(context.Context, *SelectShoppingListRequest) (*SelectShoppingListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SelectShoppingList not implemented")
 }
 func (UnimplementedDepotServiceServer) mustEmbedUnimplementedDepotServiceServer() {}
 
@@ -120,6 +134,24 @@ func _DepotService_CancelOrder_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DepotService_SelectShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SelectShoppingListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DepotServiceServer).SelectShoppingList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/depotpb.DepotService/SelectShoppingList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DepotServiceServer).SelectShoppingList(ctx, req.(*SelectShoppingListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DepotService_ServiceDesc is the grpc.ServiceDesc for DepotService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var DepotService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelOrder",
 			Handler:    _DepotService_CancelOrder_Handler,
+		},
+		{
+			MethodName: "SelectShoppingList",
+			Handler:    _DepotService_SelectShoppingList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

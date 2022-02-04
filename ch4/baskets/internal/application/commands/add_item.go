@@ -8,7 +8,6 @@ import (
 
 type AddItem struct {
 	ID        string
-	StoreID   string
 	ProductID string
 	Quantity  int
 }
@@ -26,7 +25,7 @@ func NewAddItemHandler(basketRepo domain.BasketRepository, productRepo domain.Pr
 }
 
 func (h AddItemHandler) AddItem(ctx context.Context, cmd AddItem) error {
-	product, err := h.productRepo.Find(ctx, cmd.StoreID, cmd.ProductID)
+	product, err := h.productRepo.Find(ctx, cmd.ProductID)
 	if err != nil {
 		return err
 	}

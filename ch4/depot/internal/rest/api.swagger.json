@@ -109,6 +109,9 @@
         }
       }
     },
+    "depotpbSelectShoppingListResponse": {
+      "type": "object"
+    },
     "depotpbSubmitOrderRequest": {
       "type": "object",
       "properties": {

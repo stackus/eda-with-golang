@@ -8,7 +8,6 @@ import (
 	"github.com/stackus/eda-with-golang/ch4/depot/depotpb"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/application/commands"
-	"github.com/stackus/eda-with-golang/ch4/depot/internal/domain"
 )
 
 type server struct {
@@ -21,7 +20,7 @@ var _ depotpb.DepotServiceServer = (*server)(nil)
 func (s server) SubmitOrder(ctx context.Context, request *depotpb.SubmitOrderRequest) (*depotpb.SubmitOrderResponse, error) {
 	id := uuid.New().String()
 
-	items := make([]domain.OrderItem, 0, len(request.GetItems()))
+	items := make([]commands.OrderItem, 0, len(request.GetItems()))
 	for _, item := range request.GetItems() {
 		items = append(items, s.itemToDomain(item))
 	}
@@ -41,8 +40,8 @@ func (s server) CancelOrder(ctx context.Context, request *depotpb.CancelOrderReq
 	return &depotpb.CancelOrderResponse{}, err
 }
 
-func (s server) itemToDomain(item *depotpb.OrderItem) domain.OrderItem {
-	return domain.OrderItem{
+func (s server) itemToDomain(item *depotpb.OrderItem) commands.OrderItem {
+	return commands.OrderItem{
 		StoreID:   item.GetStoreId(),
 		ProductID: item.GetProductId(),
 		Quantity:  int(item.GetQuantity()),

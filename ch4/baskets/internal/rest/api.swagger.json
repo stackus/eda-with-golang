@@ -142,9 +142,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "storeId": {
-                  "type": "string"
-                },
                 "productId": {
                   "type": "string"
                 },
@@ -240,9 +237,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "storeId": {
-                  "type": "string"
-                },
                 "productId": {
                   "type": "string"
                 },

@@ -35,7 +35,6 @@ message CheckoutBasketResponse {}
 
 message AddItemRequest {
   string id = 1;
-  string store_id = 2;
   string product_id = 3;
   int32 quantity = 4;
 }
@@ -44,7 +43,6 @@ message AddItemResponse {}
 
 message RemoveItemRequest {
   string id = 1;
-  string store_id = 2;
   string product_id = 3;
   int32 quantity = 4;
 }

@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/ports"
+	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
 )
 
 type EnableParticipation struct {
@@ -11,10 +11,10 @@ type EnableParticipation struct {
 }
 
 type EnableParticipationHandler struct {
-	repo ports.StoreRepository
+	repo domain.StoreRepository
 }
 
-func NewEnableParticipationHandler(repo ports.StoreRepository) EnableParticipationHandler {
+func NewEnableParticipationHandler(repo domain.StoreRepository) EnableParticipationHandler {
 	return EnableParticipationHandler{repo: repo}
 }
 

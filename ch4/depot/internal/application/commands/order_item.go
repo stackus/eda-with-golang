@@ -1,4 +1,4 @@
-package domain
+package commands
 
 type OrderItem struct {
 	StoreID   string

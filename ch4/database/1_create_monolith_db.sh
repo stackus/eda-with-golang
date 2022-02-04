@@ -7,19 +7,21 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
   CREATE USER mallbots_user WITH ENCRYPTED PASSWORD 'mallbots_pass';
 
   GRANT CONNECT ON DATABASE mallbots TO mallbots_user;
+EOSQL
 
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
   -- Apply to keep modifications to the created_at column from being made
   CREATE OR REPLACE FUNCTION created_at_trigger()
-  RETURNS TRIGGER AS $$
+  RETURNS TRIGGER AS \$\$
   BEGIN
-    NEW.created_at := OLD.created_at
+    NEW.created_at := OLD.created_at;
     RETURN NEW;
   END;
-  $$ language 'plpgsql';
+  \$\$ language 'plpgsql';
 
   -- Apply to a table to automatically update update_at columns
   CREATE OR REPLACE FUNCTION updated_at_trigger()
-  RETURNS TRIGGER AS $$
+  RETURNS TRIGGER AS \$\$
   BEGIN
      IF row(NEW.*) IS DISTINCT FROM row(OLD.*) THEN
         NEW.updated_at = NOW();
@@ -28,5 +30,5 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
         RETURN OLD;
      END IF;
   END;
-  $$ language 'plpgsql';
+  \$\$ language 'plpgsql';
 EOSQL

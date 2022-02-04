@@ -7,7 +7,6 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/ports"
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
 )
 
@@ -16,7 +15,7 @@ type ParticipatingStoreRepository struct {
 	db        *sql.DB
 }
 
-var _ ports.ParticipatingStoreRepository = (*ParticipatingStoreRepository)(nil)
+var _ domain.ParticipatingStoreRepository = (*ParticipatingStoreRepository)(nil)
 
 func NewParticipatingStoreRepository(tableName string, db *sql.DB) ParticipatingStoreRepository {
 	return ParticipatingStoreRepository{tableName: tableName, db: db}

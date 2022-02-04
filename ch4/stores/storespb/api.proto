@@ -11,10 +11,10 @@ service StoresService {
   rpc EnableParticipation(EnableParticipationRequest) returns (EnableParticipationResponse) {};
   rpc DisableParticipation(DisableParticipationRequest) returns (DisableParticipationResponse) {};
   rpc GetParticipatingStores(GetParticipatingStoresRequest) returns (GetParticipatingStoresResponse) {};
-  rpc AddOffering(AddOfferingRequest) returns (AddOfferingResponse) {};
-  rpc RemoveOffering(RemoveOfferingRequest) returns (RemoveOfferingResponse) {};
-  rpc GetStoreOfferings(GetStoreOfferingsRequest) returns (GetStoreOfferingsResponse) {};
-  rpc GetOffering(GetOfferingRequest) returns (GetOfferingResponse) {};
+  rpc AddProduct(AddProductRequest) returns (AddProductResponse) {};
+  rpc RemoveProduct(RemoveProductRequest) returns (RemoveProductResponse) {};
+  rpc GetCatalog(GetCatalogRequest) returns (GetCatalogResponse) {};
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse) {};
 }
 
 message CreateStoreRequest {
@@ -58,37 +58,36 @@ message GetParticipatingStoresResponse {
   repeated Store stores = 1;
 }
 
-message AddOfferingRequest {
+message AddProductRequest {
   string store_id = 1;
   string name = 2;
   string description = 3;
-  double price = 4;
+  string sku = 4;
+  double price = 5;
 }
 
-message AddOfferingResponse {
+message AddProductResponse {
   string id = 1;
 }
 
-message RemoveOfferingRequest {
+message RemoveProductRequest {
   string id = 1;
-  string store_id = 2;
 }
 
-message RemoveOfferingResponse {}
+message RemoveProductResponse {}
 
-message GetStoreOfferingsRequest {
+message GetCatalogRequest {
   string store_id = 1;
 }
 
-message GetStoreOfferingsResponse {
-  repeated Offering offerings = 1;
+message GetCatalogResponse {
+  repeated Product products = 1;
 }
 
-message GetOfferingRequest {
+message GetProductRequest {
   string id = 1;
-  string store_id = 2;
 }
 
-message GetOfferingResponse {
-  Offering offering = 1;
+message GetProductResponse {
+  Product product = 1;
 }

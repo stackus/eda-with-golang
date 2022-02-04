@@ -26,11 +26,14 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
       store_id    text NOT NULL,
       name        text NOT NULL,
       description text NOT NULL,
+      sku         text NOT NULL,
       price       decimal NOT NULL,
       created_at  timestamptz NOT NULL DEFAULT NOW(),
       updated_at  timestamptz NOT NULL DEFAULT NOW(),
-      PRIMARY KEY (id, store_id)
+      PRIMARY KEY (id)
   );
+
+  CREATE INDEX store_offerings_idx ON store.offerings (store_id);
 
   CREATE TRIGGER created_at_offerings_trgr BEFORE UPDATE ON store.offerings FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
   CREATE TRIGGER updated_at_offerings_trgr BEFORE UPDATE ON store.offerings FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();

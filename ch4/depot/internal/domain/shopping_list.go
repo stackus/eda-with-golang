@@ -36,6 +36,41 @@ type ShoppingList struct {
 	Status        ShoppingListStatus
 }
 
+func CreateShoppingList(id, orderID string) *ShoppingList {
+	return &ShoppingList{
+		ID:      id,
+		OrderID: orderID,
+		Status:  ShoppingListAvailable,
+	}
+}
+
+func (sl *ShoppingList) AddItem(store *Store, product *Product, quantity int) error {
+	for _, stop := range sl.Stops {
+		if stop.StoreID == store.ID {
+			stop.Items = append(stop.Items, &Item{
+				ID:       product.ID,
+				Name:     product.Name,
+				Quantity: quantity,
+			})
+			return nil
+		}
+	}
+	sl.Stops = append(sl.Stops, &Stop{
+		StoreID:       store.ID,
+		StoreName:     store.ID,
+		StoreLocation: store.Location,
+		Items: []*Item{
+			{
+				ID:       product.ID,
+				Name:     product.Name,
+				Quantity: quantity,
+			},
+		},
+	})
+
+	return nil
+}
+
 func (sl *ShoppingList) Cancel() error {
 	sl.Status = ShoppingListCancelled
 

@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/stackus/eda-with-golang/ch4/baskets"
+	"github.com/stackus/eda-with-golang/ch4/depot"
 	"github.com/stackus/eda-with-golang/ch4/internal/config"
 	"github.com/stackus/eda-with-golang/ch4/internal/egress"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
@@ -23,7 +24,7 @@ import (
 
 func main() {
 	if err := run(); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }
@@ -57,6 +58,7 @@ func run() (err error) {
 	// init modules
 	m.modules = []monolith.Module{
 		&baskets.Module{},
+		&depot.Module{},
 		&stores.Module{},
 		&ordering.Module{},
 	}

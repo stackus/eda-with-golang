@@ -3,12 +3,10 @@ package grpc
 import (
 	"context"
 
-	"github.com/stackus/errors"
 	"google.golang.org/grpc"
 
+	"github.com/stackus/eda-with-golang/ch4/depot/internal/domain"
 	"github.com/stackus/eda-with-golang/ch4/stores/storespb"
-
-	"github.com/stackus/eda-with-golang/ch4/baskets/internal/domain"
 )
 
 type ProductRepository struct {
@@ -22,11 +20,9 @@ func NewProductRepository(conn *grpc.ClientConn) ProductRepository {
 }
 
 func (r ProductRepository) Find(ctx context.Context, productID string) (*domain.Product, error) {
-	resp, err := r.client.GetProduct(ctx, &storespb.GetProductRequest{
-		Id: productID,
-	})
+	resp, err := r.client.GetProduct(ctx, &storespb.GetProductRequest{Id: productID})
 	if err != nil {
-		return nil, errors.Wrap(err, "requesting product")
+		return nil, err
 	}
 
 	return r.productToDomain(resp.Product), nil
@@ -37,6 +33,5 @@ func (r ProductRepository) productToDomain(product *storespb.Product) *domain.Pr
 		ID:      product.GetId(),
 		StoreID: product.GetStoreId(),
 		Name:    product.GetName(),
-		Price:   product.GetPrice(),
 	}
 }

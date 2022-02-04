@@ -43,27 +43,27 @@ openapiOptions:
         tags:
           - Participation
         summary: Get a list of participating stores
-    - method: storespb.StoresService.AddOffering
+    - method: storespb.StoresService.AddProduct
       option:
-        operationId: addOffering
+        operationId: addProduct
         tags:
-          - Offering
-        summary: Add a store offering
-    - method: storespb.StoresService.GetOffering
+          - Product
+        summary: Add a store product
+    - method: storespb.StoresService.GetProduct
       option:
-        operationId: getOffering
+        operationId: getProduct
         tags:
-          - Offering
-        summary: Get a store offering
-    - method: storespb.StoresService.RemoveOffering
+          - Product
+        summary: Get a store product
+    - method: storespb.StoresService.RemoveProduct
       option:
-        operationId: removeOffering
+        operationId: removeProduct
         tags:
-          - Offering
-        summary: Remove a store offering
-    - method: storespb.StoresService.GetStoreOfferings
+          - Product
+        summary: Remove a store product
+    - method: storespb.StoresService.GetCatalog
       option:
-        operationId: getStoreOffering
+        operationId: getStoreProduct
         tags:
-          - Offering
-        summary: Get a list of store offerings
+          - Product
+        summary: Get a list of store products

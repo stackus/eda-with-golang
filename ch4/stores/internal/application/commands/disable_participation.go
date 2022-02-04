@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/ports"
+	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
 )
 
 type DisableParticipation struct {
@@ -11,10 +11,10 @@ type DisableParticipation struct {
 }
 
 type DisableParticipationHandler struct {
-	repo ports.StoreRepository
+	repo domain.StoreRepository
 }
 
-func NewDisableParticipationHandler(repo ports.StoreRepository) DisableParticipationHandler {
+func NewDisableParticipationHandler(repo domain.StoreRepository) DisableParticipationHandler {
 	return DisableParticipationHandler{repo: repo}
 }
 

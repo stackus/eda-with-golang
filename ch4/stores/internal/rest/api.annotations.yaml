@@ -16,12 +16,12 @@ http:
       delete: /api/stores/{id}/participating
     - selector: storespb.StoresService.GetParticipatingStores
       get: /api/stores/participating
-    - selector: storespb.StoresService.AddOffering
-      post: /api/stores/{store_id}/offerings
+    - selector: storespb.StoresService.AddProduct
+      post: /api/stores/{store_id}/products
       body: "*"
-    - selector: storespb.StoresService.GetOffering
-      get: /api/stores/{store_id}/offerings/{id}
-    - selector: storespb.StoresService.RemoveOffering
-      delete: /api/stores/{store_id}/offerings/{id}
-    - selector: storespb.StoresService.GetStoreOfferings
-      get: /api/stores/{store_id}/offerings
+    - selector: storespb.StoresService.GetProduct
+      get: /api/stores/products/{id}
+    - selector: storespb.StoresService.RemoveProduct
+      delete: /api/stores/products/{id}
+    - selector: storespb.StoresService.GetCatalog
+      get: /api/stores/{store_id}/products

@@ -94,6 +94,66 @@
         ]
       }
     },
+    "/api/stores/products/{id}": {
+      "get": {
+        "summary": "Get a store product",
+        "operationId": "getProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbGetProductResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Product"
+        ]
+      },
+      "delete": {
+        "summary": "Remove a store product",
+        "operationId": "removeProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbRemoveProductResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Product"
+        ]
+      }
+    },
     "/api/stores/{id}": {
       "get": {
         "summary": "Get a store",
@@ -193,15 +253,15 @@
         ]
       }
     },
-    "/api/stores/{storeId}/offerings": {
+    "/api/stores/{storeId}/products": {
       "get": {
-        "summary": "Get a list of store offerings",
-        "operationId": "getStoreOffering",
+        "summary": "Get a list of store products",
+        "operationId": "getStoreProduct",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/storespbGetStoreOfferingsResponse"
+              "$ref": "#/definitions/storespbGetCatalogResponse"
             }
           },
           "default": {
@@ -220,17 +280,17 @@
           }
         ],
         "tags": [
-          "Offering"
+          "Product"
         ]
       },
       "post": {
-        "summary": "Add a store offering",
-        "operationId": "addOffering",
+        "summary": "Add a store product",
+        "operationId": "addProduct",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/storespbAddOfferingResponse"
+              "$ref": "#/definitions/storespbAddProductResponse"
             }
           },
           "default": {
@@ -260,6 +320,9 @@
                 "description": {
                   "type": "string"
                 },
+                "sku": {
+                  "type": "string"
+                },
                 "price": {
                   "type": "number",
                   "format": "double"
@@ -269,79 +332,7 @@
           }
         ],
         "tags": [
-          "Offering"
-        ]
-      }
-    },
-    "/api/stores/{storeId}/offerings/{id}": {
-      "get": {
-        "summary": "Get a store offering",
-        "operationId": "getOffering",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/storespbGetOfferingResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "storeId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Offering"
-        ]
-      },
-      "delete": {
-        "summary": "Remove a store offering",
-        "operationId": "removeOffering",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/storespbRemoveOfferingResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "storeId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Offering"
+          "Product"
         ]
       }
     }
@@ -374,7 +365,7 @@
         }
       }
     },
-    "storespbAddOfferingResponse": {
+    "storespbAddProductResponse": {
       "type": "object",
       "properties": {
         "id": {
@@ -407,11 +398,14 @@
     "storespbEnableParticipationResponse": {
       "type": "object"
     },
-    "storespbGetOfferingResponse": {
+    "storespbGetCatalogResponse": {
       "type": "object",
       "properties": {
-        "offering": {
-          "$ref": "#/definitions/storespbOffering"
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/storespbProduct"
+          }
         }
       }
     },
@@ -426,14 +420,11 @@
         }
       }
     },
-    "storespbGetStoreOfferingsResponse": {
+    "storespbGetProductResponse": {
       "type": "object",
       "properties": {
-        "offerings": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/storespbOffering"
-          }
+        "product": {
+          "$ref": "#/definitions/storespbProduct"
         }
       }
     },
@@ -456,7 +447,7 @@
         }
       }
     },
-    "storespbOffering": {
+    "storespbProduct": {
       "type": "object",
       "properties": {
         "id": {
@@ -471,13 +462,16 @@
         "description": {
           "type": "string"
         },
+        "sku": {
+          "type": "string"
+        },
         "price": {
           "type": "number",
           "format": "double"
         }
       }
     },
-    "storespbRemoveOfferingResponse": {
+    "storespbRemoveProductResponse": {
       "type": "object"
     },
     "storespbStore": {

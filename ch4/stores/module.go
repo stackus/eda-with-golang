@@ -17,10 +17,10 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup Driven adapters
 	storeRepo := postgres.NewStoreRepository("store.stores", mono.DB())
 	participatingStoreRepo := postgres.NewParticipatingStoreRepository("store.stores", mono.DB())
-	offeringRepo := postgres.NewOfferingRepository("store.offerings", mono.DB())
+	productRepo := postgres.NewProductRepository("store.products", mono.DB())
 
 	// setup application
-	app := application.New(storeRepo, participatingStoreRepo, offeringRepo)
+	app := application.New(storeRepo, participatingStoreRepo, productRepo)
 
 	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {

@@ -100,57 +100,56 @@ func (s server) GetParticipatingStores(ctx context.Context, request *storespb.Ge
 	}, nil
 }
 
-func (s server) AddOffering(ctx context.Context, request *storespb.AddOfferingRequest) (*storespb.AddOfferingResponse, error) {
+func (s server) AddProduct(ctx context.Context, request *storespb.AddProductRequest) (*storespb.AddProductResponse, error) {
 	id := uuid.New().String()
-	err := s.app.AddOffering(ctx, commands.AddOffering{
+	err := s.app.AddProduct(ctx, commands.AddProduct{
 		ID:          id,
 		StoreID:     request.GetStoreId(),
 		Name:        request.GetName(),
 		Description: request.GetDescription(),
+		SKU:         request.GetSku(),
 		Price:       request.GetPrice(),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &storespb.AddOfferingResponse{Id: id}, nil
+	return &storespb.AddProductResponse{Id: id}, nil
 }
 
-func (s server) RemoveOffering(ctx context.Context, request *storespb.RemoveOfferingRequest) (*storespb.RemoveOfferingResponse, error) {
-	err := s.app.RemoveOffering(ctx, commands.RemoveOffering{
-		ID:      request.GetId(),
-		StoreID: request.GetStoreId(),
+func (s server) RemoveProduct(ctx context.Context, request *storespb.RemoveProductRequest) (*storespb.RemoveProductResponse, error) {
+	err := s.app.RemoveProduct(ctx, commands.RemoveProduct{
+		ID: request.GetId(),
 	})
 
-	return &storespb.RemoveOfferingResponse{}, err
+	return &storespb.RemoveProductResponse{}, err
 }
 
-func (s server) GetStoreOfferings(ctx context.Context, request *storespb.GetStoreOfferingsRequest) (*storespb.GetStoreOfferingsResponse, error) {
-	offerings, err := s.app.GetStoreOfferings(ctx, queries.GetStoreOfferings{StoreID: request.GetStoreId()})
+func (s server) GetCatalog(ctx context.Context, request *storespb.GetCatalogRequest) (*storespb.GetCatalogResponse, error) {
+	products, err := s.app.GetCatalog(ctx, queries.GetCatalog{StoreID: request.GetStoreId()})
 	if err != nil {
 		return nil, err
 	}
 
-	protoOfferings := []*storespb.Offering{}
-	for _, offering := range offerings {
-		protoOfferings = append(protoOfferings, s.offeringFromDomain(offering))
+	protoProducts := []*storespb.Product{}
+	for _, product := range products {
+		protoProducts = append(protoProducts, s.productFromDomain(product))
 	}
 
-	return &storespb.GetStoreOfferingsResponse{
-		Offerings: protoOfferings,
+	return &storespb.GetCatalogResponse{
+		Products: protoProducts,
 	}, nil
 }
 
-func (s server) GetOffering(ctx context.Context, request *storespb.GetOfferingRequest) (*storespb.GetOfferingResponse, error) {
-	offering, err := s.app.GetOffering(ctx, queries.GetOffering{
-		ID:      request.GetId(),
-		StoreID: request.GetStoreId(),
+func (s server) GetProduct(ctx context.Context, request *storespb.GetProductRequest) (*storespb.GetProductResponse, error) {
+	product, err := s.app.GetProduct(ctx, queries.GetProduct{
+		ID: request.GetId(),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &storespb.GetOfferingResponse{Offering: s.offeringFromDomain(offering)}, nil
+	return &storespb.GetProductResponse{Product: s.productFromDomain(product)}, nil
 }
 
 func (s server) storeFromDomain(store *domain.Store) *storespb.Store {
@@ -162,12 +161,13 @@ func (s server) storeFromDomain(store *domain.Store) *storespb.Store {
 	}
 }
 
-func (s server) offeringFromDomain(offering *domain.Offering) *storespb.Offering {
-	return &storespb.Offering{
-		Id:          offering.ID,
-		StoreId:     offering.StoreID,
-		Name:        offering.Name,
-		Description: offering.Description,
-		Price:       offering.Price,
+func (s server) productFromDomain(product *domain.Product) *storespb.Product {
+	return &storespb.Product{
+		Id:          product.ID,
+		StoreId:     product.StoreID,
+		Name:        product.Name,
+		Description: product.Description,
+		Sku:         product.SKU,
+		Price:       product.Price,
 	}
 }

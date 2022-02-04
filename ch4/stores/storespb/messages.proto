@@ -9,10 +9,11 @@ message Store {
   bool participating = 4;
 }
 
-message Offering {
+message Product {
   string id = 1;
   string store_id = 2;
   string name = 3;
   string description = 4;
-  double price = 5;
+  string sku = 5;
+  double price = 6;
 }

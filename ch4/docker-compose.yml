@@ -26,7 +26,7 @@ services:
       - '5432:5432'
     volumes:
       - 'pgdata:/var/lib/postgresql/data'
-      - './database/monolith.sql:/docker-entrypoint-initdb.d/init-mallbots-db.sql'
+      - './database:/docker-entrypoint-initdb.d'
   nats:
     container_name: nats
     hostname: nats

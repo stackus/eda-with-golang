@@ -64,6 +64,8 @@ func (a *app) waitForWeb(ctx context.Context) error {
 
 	group, gCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
+		fmt.Println("web server started")
+		defer fmt.Println("web server shutdown")
 		if err := webServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			return err
 		}
@@ -71,6 +73,7 @@ func (a *app) waitForWeb(ctx context.Context) error {
 	})
 	group.Go(func() error {
 		<-gCtx.Done()
+		fmt.Println("web server to be shutdown")
 		ctx, cancel := context.WithTimeout(context.Background(), a.cfg.ShutdownTimeout)
 		defer cancel()
 		if err := webServer.Shutdown(ctx); err != nil {
@@ -90,6 +93,8 @@ func (a *app) waitForRPC(ctx context.Context) error {
 
 	group, gCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
+		fmt.Println("rpc server started")
+		defer fmt.Println("rpc server shutdown")
 		if err := a.RPC().Serve(listener); err != nil && err != grpc.ErrServerStopped {
 			return err
 		}
@@ -97,6 +102,7 @@ func (a *app) waitForRPC(ctx context.Context) error {
 	})
 	group.Go(func() error {
 		<-gCtx.Done()
+		fmt.Println("rpc server to be shutdown")
 		stopped := make(chan struct{})
 		go func() {
 			a.RPC().GracefulStop()

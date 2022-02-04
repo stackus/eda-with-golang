@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/ports"
 	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
 )
 
@@ -15,11 +14,11 @@ type (
 	}
 
 	CreateStoreHandler struct {
-		repo ports.StoreRepository
+		repo domain.StoreRepository
 	}
 )
 
-func NewCreateStoreHandler(repo ports.StoreRepository) CreateStoreHandler {
+func NewCreateStoreHandler(repo domain.StoreRepository) CreateStoreHandler {
 	return CreateStoreHandler{repo: repo}
 }
 

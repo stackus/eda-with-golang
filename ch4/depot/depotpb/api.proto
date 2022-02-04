@@ -29,3 +29,5 @@ message SelectShoppingListRequest {
   string bot_id = 1;
   string shopping_list_id = 2;
 }
+
+message SelectShoppingListResponse {}

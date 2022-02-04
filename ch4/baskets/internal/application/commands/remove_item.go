@@ -8,7 +8,6 @@ import (
 
 type RemoveItem struct {
 	ID        string
-	StoreID   string
 	ProductID string
 	Quantity  int
 }
@@ -26,7 +25,7 @@ func NewRemoveItemHandler(basketRepo domain.BasketRepository, productRepo domain
 }
 
 func (h RemoveItemHandler) RemoveItem(ctx context.Context, cmd RemoveItem) error {
-	product, err := h.productRepo.Find(ctx, cmd.ProductID, cmd.StoreID)
+	product, err := h.productRepo.Find(ctx, cmd.ProductID)
 	if err != nil {
 		return err
 	}

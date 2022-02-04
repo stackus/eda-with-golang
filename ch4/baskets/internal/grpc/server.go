@@ -45,7 +45,6 @@ func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutB
 func (s server) AddItem(ctx context.Context, request *basketspb.AddItemRequest) (*basketspb.AddItemResponse, error) {
 	err := s.app.AddItem(ctx, commands.AddItem{
 		ID:        request.GetId(),
-		StoreID:   request.GetStoreId(),
 		ProductID: request.GetProductId(),
 		Quantity:  int(request.GetQuantity()),
 	})
@@ -56,7 +55,6 @@ func (s server) AddItem(ctx context.Context, request *basketspb.AddItemRequest) 
 func (s server) RemoveItem(ctx context.Context, request *basketspb.RemoveItemRequest) (*basketspb.RemoveItemResponse, error) {
 	err := s.app.RemoveItem(ctx, commands.RemoveItem{
 		ID:        request.GetId(),
-		StoreID:   request.GetStoreId(),
 		ProductID: request.GetProductId(),
 		Quantity:  int(request.GetQuantity()),
 	})

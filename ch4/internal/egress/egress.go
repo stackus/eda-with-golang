@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type WaitFunc func(ctx context.Context) error
@@ -37,7 +39,7 @@ func New(options ...EgressOption) Waiter {
 		option(cfg)
 	}
 
-	w := waiter{
+	w := &waiter{
 		fns: []WaitFunc{},
 	}
 	w.ctx, w.cancel = context.WithCancel(cfg.parentCtx)
@@ -48,25 +50,25 @@ func New(options ...EgressOption) Waiter {
 	return w
 }
 
-func (w waiter) Add(fns ...WaitFunc) {
+func (w *waiter) Add(fns ...WaitFunc) {
 	w.fns = append(w.fns, fns...)
 }
 
 func (w waiter) Wait() (err error) {
-	errc := make(chan error)
+	g, ctx := errgroup.WithContext(w.ctx)
+
+	g.Go(func() error {
+		<-ctx.Done()
+		w.cancel()
+		return nil
+	})
+
 	for _, fn := range w.fns {
 		fn := fn
-		go func() { errc <- fn(w.ctx) }()
+		g.Go(func() error { return fn(ctx) })
 	}
-	for range w.fns {
-		if err != nil {
-			<-errc
-		} else {
-			err = <-errc
-		}
-		w.cancel()
-	}
-	return
+
+	return g.Wait()
 }
 
 func (w waiter) Context() context.Context {
