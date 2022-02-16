@@ -10,6 +10,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
     items      bytea NOT NULL,
     card_token text NOT NULL,
     sms_number text NOT NULL,
+    invoice_id text NOT NULL,
     status     text NOT NULL,
     created_at timestamptz NOT NULL DEFAULT NOW(),
     updated_at timestamptz NOT NULL DEFAULT NOW(),

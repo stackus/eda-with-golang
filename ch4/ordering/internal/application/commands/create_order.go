@@ -9,18 +9,24 @@ import (
 )
 
 type CreateOrder struct {
-	ID        string
+	ID        domain.OrderID
 	Items     []*domain.Item
 	CardToken string
 	SmsNumber string
 }
 
 type CreateOrderHandler struct {
-	repo domain.OrderRepository
+	orders        domain.OrderRepository
+	invoices      domain.InvoiceRepository
+	shoppingLists domain.ShoppingListRepository
 }
 
-func NewCreateOrderHandler(repo domain.OrderRepository) CreateOrderHandler {
-	return CreateOrderHandler{repo: repo}
+func NewCreateOrderHandler(orders domain.OrderRepository, invoices domain.InvoiceRepository, shoppingLists domain.ShoppingListRepository) CreateOrderHandler {
+	return CreateOrderHandler{
+		orders:        orders,
+		invoices:      invoices,
+		shoppingLists: shoppingLists,
+	}
 }
 
 func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) error {
@@ -29,5 +35,15 @@ func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) er
 		return errors.Wrap(err, "create order command")
 	}
 
-	return errors.Wrap(h.repo.Save(ctx, order), "create order command")
+	order.InvoiceID, err = h.invoices.Save(ctx, order.ID, order.GetTotal())
+	if err != nil {
+		return err
+	}
+
+	err = h.shoppingLists.Save(ctx, order)
+	if err != nil {
+		errors.Wrap(err, "create order command")
+	}
+
+	return errors.Wrap(h.orders.Save(ctx, order), "create order command")
 }

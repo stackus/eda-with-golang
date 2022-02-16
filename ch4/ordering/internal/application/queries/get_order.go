@@ -9,7 +9,7 @@ import (
 )
 
 type GetOrder struct {
-	ID string
+	ID domain.OrderID
 }
 
 type GetOrderHandler struct {

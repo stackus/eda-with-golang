@@ -50,21 +50,21 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(storeRepo domain.StoreRepository, participatingStoreRepo domain.ParticipatingStoreRepository, productRepo domain.ProductRepository) *Application {
+func New(stores domain.StoreRepository, participatingStores domain.ParticipatingStoreRepository, products domain.ProductRepository) *Application {
 	return &Application{
 		appCommands: appCommands{
-			CreateStoreHandler:          commands.NewCreateStoreHandler(storeRepo),
-			EnableParticipationHandler:  commands.NewEnableParticipationHandler(storeRepo),
-			DisableParticipationHandler: commands.NewDisableParticipationHandler(storeRepo),
-			AddProductHandler:           commands.NewAddProductHandler(storeRepo, productRepo),
-			RemoveProductHandler:        commands.NewRemoveProductHandler(storeRepo, productRepo),
+			CreateStoreHandler:          commands.NewCreateStoreHandler(stores),
+			EnableParticipationHandler:  commands.NewEnableParticipationHandler(stores),
+			DisableParticipationHandler: commands.NewDisableParticipationHandler(stores),
+			AddProductHandler:           commands.NewAddProductHandler(stores, products),
+			RemoveProductHandler:        commands.NewRemoveProductHandler(stores, products),
 		},
 		appQueries: appQueries{
-			GetStoreHandler:               queries.NewGetStoreHandler(storeRepo),
-			GetStoresHandler:              queries.NewGetStoresHandler(storeRepo),
-			GetParticipatingStoresHandler: queries.NewGetParticipatingStoresHandler(participatingStoreRepo),
-			GetCatalogHandler:             queries.NewGetCatalogHandler(productRepo),
-			GetProductHandler:             queries.NewGetProductHandler(productRepo),
+			GetStoreHandler:               queries.NewGetStoreHandler(stores),
+			GetStoresHandler:              queries.NewGetStoresHandler(stores),
+			GetParticipatingStoresHandler: queries.NewGetParticipatingStoresHandler(participatingStores),
+			GetCatalogHandler:             queries.NewGetCatalogHandler(products),
+			GetProductHandler:             queries.NewGetProductHandler(products),
 		},
 	}
 }

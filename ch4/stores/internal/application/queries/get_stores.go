@@ -10,13 +10,13 @@ type GetStores struct {
 }
 
 type GetStoresHandler struct {
-	repo domain.StoreRepository
+	stores domain.StoreRepository
 }
 
-func NewGetStoresHandler(repo domain.StoreRepository) GetStoresHandler {
-	return GetStoresHandler{repo: repo}
+func NewGetStoresHandler(stores domain.StoreRepository) GetStoresHandler {
+	return GetStoresHandler{stores: stores}
 }
 
 func (h GetStoresHandler) GetStores(ctx context.Context, _ GetStores) ([]*domain.Store, error) {
-	return h.repo.FindAll(ctx)
+	return h.stores.FindAll(ctx)
 }

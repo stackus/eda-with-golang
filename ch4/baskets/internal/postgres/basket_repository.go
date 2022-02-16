@@ -20,7 +20,7 @@ func NewBasketRepository(tableName string, db *sql.DB) BasketRepository {
 	return BasketRepository{tableName: tableName, db: db}
 }
 
-func (r BasketRepository) Find(ctx context.Context, basketID string) (*domain.Basket, error) {
+func (r BasketRepository) Find(ctx context.Context, basketID domain.BasketID) (*domain.Basket, error) {
 	const query = "SELECT items, card_token, sms_number, status FROM %s WHERE id = $1 LIMIT 1"
 
 	basket := &domain.Basket{
@@ -29,7 +29,7 @@ func (r BasketRepository) Find(ctx context.Context, basketID string) (*domain.Ba
 	var items []byte
 	var status string
 
-	err := r.db.QueryRowContext(ctx, r.table(query), basketID).Scan(&items, &basket.CardToken, &basket.SmsNumber, &status)
+	err := r.db.QueryRowContext(ctx, r.table(query), basketID.String()).Scan(&items, &basket.CardToken, &basket.SmsNumber, &status)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (r BasketRepository) Save(ctx context.Context, basket *domain.Basket) error
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID, items, basket.CardToken, basket.SmsNumber, basket.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID.String(), items, basket.CardToken, basket.SmsNumber, basket.Status.String())
 
 	return err
 }
@@ -68,7 +68,7 @@ func (r BasketRepository) Update(ctx context.Context, basket *domain.Basket) err
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), items, basket.CardToken, basket.SmsNumber, basket.Status.String(), basket.ID)
+	_, err = r.db.ExecContext(ctx, r.table(query), items, basket.CardToken, basket.SmsNumber, basket.Status.String(), basket.ID.String())
 
 	return err
 }

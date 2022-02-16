@@ -13,6 +13,7 @@ import (
 type Module struct{}
 
 func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
+	// setup Driven adapters
 	listRepo := postgres.NewShoppingListRepository("depot.shopping_lists", mono.DB())
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
@@ -21,8 +22,10 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	storeRepo := grpc.NewStoreRepository(conn)
 	productRepo := grpc.NewProductRepository(conn)
 
+	// setup application
 	app := application.New(listRepo, storeRepo, productRepo)
 
+	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
 		return err
 	}

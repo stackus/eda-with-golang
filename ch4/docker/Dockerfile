@@ -9,14 +9,17 @@ COPY go.* ./
 RUN go mod download
 
 # Copy local code to the container image.
-COPY . ./
+COPY .. ./
 
 # Build the binary.
 RUN go build -v -o monolith ./cmd/mallbots
 
 FROM alpine:latest AS runtime
 
+COPY --from=builder /mallbots/docker/wait-for-it.sh .
+RUN chmod +x /wait-for-it.sh
+
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /mallbots/monolith /mallbots/monolith
 
-ENTRYPOINT /mallbots/monolith
+CMD ["/mallbots/monolith"]

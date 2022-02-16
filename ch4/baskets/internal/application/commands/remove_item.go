@@ -7,30 +7,30 @@ import (
 )
 
 type RemoveItem struct {
-	ID        string
-	ProductID string
+	ID        domain.BasketID
+	ProductID domain.ProductID
 	Quantity  int
 }
 
 type RemoveItemHandler struct {
-	basketRepo  domain.BasketRepository
-	productRepo domain.ProductRepository
+	baskets  domain.BasketRepository
+	products domain.ProductRepository
 }
 
-func NewRemoveItemHandler(basketRepo domain.BasketRepository, productRepo domain.ProductRepository) RemoveItemHandler {
+func NewRemoveItemHandler(baskets domain.BasketRepository, products domain.ProductRepository) RemoveItemHandler {
 	return RemoveItemHandler{
-		basketRepo:  basketRepo,
-		productRepo: productRepo,
+		baskets:  baskets,
+		products: products,
 	}
 }
 
 func (h RemoveItemHandler) RemoveItem(ctx context.Context, cmd RemoveItem) error {
-	product, err := h.productRepo.Find(ctx, cmd.ProductID)
+	product, err := h.products.Find(ctx, cmd.ProductID)
 	if err != nil {
 		return err
 	}
 
-	basket, err := h.basketRepo.Find(ctx, cmd.ID)
+	basket, err := h.baskets.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -40,5 +40,5 @@ func (h RemoveItemHandler) RemoveItem(ctx context.Context, cmd RemoveItem) error
 		return err
 	}
 
-	return h.basketRepo.Update(ctx, basket)
+	return h.baskets.Update(ctx, basket)
 }

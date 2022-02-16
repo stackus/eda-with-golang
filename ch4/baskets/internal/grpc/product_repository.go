@@ -21,9 +21,9 @@ func NewProductRepository(conn *grpc.ClientConn) ProductRepository {
 	return ProductRepository{client: storespb.NewStoresServiceClient(conn)}
 }
 
-func (r ProductRepository) Find(ctx context.Context, productID string) (*domain.Product, error) {
+func (r ProductRepository) Find(ctx context.Context, productID domain.ProductID) (*domain.Product, error) {
 	resp, err := r.client.GetProduct(ctx, &storespb.GetProductRequest{
-		Id: productID,
+		Id: productID.String(),
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "requesting product")
@@ -34,9 +34,9 @@ func (r ProductRepository) Find(ctx context.Context, productID string) (*domain.
 
 func (r ProductRepository) productToDomain(product *storespb.Product) *domain.Product {
 	return &domain.Product{
-		ID:      product.GetId(),
-		StoreID: product.GetStoreId(),
+		ID:      domain.ProductID(product.GetId()),
+		StoreID: domain.StoreID(product.GetStoreId()),
 		Name:    product.GetName(),
-		Price:   product.GetPrice(),
+		Price:   domain.Price(product.GetPrice()),
 	}
 }

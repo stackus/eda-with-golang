@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"sort"
 )
 
 var (
@@ -13,6 +14,8 @@ var (
 	ErrSmsNumberCannotBeBlank   = fmt.Errorf("the sms number cannot be blank")
 )
 
+type BasketID string
+
 type BasketStatus string
 
 const (
@@ -21,6 +24,10 @@ const (
 	BasketCancelled  BasketStatus = "cancelled"
 	BasketCheckedOut BasketStatus = "checked_out"
 )
+
+func (i BasketID) String() string {
+	return string(i)
+}
 
 func (s BasketStatus) String() string {
 	switch s {
@@ -32,14 +39,14 @@ func (s BasketStatus) String() string {
 }
 
 type Basket struct {
-	ID        string
+	ID        BasketID
 	Items     []Item
 	CardToken string
 	SmsNumber string
 	Status    BasketStatus
 }
 
-func StartBasket(id string) (basket *Basket) {
+func StartBasket(id BasketID) (basket *Basket) {
 	basket = &Basket{
 		ID:     id,
 		Status: BasketOpen,
@@ -92,7 +99,7 @@ func (b *Basket) Checkout(cardToken, smsNumber string) error {
 	return nil
 }
 
-func (b *Basket) AddItem(product *Product, quantity int) error {
+func (b *Basket) AddItem(store *Store, product *Product, quantity int) error {
 	if !b.IsOpen() {
 		return ErrBasketCannotBeModified
 	}
@@ -109,11 +116,16 @@ func (b *Basket) AddItem(product *Product, quantity int) error {
 	}
 
 	b.Items = append(b.Items, Item{
-		StoreID:      product.StoreID,
+		StoreID:      store.ID,
 		ProductID:    product.ID,
+		StoreName:    store.Name,
 		ProductName:  product.Name,
 		ProductPrice: product.Price,
 		Quantity:     quantity,
+	})
+
+	sort.Slice(b.Items, func(i, j int) bool {
+		return b.Items[i].StoreName <= b.Items[j].StoreName && b.Items[i].ProductName < b.Items[j].ProductName
 	})
 
 	return nil

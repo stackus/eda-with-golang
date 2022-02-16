@@ -15,6 +15,7 @@ type (
 	}
 	Commands interface {
 		CreateOrder(ctx context.Context, cmd commands.CreateOrder) error
+		CancelOrder(ctx context.Context, cmd commands.CancelOrder) error
 	}
 	Queries interface {
 		GetOrder(ctx context.Context, query queries.GetOrder) (*domain.Order, error)
@@ -26,6 +27,7 @@ type (
 	}
 	appCommands struct {
 		commands.CreateOrderHandler
+		commands.CancelOrderHandler
 	}
 	appQueries struct {
 		queries.GetOrderHandler
@@ -34,13 +36,14 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(orderRepo domain.OrderRepository) *Application {
+func New(orders domain.OrderRepository, invoices domain.InvoiceRepository, shoppingLists domain.ShoppingListRepository) *Application {
 	return &Application{
 		appCommands: appCommands{
-			CreateOrderHandler: commands.NewCreateOrderHandler(orderRepo),
+			CreateOrderHandler: commands.NewCreateOrderHandler(orders, invoices, shoppingLists),
+			CancelOrderHandler: commands.NewCancelOrderHandler(orders, invoices, shoppingLists),
 		},
 		appQueries: appQueries{
-			GetOrderHandler: queries.NewGetOrderHandler(orderRepo),
+			GetOrderHandler: queries.NewGetOrderHandler(orders),
 		},
 	}
 }

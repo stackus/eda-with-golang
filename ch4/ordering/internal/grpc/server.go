@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
 
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application/commands"
@@ -19,6 +20,11 @@ type server struct {
 
 var _ orderingpb.OrderingServiceServer = (*server)(nil)
 
+func RegisterServer(_ context.Context, app application.App, registrar grpc.ServiceRegistrar) error {
+	orderingpb.RegisterOrderingServiceServer(registrar, server{app: app})
+	return nil
+}
+
 func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrderRequest) (*orderingpb.CreateOrderResponse, error) {
 	id := uuid.New().String()
 
@@ -28,7 +34,7 @@ func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrder
 	}
 
 	err := s.app.CreateOrder(ctx, commands.CreateOrder{
-		ID:        id,
+		ID:        domain.OrderID(id),
 		Items:     items,
 		CardToken: request.CardToken,
 		SmsNumber: request.SmsNumber,
@@ -37,8 +43,14 @@ func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrder
 	return &orderingpb.CreateOrderResponse{Id: id}, err
 }
 
+func (s server) CancelOrder(ctx context.Context, request *orderingpb.CancelOrderRequest) (*orderingpb.CancelOrderResponse, error) {
+	err := s.app.CancelOrder(ctx, commands.CancelOrder{ID: domain.OrderID(request.GetId())})
+
+	return &orderingpb.CancelOrderResponse{}, err
+}
+
 func (s server) GetOrder(ctx context.Context, request *orderingpb.GetOrderRequest) (*orderingpb.GetOrderResponse, error) {
-	order, err := s.app.GetOrder(ctx, queries.GetOrder{ID: request.GetId()})
+	order, err := s.app.GetOrder(ctx, queries.GetOrder{ID: domain.OrderID(request.GetId())})
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +67,7 @@ func (s server) orderFromDomain(order *domain.Order) *orderingpb.Order {
 	}
 
 	return &orderingpb.Order{
-		Id:        order.ID,
+		Id:        order.ID.String(),
 		Items:     items,
 		CardToken: order.CardToken,
 		SmsNumber: order.SmsNumber,
@@ -65,18 +77,22 @@ func (s server) orderFromDomain(order *domain.Order) *orderingpb.Order {
 
 func (s server) itemToDomain(item *orderingpb.Item) *domain.Item {
 	return &domain.Item{
-		ProductID: item.GetProductId(),
-		StoreID:   item.GetStoreId(),
-		Price:     item.GetPrice(),
-		Quantity:  int(item.GetQuantity()),
+		ProductID:   item.GetProductId(),
+		StoreID:     item.GetStoreId(),
+		StoreName:   item.GetStoreName(),
+		ProductName: item.GetProductName(),
+		Price:       item.GetPrice(),
+		Quantity:    int(item.GetQuantity()),
 	}
 }
 
 func (s server) itemFromDomain(item *domain.Item) *orderingpb.Item {
 	return &orderingpb.Item{
-		StoreId:   item.StoreID,
-		ProductId: item.ProductID,
-		Price:     item.Price,
-		Quantity:  int32(item.Quantity),
+		StoreId:     item.StoreID,
+		ProductId:   item.ProductID,
+		StoreName:   item.StoreName,
+		ProductName: item.ProductName,
+		Price:       item.Price,
+		Quantity:    int32(item.Quantity),
 	}
 }

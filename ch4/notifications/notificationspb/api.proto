@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package notificationspb;
+
+import "notificationspb/messages.proto";
+
+service NotificationsService {
+  rpc NotifyOrderCreated(NotifyOrderCreatedRequest) returns (NotifyOrderCreatedResponse) {};
+}
+
+message NotifyOrderCreatedRequest {
+  string order_id = 1;
+  string customer_id = 2;
+}
+message NotifyOrderCreatedResponse {}

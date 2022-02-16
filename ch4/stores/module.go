@@ -15,18 +15,21 @@ type Module struct {
 
 func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup Driven adapters
-	storeRepo := postgres.NewStoreRepository("store.stores", mono.DB())
-	participatingStoreRepo := postgres.NewParticipatingStoreRepository("store.stores", mono.DB())
-	productRepo := postgres.NewProductRepository("store.products", mono.DB())
+	stores := postgres.NewStoreRepository("stores.stores", mono.DB())
+	participatingStores := postgres.NewParticipatingStoreRepository("stores.stores", mono.DB())
+	products := postgres.NewProductRepository("stores.products", mono.DB())
 
 	// setup application
-	app := application.New(storeRepo, participatingStoreRepo, productRepo)
+	app := application.New(stores, participatingStores, products)
 
 	// setup Driver adapters
-	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
+	if err := grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, app, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+		return err
+	}
+	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
 

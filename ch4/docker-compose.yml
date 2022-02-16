@@ -6,11 +6,12 @@ services:
     hostname: monolith
     build:
       context: .
+      dockerfile: docker/Dockerfile
     ports:
       - '8080:8080'
       - '8085:8085'
     env_file:
-      - .env
+      - docker/.env
     depends_on:
       - nats
       - postgres
@@ -26,7 +27,7 @@ services:
       - '5432:5432'
     volumes:
       - 'pgdata:/var/lib/postgresql/data'
-      - './database:/docker-entrypoint-initdb.d'
+      - './docker/database:/docker-entrypoint-initdb.d'
   nats:
     container_name: nats
     hostname: nats

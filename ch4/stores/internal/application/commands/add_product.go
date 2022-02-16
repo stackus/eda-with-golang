@@ -18,19 +18,19 @@ type AddProduct struct {
 }
 
 type AddProductHandler struct {
-	storeRepo   domain.StoreRepository
-	productRepo domain.ProductRepository
+	stores   domain.StoreRepository
+	products domain.ProductRepository
 }
 
-func NewAddProductHandler(storeRepo domain.StoreRepository, productRepo domain.ProductRepository) AddProductHandler {
+func NewAddProductHandler(stores domain.StoreRepository, products domain.ProductRepository) AddProductHandler {
 	return AddProductHandler{
-		storeRepo:   storeRepo,
-		productRepo: productRepo,
+		stores:   stores,
+		products: products,
 	}
 }
 
 func (h AddProductHandler) AddProduct(ctx context.Context, cmd AddProduct) error {
-	_, err := h.storeRepo.Find(ctx, cmd.StoreID)
+	_, err := h.stores.Find(ctx, cmd.StoreID)
 	if err != nil {
 		return errors.Wrap(err, "error adding product")
 	}
@@ -40,5 +40,5 @@ func (h AddProductHandler) AddProduct(ctx context.Context, cmd AddProduct) error
 		return errors.Wrap(err, "error adding product")
 	}
 
-	return errors.Wrap(h.productRepo.AddProduct(ctx, product), "error adding product")
+	return errors.Wrap(h.products.AddProduct(ctx, product), "error adding product")
 }

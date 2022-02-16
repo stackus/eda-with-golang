@@ -14,16 +14,17 @@ type Module struct{}
 
 func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	// setup Driven adapters
-	basketRepo := postgres.NewBasketRepository("basket.baskets", mono.DB())
+	baskets := postgres.NewBasketRepository("basket.baskets", mono.DB())
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
 		return err
 	}
-	productRepo := grpc.NewProductRepository(conn)
-	orderRepo := grpc.NewOrderRepository(conn)
+	stores := grpc.NewStoreRepository(conn)
+	products := grpc.NewProductRepository(conn)
+	orders := grpc.NewOrderRepository(conn)
 
 	// setup application
-	app := application.New(basketRepo, productRepo, orderRepo)
+	app := application.New(baskets, stores, products, orders)
 
 	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {

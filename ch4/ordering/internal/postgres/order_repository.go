@@ -25,7 +25,7 @@ func NewOrderRepository(tableName string, db *sql.DB) OrderRepository {
 	}
 }
 
-func (r OrderRepository) Find(ctx context.Context, orderID string) (*domain.Order, error) {
+func (r OrderRepository) Find(ctx context.Context, orderID domain.OrderID) (*domain.Order, error) {
 	const query = "SELECT items, card_token, sms_number, status FROM %s WHERE id = $1 LIMIT 1"
 
 	order := &domain.Order{
@@ -35,7 +35,7 @@ func (r OrderRepository) Find(ctx context.Context, orderID string) (*domain.Orde
 	var items []byte
 	var status string
 
-	err := r.db.QueryRowContext(ctx, r.table(query), orderID).Scan(&items, &order.CardToken, &order.SmsNumber, &status)
+	err := r.db.QueryRowContext(ctx, r.table(query), orderID.String()).Scan(&items, &order.CardToken, &order.SmsNumber, &status)
 	if err != nil {
 		return nil, errors.Wrap(err, "scanning order")
 	}
@@ -61,7 +61,7 @@ func (r OrderRepository) Save(ctx context.Context, order *domain.Order) error {
 		return errors.Wrap(err, "marshalling items")
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), order.ID, items, order.CardToken, order.SmsNumber, order.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), order.ID.String(), items, order.CardToken, order.SmsNumber, order.Status.String())
 	if err != nil {
 		return errors.Wrap(err, "inserting order")
 	}
@@ -77,7 +77,7 @@ func (r OrderRepository) Update(ctx context.Context, order *domain.Order) error 
 		return errors.Wrap(err, "marshalling items")
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), items, order.CardToken, order.SmsNumber, order.Status.String(), order.ID)
+	_, err = r.db.ExecContext(ctx, r.table(query), items, order.CardToken, order.SmsNumber, order.Status.String(), order.ID.String())
 	if err != nil {
 		return errors.Wrap(err, "updating order")
 	}

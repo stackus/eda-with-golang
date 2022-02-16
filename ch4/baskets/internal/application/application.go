@@ -42,17 +42,17 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(basketRepo domain.BasketRepository, productRepo domain.ProductRepository, orderRepo domain.OrderRepository) *Application {
+func New(baskets domain.BasketRepository, stores domain.StoreRepository, products domain.ProductRepository, orders domain.OrderRepository) *Application {
 	return &Application{
 		appCommands: appCommands{
-			StartBasketHandler:    commands.NewStartBasketHandler(basketRepo),
-			CancelBasketHandler:   commands.NewCancelBasketHandler(basketRepo),
-			CheckoutBasketHandler: commands.NewCheckoutBasketHandler(basketRepo, orderRepo),
-			AddItemHandler:        commands.NewAddItemHandler(basketRepo, productRepo),
-			RemoveItemHandler:     commands.NewRemoveItemHandler(basketRepo, productRepo),
+			StartBasketHandler:    commands.NewStartBasketHandler(baskets),
+			CancelBasketHandler:   commands.NewCancelBasketHandler(baskets),
+			CheckoutBasketHandler: commands.NewCheckoutBasketHandler(baskets, orders),
+			AddItemHandler:        commands.NewAddItemHandler(baskets, stores, products),
+			RemoveItemHandler:     commands.NewRemoveItemHandler(baskets, products),
 		},
 		appQueries: appQueries{
-			GetBasketHandler: queries.NewGetBasketHandler(basketRepo),
+			GetBasketHandler: queries.NewGetBasketHandler(baskets),
 		},
 	}
 }

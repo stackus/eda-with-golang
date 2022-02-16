@@ -82,6 +82,9 @@
     }
   },
   "definitions": {
+    "orderingpbCancelOrderResponse": {
+      "type": "object"
+    },
     "orderingpbCreateOrderRequest": {
       "type": "object",
       "properties": {
@@ -122,6 +125,12 @@
           "type": "string"
         },
         "productId": {
+          "type": "string"
+        },
+        "storeName": {
+          "type": "string"
+        },
+        "productName": {
           "type": "string"
         },
         "price": {

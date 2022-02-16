@@ -13,6 +13,8 @@ message Order {
 message Item {
   string store_id = 1;
   string product_id = 2;
-  double price = 3;
-  int32 quantity = 4;
+  string store_name = 3;
+  string product_name = 4;
+  double price = 5;
+  int32 quantity = 6;
 }

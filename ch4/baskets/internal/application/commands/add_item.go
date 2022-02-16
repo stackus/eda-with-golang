@@ -7,38 +7,44 @@ import (
 )
 
 type AddItem struct {
-	ID        string
-	ProductID string
+	ID        domain.BasketID
+	ProductID domain.ProductID
 	Quantity  int
 }
 
 type AddItemHandler struct {
-	basketRepo  domain.BasketRepository
-	productRepo domain.ProductRepository
+	baskets  domain.BasketRepository
+	stores   domain.StoreRepository
+	products domain.ProductRepository
 }
 
-func NewAddItemHandler(basketRepo domain.BasketRepository, productRepo domain.ProductRepository) AddItemHandler {
+func NewAddItemHandler(baskets domain.BasketRepository, stores domain.StoreRepository, products domain.ProductRepository) AddItemHandler {
 	return AddItemHandler{
-		basketRepo:  basketRepo,
-		productRepo: productRepo,
+		baskets:  baskets,
+		stores:   stores,
+		products: products,
 	}
 }
 
 func (h AddItemHandler) AddItem(ctx context.Context, cmd AddItem) error {
-	product, err := h.productRepo.Find(ctx, cmd.ProductID)
+	basket, err := h.baskets.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
 
-	basket, err := h.basketRepo.Find(ctx, cmd.ID)
+	product, err := h.products.Find(ctx, cmd.ProductID)
 	if err != nil {
 		return err
 	}
 
-	err = basket.AddItem(product, cmd.Quantity)
+	store, err := h.stores.Find(ctx, product.StoreID)
+	if err != nil {
+		return nil
+	}
+	err = basket.AddItem(store, product, cmd.Quantity)
 	if err != nil {
 		return err
 	}
 
-	return h.basketRepo.Update(ctx, basket)
+	return h.baskets.Update(ctx, basket)
 }

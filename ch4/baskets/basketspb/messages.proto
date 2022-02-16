@@ -10,7 +10,8 @@ message Basket {
 message Item {
   string store_id = 1;
   string product_id = 2;
-  string product_name = 3;
-  double product_price = 4;
-  int32 quantity = 5;
+  string store_name = 3;
+  string product_name = 4;
+  double product_price = 5;
+  int32 quantity = 6;
 }

@@ -24,10 +24,12 @@ func (r OrderRepository) Save(ctx context.Context, basket *domain.Basket) (strin
 	items := make([]*orderingpb.Item, 0, len(basket.Items))
 	for _, item := range basket.Items {
 		items = append(items, &orderingpb.Item{
-			StoreId:   item.StoreID,
-			ProductId: item.ProductID,
-			Price:     item.ProductPrice,
-			Quantity:  int32(item.Quantity),
+			StoreId:     item.StoreID.String(),
+			ProductId:   item.ProductID.String(),
+			StoreName:   item.StoreName,
+			ProductName: item.ProductName,
+			Price:       item.ProductPrice.Float64(),
+			Quantity:    int32(item.Quantity),
 		})
 	}
 

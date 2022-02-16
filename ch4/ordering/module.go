@@ -13,14 +13,26 @@ import (
 type Module struct{}
 
 func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
-	orderRepo := postgres.NewOrderRepository("ordering.orders", mono.DB())
-
-	app := application.New(orderRepo)
-
-	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
+	// setup Driven adapters
+	orders := postgres.NewOrderRepository("ordering.orders", mono.DB())
+	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
+	if err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, app, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	invoices := grpc.NewInvoiceRepository(conn)
+	shoppingLists := grpc.NewShoppingListRepository(conn)
+
+	// setup application
+	app := application.New(orders, invoices, shoppingLists)
+
+	// setup Driver adapters
+	if err := grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
+		return err
+	}
+	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+		return err
+	}
+	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
 

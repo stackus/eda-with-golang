@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package paymentspb;
+
+import "paymentspb/messages.proto";
+
+service PaymentsService {
+  rpc CreateInvoice(CreateInvoiceRequest) returns (CreateInvoiceResponse) {};
+  rpc AdjustInvoice(AdjustInvoiceRequest) returns (AdjustInvoiceResponse) {};
+  rpc PayInvoice(PayInvoiceRequest) returns (PayInvoiceResponse) {};
+  rpc CancelInvoice(CancelInvoiceRequest) returns (CancelInvoiceResponse) {};
+}
+
+message CreateInvoiceRequest {
+  string order_id = 1;
+  double amount = 2;
+}
+message CreateInvoiceResponse {
+  string id = 1;
+}
+
+message AdjustInvoiceRequest {
+  string id = 1;
+  double amount = 2;
+}
+message AdjustInvoiceResponse {}
+
+message PayInvoiceRequest {
+  string id = 1;
+}
+message PayInvoiceResponse {}
+
+message CancelInvoiceRequest {
+  string id = 1;
+}
+message CancelInvoiceResponse {}

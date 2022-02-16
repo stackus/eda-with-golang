@@ -11,17 +11,17 @@ type RemoveProduct struct {
 }
 
 type RemoveProductHandler struct {
-	storeRepo   domain.StoreRepository
-	productRepo domain.ProductRepository
+	stores   domain.StoreRepository
+	products domain.ProductRepository
 }
 
-func NewRemoveProductHandler(storeRepo domain.StoreRepository, productRepo domain.ProductRepository) RemoveProductHandler {
+func NewRemoveProductHandler(stores domain.StoreRepository, products domain.ProductRepository) RemoveProductHandler {
 	return RemoveProductHandler{
-		storeRepo:   storeRepo,
-		productRepo: productRepo,
+		stores:   stores,
+		products: products,
 	}
 }
 
 func (h RemoveProductHandler) RemoveProduct(ctx context.Context, cmd RemoveProduct) error {
-	return h.productRepo.RemoveProduct(ctx, cmd.ID)
+	return h.products.RemoveProduct(ctx, cmd.ID)
 }

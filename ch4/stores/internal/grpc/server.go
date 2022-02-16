@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
 
 	"github.com/stackus/eda-with-golang/ch4/stores/storespb"
 
@@ -19,6 +20,11 @@ type server struct {
 }
 
 var _ storespb.StoresServiceServer = (*server)(nil)
+
+func RegisterServer(_ context.Context, app application.App, registrar grpc.ServiceRegistrar) error {
+	storespb.RegisterStoresServiceServer(registrar, server{app: app})
+	return nil
+}
 
 func (s server) CreateStore(ctx context.Context, request *storespb.CreateStoreRequest) (*storespb.CreateStoreResponse, error) {
 	storeID := uuid.New().String()

@@ -7,7 +7,7 @@ import (
 )
 
 type StartBasket struct {
-	ID string
+	ID domain.BasketID
 }
 
 type StartBasketHandler struct {

@@ -14,12 +14,12 @@ type (
 	}
 
 	CreateStoreHandler struct {
-		repo domain.StoreRepository
+		stores domain.StoreRepository
 	}
 )
 
-func NewCreateStoreHandler(repo domain.StoreRepository) CreateStoreHandler {
-	return CreateStoreHandler{repo: repo}
+func NewCreateStoreHandler(stores domain.StoreRepository) CreateStoreHandler {
+	return CreateStoreHandler{stores: stores}
 }
 
 func (h CreateStoreHandler) CreateStore(ctx context.Context, cmd CreateStore) error {
@@ -28,7 +28,7 @@ func (h CreateStoreHandler) CreateStore(ctx context.Context, cmd CreateStore) er
 		return err
 	}
 
-	err = h.repo.Save(ctx, store)
+	err = h.stores.Save(ctx, store)
 
 	return err
 }

@@ -24,7 +24,7 @@ func (r ShoppingListRepository) Save(ctx context.Context, order *domain.Order) e
 	panic("implement me")
 }
 
-func (r ShoppingListRepository) Delete(ctx context.Context, orderID string) error {
+func (r ShoppingListRepository) Delete(ctx context.Context, orderID domain.OrderID) error {
 	// TODO implement me
 	panic("implement me")
 }

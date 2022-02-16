@@ -9,25 +9,25 @@ import (
 )
 
 type CheckoutBasket struct {
-	ID        string
+	ID        domain.BasketID
 	CardToken string
 	SmsNumber string
 }
 
 type CheckoutBasketHandler struct {
-	basketRepo domain.BasketRepository
-	orderRepo  domain.OrderRepository
+	baskets domain.BasketRepository
+	orders  domain.OrderRepository
 }
 
-func NewCheckoutBasketHandler(basketRepo domain.BasketRepository, orderRepo domain.OrderRepository) CheckoutBasketHandler {
+func NewCheckoutBasketHandler(baskets domain.BasketRepository, orders domain.OrderRepository) CheckoutBasketHandler {
 	return CheckoutBasketHandler{
-		basketRepo: basketRepo,
-		orderRepo:  orderRepo,
+		baskets: baskets,
+		orders:  orders,
 	}
 }
 
 func (h CheckoutBasketHandler) CheckoutBasket(ctx context.Context, cmd CheckoutBasket) error {
-	basket, err := h.basketRepo.Find(ctx, cmd.ID)
+	basket, err := h.baskets.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -38,10 +38,10 @@ func (h CheckoutBasketHandler) CheckoutBasket(ctx context.Context, cmd CheckoutB
 	}
 
 	// submit the basket to the order module
-	_, err = h.orderRepo.Save(ctx, basket)
+	_, err = h.orders.Save(ctx, basket)
 	if err != nil {
 		return errors.Wrap(err, "baskets checkout")
 	}
 
-	return errors.Wrap(h.basketRepo.Update(ctx, basket), "basket checkout")
+	return errors.Wrap(h.baskets.Update(ctx, basket), "basket checkout")
 }

@@ -19,22 +19,26 @@ type server struct {
 
 var _ basketspb.BasketServiceServer = (*server)(nil)
 
-func (s server) StartBasket(ctx context.Context, request *basketspb.StartBasketRequest) (*basketspb.StartBasketResponse, error) {
+func (s server) StartBasket(ctx context.Context, _ *basketspb.StartBasketRequest) (*basketspb.StartBasketResponse, error) {
 	basketID := uuid.New().String()
-	err := s.app.StartBasket(ctx, commands.StartBasket{ID: basketID})
+	err := s.app.StartBasket(ctx, commands.StartBasket{
+		ID: domain.BasketID(basketID),
+	})
 
 	return &basketspb.StartBasketResponse{Id: basketID}, err
 }
 
 func (s server) CancelBasket(ctx context.Context, request *basketspb.CancelBasketRequest) (*basketspb.CancelBasketResponse, error) {
-	err := s.app.CancelBasket(ctx, commands.CancelBasket{ID: request.GetId()})
+	err := s.app.CancelBasket(ctx, commands.CancelBasket{
+		ID: domain.BasketID(request.GetId()),
+	})
 
 	return &basketspb.CancelBasketResponse{}, err
 }
 
 func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutBasketRequest) (*basketspb.CheckoutBasketResponse, error) {
 	err := s.app.CheckoutBasket(ctx, commands.CheckoutBasket{
-		ID:        request.GetId(),
+		ID:        domain.BasketID(request.GetId()),
 		CardToken: request.GetCardToken(),
 		SmsNumber: request.GetSmsNumber(),
 	})
@@ -44,8 +48,8 @@ func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutB
 
 func (s server) AddItem(ctx context.Context, request *basketspb.AddItemRequest) (*basketspb.AddItemResponse, error) {
 	err := s.app.AddItem(ctx, commands.AddItem{
-		ID:        request.GetId(),
-		ProductID: request.GetProductId(),
+		ID:        domain.BasketID(request.GetId()),
+		ProductID: domain.ProductID(request.GetProductId()),
 		Quantity:  int(request.GetQuantity()),
 	})
 
@@ -54,8 +58,8 @@ func (s server) AddItem(ctx context.Context, request *basketspb.AddItemRequest) 
 
 func (s server) RemoveItem(ctx context.Context, request *basketspb.RemoveItemRequest) (*basketspb.RemoveItemResponse, error) {
 	err := s.app.RemoveItem(ctx, commands.RemoveItem{
-		ID:        request.GetId(),
-		ProductID: request.GetProductId(),
+		ID:        domain.BasketID(request.GetId()),
+		ProductID: domain.ProductID(request.GetProductId()),
 		Quantity:  int(request.GetQuantity()),
 	})
 
@@ -63,7 +67,9 @@ func (s server) RemoveItem(ctx context.Context, request *basketspb.RemoveItemReq
 }
 
 func (s server) GetBasket(ctx context.Context, request *basketspb.GetBasketRequest) (*basketspb.GetBasketResponse, error) {
-	basket, err := s.app.GetBasket(ctx, queries.GetBasket{ID: request.GetId()})
+	basket, err := s.app.GetBasket(ctx, queries.GetBasket{
+		ID: domain.BasketID(request.GetId()),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -75,17 +81,18 @@ func (s server) GetBasket(ctx context.Context, request *basketspb.GetBasketReque
 
 func (s server) basketFromDomain(basket *domain.Basket) *basketspb.Basket {
 	protoBasket := &basketspb.Basket{
-		Id: basket.ID,
+		Id: basket.ID.String(),
 	}
 
 	protoBasket.Items = make([]*basketspb.Item, 0, len(basket.Items))
 
 	for _, item := range basket.Items {
 		protoBasket.Items = append(protoBasket.Items, &basketspb.Item{
-			StoreId:      item.StoreID,
-			ProductId:    item.ProductID,
+			StoreId:      item.StoreID.String(),
+			StoreName:    item.StoreName,
+			ProductId:    item.ProductID.String(),
 			ProductName:  item.ProductName,
-			ProductPrice: item.ProductPrice,
+			ProductPrice: item.ProductPrice.Float64(),
 			Quantity:     int32(item.Quantity),
 		})
 	}

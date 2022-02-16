@@ -11,15 +11,15 @@ type DisableParticipation struct {
 }
 
 type DisableParticipationHandler struct {
-	repo domain.StoreRepository
+	stores domain.StoreRepository
 }
 
-func NewDisableParticipationHandler(repo domain.StoreRepository) DisableParticipationHandler {
-	return DisableParticipationHandler{repo: repo}
+func NewDisableParticipationHandler(stores domain.StoreRepository) DisableParticipationHandler {
+	return DisableParticipationHandler{stores: stores}
 }
 
 func (h DisableParticipationHandler) DisableParticipation(ctx context.Context, cmd DisableParticipation) error {
-	store, err := h.repo.Find(ctx, cmd.ID)
+	store, err := h.stores.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -29,5 +29,5 @@ func (h DisableParticipationHandler) DisableParticipation(ctx context.Context, c
 		return err
 	}
 
-	return h.repo.Update(ctx, store)
+	return h.stores.Update(ctx, store)
 }

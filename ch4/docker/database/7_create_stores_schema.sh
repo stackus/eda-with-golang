@@ -4,7 +4,7 @@ set -e
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
   CREATE SCHEMA store;
 
-  CREATE TABLE store.stores
+  CREATE TABLE stores.stores
   (
       id            text NOT NULL,
       name          text NOT NULL,
@@ -15,28 +15,28 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
       PRIMARY KEY (id)
   );
 
-  CREATE INDEX participating_stores_idx ON store.stores (participating) WHERE participating;
+  CREATE INDEX participating_stores_idx ON stores.stores (participating) WHERE participating;
 
-  CREATE TRIGGER created_at_stores_trgr BEFORE UPDATE ON store.stores FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-  CREATE TRIGGER updated_at_stores_trgr BEFORE UPDATE ON store.stores FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
+  CREATE TRIGGER created_at_stores_trgr BEFORE UPDATE ON stores.stores FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
+  CREATE TRIGGER updated_at_stores_trgr BEFORE UPDATE ON stores.stores FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
-  CREATE TABLE store.offerings
+  CREATE TABLE stores.products
   (
       id          text NOT NULL,
       store_id    text NOT NULL,
       name        text NOT NULL,
       description text NOT NULL,
       sku         text NOT NULL,
-      price       decimal NOT NULL,
+      price       decimal(9,4) NOT NULL,
       created_at  timestamptz NOT NULL DEFAULT NOW(),
       updated_at  timestamptz NOT NULL DEFAULT NOW(),
       PRIMARY KEY (id)
   );
 
-  CREATE INDEX store_offerings_idx ON store.offerings (store_id);
+  CREATE INDEX store_products_idx ON stores.products (store_id);
 
-  CREATE TRIGGER created_at_offerings_trgr BEFORE UPDATE ON store.offerings FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-  CREATE TRIGGER updated_at_offerings_trgr BEFORE UPDATE ON store.offerings FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
+  CREATE TRIGGER created_at_products_trgr BEFORE UPDATE ON stores.products FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
+  CREATE TRIGGER updated_at_products_trgr BEFORE UPDATE ON stores.products FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
   GRANT USAGE ON SCHEMA store TO mallbots_user;
   GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA store TO mallbots_user;
