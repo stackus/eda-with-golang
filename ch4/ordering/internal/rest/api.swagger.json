@@ -94,10 +94,10 @@
             "$ref": "#/definitions/orderingpbItem"
           }
         },
-        "cardToken": {
+        "customerId": {
           "type": "string"
         },
-        "smsNumber": {
+        "paymentId": {
           "type": "string"
         }
       }
@@ -149,17 +149,17 @@
         "id": {
           "type": "string"
         },
+        "customerId": {
+          "type": "string"
+        },
+        "paymentId": {
+          "type": "string"
+        },
         "items": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/orderingpbItem"
           }
-        },
-        "cardToken": {
-          "type": "string"
-        },
-        "smsNumber": {
-          "type": "string"
         },
         "status": {
           "type": "string"

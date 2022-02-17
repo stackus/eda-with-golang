@@ -19,14 +19,16 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	if err != nil {
 		return err
 	}
+	customers := grpc.NewCustomerRepository(conn)
+	payments := grpc.NewPaymentRepository(conn)
 	invoices := grpc.NewInvoiceRepository(conn)
-	shoppingLists := grpc.NewShoppingListRepository(conn)
+	shopping := grpc.NewShoppingListRepository(conn)
 
 	// setup application
-	app := application.New(orders, invoices, shoppingLists)
+	app := application.New(orders, customers, payments, invoices, shopping)
 
 	// setup Driver adapters
-	if err := grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
+	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {
 		return err
 	}
 	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {

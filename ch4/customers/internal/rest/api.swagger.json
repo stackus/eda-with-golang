@@ -160,6 +160,9 @@
     }
   },
   "definitions": {
+    "customerspbAuthorizeCustomerResponse": {
+      "type": "object"
+    },
     "customerspbCustomer": {
       "type": "object",
       "properties": {

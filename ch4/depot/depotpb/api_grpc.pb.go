@@ -22,9 +22,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DepotServiceClient interface {
-	SubmitOrder(ctx context.Context, in *SubmitOrderRequest, opts ...grpc.CallOption) (*SubmitOrderResponse, error)
-	CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*CancelOrderResponse, error)
-	SelectShoppingList(ctx context.Context, in *SelectShoppingListRequest, opts ...grpc.CallOption) (*SelectShoppingListResponse, error)
+	CreateShoppingList(ctx context.Context, in *CreateShoppingListRequest, opts ...grpc.CallOption) (*CreateShoppingListResponse, error)
+	CancelShoppingList(ctx context.Context, in *CancelShoppingListRequest, opts ...grpc.CallOption) (*CancelShoppingListResponse, error)
+	AssignShoppingList(ctx context.Context, in *AssignShoppingListRequest, opts ...grpc.CallOption) (*AssignShoppingListResponse, error)
+	CompleteShoppingList(ctx context.Context, in *CompleteShoppingListRequest, opts ...grpc.CallOption) (*CompleteShoppingListResponse, error)
 }
 
 type depotServiceClient struct {
@@ -35,27 +36,36 @@ func NewDepotServiceClient(cc grpc.ClientConnInterface) DepotServiceClient {
 	return &depotServiceClient{cc}
 }
 
-func (c *depotServiceClient) SubmitOrder(ctx context.Context, in *SubmitOrderRequest, opts ...grpc.CallOption) (*SubmitOrderResponse, error) {
-	out := new(SubmitOrderResponse)
-	err := c.cc.Invoke(ctx, "/depotpb.DepotService/SubmitOrder", in, out, opts...)
+func (c *depotServiceClient) CreateShoppingList(ctx context.Context, in *CreateShoppingListRequest, opts ...grpc.CallOption) (*CreateShoppingListResponse, error) {
+	out := new(CreateShoppingListResponse)
+	err := c.cc.Invoke(ctx, "/depotpb.DepotService/CreateShoppingList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *depotServiceClient) CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*CancelOrderResponse, error) {
-	out := new(CancelOrderResponse)
-	err := c.cc.Invoke(ctx, "/depotpb.DepotService/CancelOrder", in, out, opts...)
+func (c *depotServiceClient) CancelShoppingList(ctx context.Context, in *CancelShoppingListRequest, opts ...grpc.CallOption) (*CancelShoppingListResponse, error) {
+	out := new(CancelShoppingListResponse)
+	err := c.cc.Invoke(ctx, "/depotpb.DepotService/CancelShoppingList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *depotServiceClient) SelectShoppingList(ctx context.Context, in *SelectShoppingListRequest, opts ...grpc.CallOption) (*SelectShoppingListResponse, error) {
-	out := new(SelectShoppingListResponse)
-	err := c.cc.Invoke(ctx, "/depotpb.DepotService/SelectShoppingList", in, out, opts...)
+func (c *depotServiceClient) AssignShoppingList(ctx context.Context, in *AssignShoppingListRequest, opts ...grpc.CallOption) (*AssignShoppingListResponse, error) {
+	out := new(AssignShoppingListResponse)
+	err := c.cc.Invoke(ctx, "/depotpb.DepotService/AssignShoppingList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *depotServiceClient) CompleteShoppingList(ctx context.Context, in *CompleteShoppingListRequest, opts ...grpc.CallOption) (*CompleteShoppingListResponse, error) {
+	out := new(CompleteShoppingListResponse)
+	err := c.cc.Invoke(ctx, "/depotpb.DepotService/CompleteShoppingList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,9 +76,10 @@ func (c *depotServiceClient) SelectShoppingList(ctx context.Context, in *SelectS
 // All implementations must embed UnimplementedDepotServiceServer
 // for forward compatibility
 type DepotServiceServer interface {
-	SubmitOrder(context.Context, *SubmitOrderRequest) (*SubmitOrderResponse, error)
-	CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error)
-	SelectShoppingList(context.Context, *SelectShoppingListRequest) (*SelectShoppingListResponse, error)
+	CreateShoppingList(context.Context, *CreateShoppingListRequest) (*CreateShoppingListResponse, error)
+	CancelShoppingList(context.Context, *CancelShoppingListRequest) (*CancelShoppingListResponse, error)
+	AssignShoppingList(context.Context, *AssignShoppingListRequest) (*AssignShoppingListResponse, error)
+	CompleteShoppingList(context.Context, *CompleteShoppingListRequest) (*CompleteShoppingListResponse, error)
 	mustEmbedUnimplementedDepotServiceServer()
 }
 
@@ -76,14 +87,17 @@ type DepotServiceServer interface {
 type UnimplementedDepotServiceServer struct {
 }
 
-func (UnimplementedDepotServiceServer) SubmitOrder(context.Context, *SubmitOrderRequest) (*SubmitOrderResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubmitOrder not implemented")
+func (UnimplementedDepotServiceServer) CreateShoppingList(context.Context, *CreateShoppingListRequest) (*CreateShoppingListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateShoppingList not implemented")
 }
-func (UnimplementedDepotServiceServer) CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CancelOrder not implemented")
+func (UnimplementedDepotServiceServer) CancelShoppingList(context.Context, *CancelShoppingListRequest) (*CancelShoppingListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelShoppingList not implemented")
 }
-func (UnimplementedDepotServiceServer) SelectShoppingList(context.Context, *SelectShoppingListRequest) (*SelectShoppingListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SelectShoppingList not implemented")
+func (UnimplementedDepotServiceServer) AssignShoppingList(context.Context, *AssignShoppingListRequest) (*AssignShoppingListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AssignShoppingList not implemented")
+}
+func (UnimplementedDepotServiceServer) CompleteShoppingList(context.Context, *CompleteShoppingListRequest) (*CompleteShoppingListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CompleteShoppingList not implemented")
 }
 func (UnimplementedDepotServiceServer) mustEmbedUnimplementedDepotServiceServer() {}
 
@@ -98,56 +112,74 @@ func RegisterDepotServiceServer(s grpc.ServiceRegistrar, srv DepotServiceServer)
 	s.RegisterService(&DepotService_ServiceDesc, srv)
 }
 
-func _DepotService_SubmitOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SubmitOrderRequest)
+func _DepotService_CreateShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateShoppingListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DepotServiceServer).SubmitOrder(ctx, in)
+		return srv.(DepotServiceServer).CreateShoppingList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/depotpb.DepotService/SubmitOrder",
+		FullMethod: "/depotpb.DepotService/CreateShoppingList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DepotServiceServer).SubmitOrder(ctx, req.(*SubmitOrderRequest))
+		return srv.(DepotServiceServer).CreateShoppingList(ctx, req.(*CreateShoppingListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DepotService_CancelOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CancelOrderRequest)
+func _DepotService_CancelShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelShoppingListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DepotServiceServer).CancelOrder(ctx, in)
+		return srv.(DepotServiceServer).CancelShoppingList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/depotpb.DepotService/CancelOrder",
+		FullMethod: "/depotpb.DepotService/CancelShoppingList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DepotServiceServer).CancelOrder(ctx, req.(*CancelOrderRequest))
+		return srv.(DepotServiceServer).CancelShoppingList(ctx, req.(*CancelShoppingListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DepotService_SelectShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SelectShoppingListRequest)
+func _DepotService_AssignShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignShoppingListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DepotServiceServer).SelectShoppingList(ctx, in)
+		return srv.(DepotServiceServer).AssignShoppingList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/depotpb.DepotService/SelectShoppingList",
+		FullMethod: "/depotpb.DepotService/AssignShoppingList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DepotServiceServer).SelectShoppingList(ctx, req.(*SelectShoppingListRequest))
+		return srv.(DepotServiceServer).AssignShoppingList(ctx, req.(*AssignShoppingListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DepotService_CompleteShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompleteShoppingListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DepotServiceServer).CompleteShoppingList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/depotpb.DepotService/CompleteShoppingList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DepotServiceServer).CompleteShoppingList(ctx, req.(*CompleteShoppingListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -160,16 +192,20 @@ var DepotService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DepotServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SubmitOrder",
-			Handler:    _DepotService_SubmitOrder_Handler,
+			MethodName: "CreateShoppingList",
+			Handler:    _DepotService_CreateShoppingList_Handler,
 		},
 		{
-			MethodName: "CancelOrder",
-			Handler:    _DepotService_CancelOrder_Handler,
+			MethodName: "CancelShoppingList",
+			Handler:    _DepotService_CancelShoppingList_Handler,
 		},
 		{
-			MethodName: "SelectShoppingList",
-			Handler:    _DepotService_SelectShoppingList_Handler,
+			MethodName: "AssignShoppingList",
+			Handler:    _DepotService_AssignShoppingList_Handler,
+		},
+		{
+			MethodName: "CompleteShoppingList",
+			Handler:    _DepotService_CompleteShoppingList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -12,8 +12,8 @@ service OrderingService {
 
 message CreateOrderRequest {
   repeated Item items = 1;
-  string card_token = 2;
-  string sms_number = 3;
+  string customer_id = 2;
+  string payment_id = 3;
 }
 
 message CreateOrderResponse {

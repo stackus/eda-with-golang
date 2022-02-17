@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
 
 	"github.com/stackus/eda-with-golang/ch4/depot/depotpb"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/application/commands"
+	"github.com/stackus/eda-with-golang/ch4/depot/internal/domain"
 )
 
 type server struct {
@@ -17,7 +19,12 @@ type server struct {
 
 var _ depotpb.DepotServiceServer = (*server)(nil)
 
-func (s server) SubmitOrder(ctx context.Context, request *depotpb.SubmitOrderRequest) (*depotpb.SubmitOrderResponse, error) {
+func Register(_ context.Context, app application.App, registrar grpc.ServiceRegistrar) error {
+	depotpb.RegisterDepotServiceServer(registrar, server{app: app})
+	return nil
+}
+
+func (s server) CreateShoppingList(ctx context.Context, request *depotpb.CreateShoppingListRequest) (*depotpb.CreateShoppingListResponse, error) {
 	id := uuid.New().String()
 
 	items := make([]commands.OrderItem, 0, len(request.GetItems()))
@@ -25,19 +32,34 @@ func (s server) SubmitOrder(ctx context.Context, request *depotpb.SubmitOrderReq
 		items = append(items, s.itemToDomain(item))
 	}
 
-	err := s.app.BuildShoppingList(ctx, commands.BuildShoppingList{
-		ID:      id,
+	err := s.app.CreateShoppingList(ctx, commands.CreateShoppingList{
+		ID:      domain.ToShoppingListID(id),
 		OrderID: request.GetOrderId(),
 		Items:   items,
 	})
 
-	return &depotpb.SubmitOrderResponse{Id: id}, err
+	return &depotpb.CreateShoppingListResponse{Id: id}, err
 }
 
-func (s server) CancelOrder(ctx context.Context, request *depotpb.CancelOrderRequest) (*depotpb.CancelOrderResponse, error) {
-	err := s.app.CancelOrder(ctx, commands.CancelOrder{OrderID: request.GetId()})
+func (s server) CancelShoppingList(ctx context.Context, request *depotpb.CancelShoppingListRequest) (*depotpb.CancelShoppingListResponse, error) {
+	err := s.app.CancelShoppingList(ctx, commands.CancelShoppingList{
+		ID: domain.ToShoppingListID(request.GetId()),
+	})
 
-	return &depotpb.CancelOrderResponse{}, err
+	return &depotpb.CancelShoppingListResponse{}, err
+}
+
+func (s server) AssignShoppingList(ctx context.Context, request *depotpb.AssignShoppingListRequest) (*depotpb.AssignShoppingListResponse, error) {
+	err := s.app.AssignShoppingList(ctx, commands.AssignShoppingList{
+		ID:    domain.ToShoppingListID(request.GetId()),
+		BotID: domain.ToBotID(request.GetBotId()),
+	})
+	return &depotpb.AssignShoppingListResponse{}, err
+}
+
+func (s server) CompleteShoppingList(ctx context.Context, request *depotpb.CompleteShoppingListRequest) (*depotpb.CompleteShoppingListResponse, error) {
+	err := s.app.CompleteShoppingList(ctx, commands.CompleteShoppingList{ID: domain.ToShoppingListID(request.GetId())})
+	return &depotpb.CompleteShoppingListResponse{}, err
 }
 
 func (s server) itemToDomain(item *depotpb.OrderItem) commands.OrderItem {

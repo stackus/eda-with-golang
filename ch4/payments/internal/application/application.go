@@ -9,10 +9,21 @@ import (
 )
 
 type (
+	AuthorizePayment struct {
+		ID         string
+		CustomerID string
+		Amount     float64
+	}
+
+	ConfirmPayment struct {
+		ID string
+	}
+
 	CreateInvoice struct {
-		ID      string
-		OrderID string
-		Amount  float64
+		ID        string
+		PaymentID string
+		OrderID   string
+		Amount    float64
 	}
 
 	AdjustInvoice struct {
@@ -29,6 +40,8 @@ type (
 	}
 
 	App interface {
+		AuthorizePayment(ctx context.Context, authorize AuthorizePayment) error
+		ConfirmPayment(ctx context.Context, confirm ConfirmPayment) error
 		CreateInvoice(ctx context.Context, create CreateInvoice) error
 		AdjustInvoice(ctx context.Context, adjust AdjustInvoice) error
 		PayInvoice(ctx context.Context, pay PayInvoice) error
@@ -37,13 +50,33 @@ type (
 
 	Application struct {
 		invoices models.InvoiceRepository
+		payments models.PaymentRepository
 	}
 )
 
 var _ App = (*Application)(nil)
 
-func New(invoices models.InvoiceRepository) *Application {
-	return &Application{invoices: invoices}
+func New(invoices models.InvoiceRepository, payments models.PaymentRepository) *Application {
+	return &Application{
+		invoices: invoices,
+		payments: payments,
+	}
+}
+
+func (a Application) AuthorizePayment(ctx context.Context, authorize AuthorizePayment) error {
+	return a.payments.Save(ctx, &models.Payment{
+		ID:         authorize.ID,
+		CustomerID: authorize.CustomerID,
+		Amount:     authorize.Amount,
+	})
+}
+
+func (a Application) ConfirmPayment(ctx context.Context, confirm ConfirmPayment) error {
+	if payment, err := a.payments.Find(ctx, confirm.ID); err != nil || payment == nil {
+		return errors.Wrap(errors.ErrNotFound, "payment cannot be confirmed")
+	}
+
+	return nil
 }
 
 func (a Application) CreateInvoice(ctx context.Context, create CreateInvoice) error {

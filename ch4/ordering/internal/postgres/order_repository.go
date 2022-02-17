@@ -26,7 +26,7 @@ func NewOrderRepository(tableName string, db *sql.DB) OrderRepository {
 }
 
 func (r OrderRepository) Find(ctx context.Context, orderID domain.OrderID) (*domain.Order, error) {
-	const query = "SELECT items, card_token, sms_number, status FROM %s WHERE id = $1 LIMIT 1"
+	const query = "SELECT customer_id, payment_id, items, status FROM %s WHERE id = $1 LIMIT 1"
 
 	order := &domain.Order{
 		ID: orderID,
@@ -35,15 +35,12 @@ func (r OrderRepository) Find(ctx context.Context, orderID domain.OrderID) (*dom
 	var items []byte
 	var status string
 
-	err := r.db.QueryRowContext(ctx, r.table(query), orderID.String()).Scan(&items, &order.CardToken, &order.SmsNumber, &status)
+	err := r.db.QueryRowContext(ctx, r.table(query), orderID.String()).Scan(&order.CustomerID, &order.PaymentID, &items, &status)
 	if err != nil {
 		return nil, errors.Wrap(err, "scanning order")
 	}
 
-	order.Status, err = r.statusToDomain(status)
-	if err != nil {
-		return nil, err
-	}
+	order.Status = domain.ToOrderStatus(status)
 
 	err = json.Unmarshal(items, &order.Items)
 	if err != nil {
@@ -54,14 +51,14 @@ func (r OrderRepository) Find(ctx context.Context, orderID domain.OrderID) (*dom
 }
 
 func (r OrderRepository) Save(ctx context.Context, order *domain.Order) error {
-	const query = "INSERT INTO %s (id, items, card_token, sms_number, status) VALUES ($1, $2, $3, $4, $5)"
+	const query = "INSERT INTO %s (id, customer_id, payment_id, items, status) VALUES ($1, $2, $3, $4, $5)"
 
 	items, err := json.Marshal(order.Items)
 	if err != nil {
 		return errors.Wrap(err, "marshalling items")
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), order.ID.String(), items, order.CardToken, order.SmsNumber, order.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), order.ID.String(), order.CustomerID, order.PaymentID, items, order.Status.String())
 	if err != nil {
 		return errors.Wrap(err, "inserting order")
 	}
@@ -70,14 +67,14 @@ func (r OrderRepository) Save(ctx context.Context, order *domain.Order) error {
 }
 
 func (r OrderRepository) Update(ctx context.Context, order *domain.Order) error {
-	const query = "UPDATE %s SET items = $1, card_token = $2, sms_number = $3, status = $4 WHERE id = $5"
+	const query = "UPDATE %s SET customer_id = $2, payment_id = $3, items = $4, status = $5 WHERE id = $1"
 
 	items, err := json.Marshal(order.Items)
 	if err != nil {
 		return errors.Wrap(err, "marshalling items")
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), items, order.CardToken, order.SmsNumber, order.Status.String(), order.ID.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), order.ID.String(), order.CustomerID, order.PaymentID, items, order.Status.String())
 	if err != nil {
 		return errors.Wrap(err, "updating order")
 	}
@@ -87,17 +84,4 @@ func (r OrderRepository) Update(ctx context.Context, order *domain.Order) error 
 
 func (r OrderRepository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
-}
-
-func (r OrderRepository) statusToDomain(status string) (domain.OrderStatus, error) {
-	switch status {
-	case domain.OrderPending.String():
-		return domain.OrderPending, nil
-	case domain.OrderCancelled.String():
-		return domain.OrderCancelled, nil
-	case domain.OrderCompleted.String():
-		return domain.OrderCompleted, nil
-	default:
-		return domain.OrderUnknown, fmt.Errorf("unknown order status: %s", status)
-	}
 }

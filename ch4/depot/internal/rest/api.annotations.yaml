@@ -2,9 +2,15 @@ type: google.api.Service
 config_version: 3
 http:
   rules:
-    - selector: depotpb.DepotService.SubmitOrder
-      post: /api/depot/orders
+    - selector: depotpb.DepotService.CreateShoppingList
+      post: /api/depot/shopping
       body: "*"
-    - selector: depotpb.DepotService.CancelOrder
-      post: /api/depot/orders/{id}
+    - selector: depotpb.DepotService.CancelShoppingList
+      post: /api/depot/shopping/{id}
+      body: "*"
+    - selector: depotpb.DepotService.AssignShoppingList
+      put: /api/depot/shopping/{id}/assign
+      body: "*"
+    - selector: depotpb.DepotService.CompleteShoppingList
+      put: /api/depot/shopping/{id}/complete
       body: "*"

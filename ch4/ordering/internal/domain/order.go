@@ -5,46 +5,51 @@ import (
 )
 
 var (
-	ErrOrderHasNoItems        = fmt.Errorf("the order has no items")
-	ErrOrderCannotBeCancelled = fmt.Errorf("the order cannot be cancelled")
-	ErrCardTokenCannotBeBlank = fmt.Errorf("the card token cannot be blank")
-	ErrSmsNumberCannotBeBlank = fmt.Errorf("the SMS number cannot be blank")
+	ErrOrderHasNoItems         = fmt.Errorf("the order has no items")
+	ErrOrderCannotBeCancelled  = fmt.Errorf("the order cannot be cancelled")
+	ErrCustomerIDCannotBeBlank = fmt.Errorf("the customer id cannot be blank")
+	ErrPaymentIDCannotBeBlank  = fmt.Errorf("the payment id cannot be blank")
 )
 
 type OrderID string
 
 type Order struct {
-	ID        OrderID
-	Items     []*Item
-	CardToken string
-	SmsNumber string
-	InvoiceID InvoiceID
-	Status    OrderStatus
+	ID         OrderID
+	CustomerID string
+	PaymentID  string
+	InvoiceID  string
+	ShoppingID string
+	Items      []*Item
+	Status     OrderStatus
 }
 
 func (i OrderID) String() string {
 	return string(i)
 }
 
-func CreateOrder(id OrderID, items []*Item, cardToken, smsNumber string) (*Order, error) {
+func ToOrderID(id string) OrderID {
+	return OrderID(id)
+}
+
+func CreateOrder(id OrderID, customerID, paymentID string, items []*Item) (*Order, error) {
 	if len(items) == 0 {
 		return nil, ErrOrderHasNoItems
 	}
 
-	if cardToken == "" {
-		return nil, ErrCardTokenCannotBeBlank
+	if customerID == "" {
+		return nil, ErrCustomerIDCannotBeBlank
 	}
 
-	if smsNumber == "" {
-		return nil, ErrSmsNumberCannotBeBlank
+	if paymentID == "" {
+		return nil, ErrPaymentIDCannotBeBlank
 	}
 
 	order := &Order{
-		ID:        id,
-		Items:     items,
-		CardToken: cardToken,
-		SmsNumber: smsNumber,
-		Status:    OrderPending,
+		ID:         id,
+		CustomerID: customerID,
+		PaymentID:  paymentID,
+		Items:      items,
+		Status:     OrderPending,
 	}
 
 	return order, nil
@@ -58,13 +63,6 @@ func (o *Order) Cancel() error {
 	o.Status = OrderCancelled
 
 	return nil
-}
-
-func (o *Order) GetInvoice() *Invoice {
-	return &Invoice{
-		ID:     o.InvoiceID,
-		Amount: o.GetTotal(),
-	}
 }
 
 func (o Order) GetTotal() float64 {

@@ -7,15 +7,27 @@ openapiOptions:
           version: "1.0.0"
         basePath: /
   method:
-    - method: depotpb.DepotService.SubmitOrder
+    - method: depotpb.DepotService.CreateShoppingList
       option:
-        operationId: submitOrder
+        operationId: createShoppingList
         tags:
-          - Order
-        summary: Submit an order for pickup
-    - method: depotpb.DepotService.CancelOrder
+          - ShoppingList
+        summary: Schedule shopping tasks for an order
+    - method: depotpb.DepotService.CancelShoppingList
       option:
-        operationId: cancelOrder
+        operationId: cancelShoppingList
         tags:
-          - Order
-        summary: Cancel an order
+          - ShoppingList
+        summary: Cancel a shopping task
+    - method: depotpb.DepotService.AssignShoppingList
+      option:
+        operationId: assignShoppingList
+        tags:
+          - ShoppingList
+        summary: Assign a shopping list to a bot
+    - method: depotpb.DepotService.CompleteShoppingList
+      option:
+        operationId: ccompleteShoppingList
+        tags:
+          - ShoppingList
+        summary: Complete a shopping task

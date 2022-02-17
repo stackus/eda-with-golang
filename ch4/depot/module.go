@@ -14,22 +14,25 @@ type Module struct{}
 
 func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup Driven adapters
-	listRepo := postgres.NewShoppingListRepository("depot.shopping_lists", mono.DB())
+	shoppingLists := postgres.NewShoppingListRepository("depot.shopping_lists", mono.DB())
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
 		return err
 	}
-	storeRepo := grpc.NewStoreRepository(conn)
-	productRepo := grpc.NewProductRepository(conn)
+	stores := grpc.NewStoreRepository(conn)
+	products := grpc.NewProductRepository(conn)
 
 	// setup application
-	app := application.New(listRepo, storeRepo, productRepo)
+	app := application.New(shoppingLists, stores, products)
 
 	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, app, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+		return err
+	}
+	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
 

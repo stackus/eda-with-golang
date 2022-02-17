@@ -13,7 +13,9 @@ service BasketService {
   rpc GetBasket(GetBasketRequest) returns (GetBasketResponse) {};
 }
 
-message StartBasketRequest {}
+message StartBasketRequest {
+  string customer_id = 1;
+}
 
 message StartBasketResponse {
   string id = 1;
@@ -27,8 +29,7 @@ message CancelBasketResponse {}
 
 message CheckoutBasketRequest {
   string id = 1;
-  string card_token = 2;
-  string sms_number = 3;
+  string payment_id = 2;
 }
 
 message CheckoutBasketResponse {}

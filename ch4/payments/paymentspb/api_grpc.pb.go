@@ -22,6 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PaymentsServiceClient interface {
+	AuthorizePayment(ctx context.Context, in *AuthorizePaymentRequest, opts ...grpc.CallOption) (*AuthorizePaymentResponse, error)
+	ConfirmPayment(ctx context.Context, in *ConfirmPaymentRequest, opts ...grpc.CallOption) (*ConfirmPaymentResponse, error)
 	CreateInvoice(ctx context.Context, in *CreateInvoiceRequest, opts ...grpc.CallOption) (*CreateInvoiceResponse, error)
 	AdjustInvoice(ctx context.Context, in *AdjustInvoiceRequest, opts ...grpc.CallOption) (*AdjustInvoiceResponse, error)
 	PayInvoice(ctx context.Context, in *PayInvoiceRequest, opts ...grpc.CallOption) (*PayInvoiceResponse, error)
@@ -34,6 +36,24 @@ type paymentsServiceClient struct {
 
 func NewPaymentsServiceClient(cc grpc.ClientConnInterface) PaymentsServiceClient {
 	return &paymentsServiceClient{cc}
+}
+
+func (c *paymentsServiceClient) AuthorizePayment(ctx context.Context, in *AuthorizePaymentRequest, opts ...grpc.CallOption) (*AuthorizePaymentResponse, error) {
+	out := new(AuthorizePaymentResponse)
+	err := c.cc.Invoke(ctx, "/paymentspb.PaymentsService/AuthorizePayment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *paymentsServiceClient) ConfirmPayment(ctx context.Context, in *ConfirmPaymentRequest, opts ...grpc.CallOption) (*ConfirmPaymentResponse, error) {
+	out := new(ConfirmPaymentResponse)
+	err := c.cc.Invoke(ctx, "/paymentspb.PaymentsService/ConfirmPayment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *paymentsServiceClient) CreateInvoice(ctx context.Context, in *CreateInvoiceRequest, opts ...grpc.CallOption) (*CreateInvoiceResponse, error) {
@@ -76,6 +96,8 @@ func (c *paymentsServiceClient) CancelInvoice(ctx context.Context, in *CancelInv
 // All implementations must embed UnimplementedPaymentsServiceServer
 // for forward compatibility
 type PaymentsServiceServer interface {
+	AuthorizePayment(context.Context, *AuthorizePaymentRequest) (*AuthorizePaymentResponse, error)
+	ConfirmPayment(context.Context, *ConfirmPaymentRequest) (*ConfirmPaymentResponse, error)
 	CreateInvoice(context.Context, *CreateInvoiceRequest) (*CreateInvoiceResponse, error)
 	AdjustInvoice(context.Context, *AdjustInvoiceRequest) (*AdjustInvoiceResponse, error)
 	PayInvoice(context.Context, *PayInvoiceRequest) (*PayInvoiceResponse, error)
@@ -87,6 +109,12 @@ type PaymentsServiceServer interface {
 type UnimplementedPaymentsServiceServer struct {
 }
 
+func (UnimplementedPaymentsServiceServer) AuthorizePayment(context.Context, *AuthorizePaymentRequest) (*AuthorizePaymentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AuthorizePayment not implemented")
+}
+func (UnimplementedPaymentsServiceServer) ConfirmPayment(context.Context, *ConfirmPaymentRequest) (*ConfirmPaymentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmPayment not implemented")
+}
 func (UnimplementedPaymentsServiceServer) CreateInvoice(context.Context, *CreateInvoiceRequest) (*CreateInvoiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateInvoice not implemented")
 }
@@ -110,6 +138,42 @@ type UnsafePaymentsServiceServer interface {
 
 func RegisterPaymentsServiceServer(s grpc.ServiceRegistrar, srv PaymentsServiceServer) {
 	s.RegisterService(&PaymentsService_ServiceDesc, srv)
+}
+
+func _PaymentsService_AuthorizePayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthorizePaymentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentsServiceServer).AuthorizePayment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/paymentspb.PaymentsService/AuthorizePayment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentsServiceServer).AuthorizePayment(ctx, req.(*AuthorizePaymentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PaymentsService_ConfirmPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmPaymentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentsServiceServer).ConfirmPayment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/paymentspb.PaymentsService/ConfirmPayment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentsServiceServer).ConfirmPayment(ctx, req.(*ConfirmPaymentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _PaymentsService_CreateInvoice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -191,6 +255,14 @@ var PaymentsService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "paymentspb.PaymentsService",
 	HandlerType: (*PaymentsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AuthorizePayment",
+			Handler:    _PaymentsService_AuthorizePayment_Handler,
+		},
+		{
+			MethodName: "ConfirmPayment",
+			Handler:    _PaymentsService_ConfirmPayment_Handler,
+		},
 		{
 			MethodName: "CreateInvoice",
 			Handler:    _PaymentsService_CreateInvoice_Handler,

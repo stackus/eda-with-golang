@@ -19,17 +19,17 @@ func NewInvoiceRepository(conn *grpc.ClientConn) InvoiceRepository {
 	return InvoiceRepository{client: paymentspb.NewPaymentsServiceClient(conn)}
 }
 
-func (r InvoiceRepository) Save(ctx context.Context, orderID domain.OrderID, amount float64) (domain.InvoiceID, error) {
+func (r InvoiceRepository) Save(ctx context.Context, orderID domain.OrderID, amount float64) (string, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (r InvoiceRepository) Update(ctx context.Context, order *domain.Order) error {
+func (r InvoiceRepository) Update(ctx context.Context, invoiceID string, amount float64) error {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (r InvoiceRepository) Delete(ctx context.Context, invoiceID domain.InvoiceID) error {
+func (r InvoiceRepository) Delete(ctx context.Context, invoiceID string) error {
 	// TODO implement me
 	panic("implement me")
 }

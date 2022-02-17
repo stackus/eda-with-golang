@@ -11,16 +11,15 @@ type CancelOrder struct {
 }
 
 type CancelOrderHandler struct {
-	orders        domain.OrderRepository
-	invoices      domain.InvoiceRepository
-	shoppingLists domain.ShoppingListRepository
+	orders   domain.OrderRepository
+	invoices domain.InvoiceRepository
+	shopping domain.ShoppingRepository
 }
 
-func NewCancelOrderHandler(orders domain.OrderRepository, invoices domain.InvoiceRepository, shoppingLists domain.ShoppingListRepository) CancelOrderHandler {
+func NewCancelOrderHandler(orders domain.OrderRepository, shopping domain.ShoppingRepository) CancelOrderHandler {
 	return CancelOrderHandler{
-		orders:        orders,
-		invoices:      invoices,
-		shoppingLists: shoppingLists,
+		orders:   orders,
+		shopping: shopping,
 	}
 }
 
@@ -35,12 +34,7 @@ func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) er
 		return err
 	}
 
-	err = h.invoices.Delete(ctx, order.InvoiceID)
-	if err != nil {
-		return err
-	}
-
-	err = h.shoppingLists.Delete(ctx, order.ID)
+	err = h.shopping.Cancel(ctx, order.ShoppingID)
 	if err != nil {
 		return err
 	}

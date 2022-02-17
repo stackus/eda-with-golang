@@ -9,41 +9,52 @@ import (
 )
 
 type CreateOrder struct {
-	ID        domain.OrderID
-	Items     []*domain.Item
-	CardToken string
-	SmsNumber string
+	ID         domain.OrderID
+	CustomerID string
+	PaymentID  string
+	Items      []*domain.Item
 }
 
 type CreateOrderHandler struct {
-	orders        domain.OrderRepository
-	invoices      domain.InvoiceRepository
-	shoppingLists domain.ShoppingListRepository
+	orders    domain.OrderRepository
+	customers domain.CustomerRepository
+	payments  domain.PaymentRepository
+	shopping  domain.ShoppingRepository
 }
 
-func NewCreateOrderHandler(orders domain.OrderRepository, invoices domain.InvoiceRepository, shoppingLists domain.ShoppingListRepository) CreateOrderHandler {
+func NewCreateOrderHandler(orders domain.OrderRepository, customers domain.CustomerRepository, payments domain.PaymentRepository, shopping domain.ShoppingRepository) CreateOrderHandler {
 	return CreateOrderHandler{
-		orders:        orders,
-		invoices:      invoices,
-		shoppingLists: shoppingLists,
+		orders:    orders,
+		customers: customers,
+		payments:  payments,
+		shopping:  shopping,
 	}
 }
 
 func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) error {
-	order, err := domain.CreateOrder(cmd.ID, cmd.Items, cmd.CardToken, cmd.SmsNumber)
+	order, err := domain.CreateOrder(cmd.ID, cmd.CustomerID, cmd.PaymentID, cmd.Items)
 	if err != nil {
 		return errors.Wrap(err, "create order command")
 	}
 
-	order.InvoiceID, err = h.invoices.Save(ctx, order.ID, order.GetTotal())
-	if err != nil {
-		return err
+	// authorizeCustomer
+	if err = h.customers.Authorize(ctx, order.CustomerID); err != nil {
+		return errors.Wrap(err, "order customer authorization")
 	}
 
-	err = h.shoppingLists.Save(ctx, order)
-	if err != nil {
-		errors.Wrap(err, "create order command")
+	// validatePayment
+	if err = h.payments.Confirm(ctx, order.PaymentID); err != nil {
+		return errors.Wrap(err, "order payment confirmation")
 	}
+
+	// scheduleShopping
+	if shoppingID, err := h.shopping.Create(ctx, order); err != nil {
+		return errors.Wrap(err, "order shopping scheduling")
+	} else {
+		order.ShoppingID = shoppingID
+	}
+
+	// inProgressOrder
 
 	return errors.Wrap(h.orders.Save(ctx, order), "create order command")
 }

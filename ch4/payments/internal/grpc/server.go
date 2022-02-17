@@ -22,6 +22,23 @@ func RegisterServer(_ context.Context, app application.App, registrar grpc.Servi
 	return nil
 }
 
+func (s server) AuthorizePayment(ctx context.Context, request *paymentspb.AuthorizePaymentRequest) (*paymentspb.AuthorizePaymentResponse, error) {
+	id := uuid.New().String()
+	err := s.app.AuthorizePayment(ctx, application.AuthorizePayment{
+		ID:         id,
+		CustomerID: request.GetCustomerId(),
+		Amount:     request.GetAmount(),
+	})
+	return &paymentspb.AuthorizePaymentResponse{Id: id}, err
+}
+
+func (s server) ConfirmPayment(ctx context.Context, request *paymentspb.ConfirmPaymentRequest) (*paymentspb.ConfirmPaymentResponse, error) {
+	err := s.app.ConfirmPayment(ctx, application.ConfirmPayment{
+		ID: request.GetId(),
+	})
+	return &paymentspb.ConfirmPaymentResponse{}, err
+}
+
 func (s server) CreateInvoice(ctx context.Context, request *paymentspb.CreateInvoiceRequest) (*paymentspb.CreateInvoiceResponse, error) {
 	id := uuid.New().String()
 	err := s.app.CreateInvoice(ctx, application.CreateInvoice{

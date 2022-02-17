@@ -190,10 +190,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "cardToken": {
-                  "type": "string"
-                },
-                "smsNumber": {
+                "paymentId": {
                   "type": "string"
                 }
               }
@@ -315,7 +312,12 @@
       "type": "object"
     },
     "basketspbStartBasketRequest": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "customerId": {
+          "type": "string"
+        }
+      }
     },
     "basketspbStartBasketResponse": {
       "type": "object",

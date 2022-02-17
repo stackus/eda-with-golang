@@ -25,7 +25,7 @@ func NewShoppingListRepository(tableName string, db *sql.DB) ShoppingListReposit
 	}
 }
 
-func (r ShoppingListRepository) Find(ctx context.Context, id string) (*domain.ShoppingList, error) {
+func (r ShoppingListRepository) Find(ctx context.Context, id domain.ShoppingListID) (*domain.ShoppingList, error) {
 	const query = "SELECT order_id, stops, assigned_bot_id, status FROM %s WHERE id = $1 LIMIT 1"
 
 	shoppingList := &domain.ShoppingList{
@@ -39,7 +39,7 @@ func (r ShoppingListRepository) Find(ctx context.Context, id string) (*domain.Sh
 		return nil, errors.Wrap(err, "scanning shopping list")
 	}
 
-	shoppingList.Status, err = r.statusToDomain(status)
+	shoppingList.Status = domain.ToShoppingListStatus(status)
 	if err != nil {
 		return nil, err
 	}
@@ -66,10 +66,7 @@ func (r ShoppingListRepository) FindByOrderID(ctx context.Context, orderID strin
 		return nil, errors.Wrap(err, "scanning shopping list")
 	}
 
-	shoppingList.Status, err = r.statusToDomain(status)
-	if err != nil {
-		return nil, err
-	}
+	shoppingList.Status = domain.ToShoppingListStatus(status)
 
 	err = json.Unmarshal(stops, &shoppingList.Stops)
 	if err != nil {
@@ -107,21 +104,4 @@ func (r ShoppingListRepository) Update(ctx context.Context, list *domain.Shoppin
 
 func (r ShoppingListRepository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
-}
-
-func (r ShoppingListRepository) statusToDomain(status string) (domain.ShoppingListStatus, error) {
-	switch status {
-	case domain.ShoppingListAvailable.String():
-		return domain.ShoppingListAvailable, nil
-	case domain.ShoppingListAssigned.String():
-		return domain.ShoppingListAssigned, nil
-	case domain.ShoppingListActive.String():
-		return domain.ShoppingListActive, nil
-	case domain.ShoppingListCompleted.String():
-		return domain.ShoppingListCompleted, nil
-	case domain.ShoppingListCancelled.String():
-		return domain.ShoppingListCancelled, nil
-	default:
-		return domain.ShoppingListUnknown, fmt.Errorf("unknown shopping list status: %s", status)
-	}
 }

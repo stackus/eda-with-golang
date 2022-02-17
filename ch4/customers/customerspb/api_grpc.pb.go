@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CustomersServiceClient interface {
 	RegisterCustomer(ctx context.Context, in *RegisterCustomerRequest, opts ...grpc.CallOption) (*RegisterCustomerResponse, error)
+	AuthorizeCustomer(ctx context.Context, in *AuthorizeCustomerRequest, opts ...grpc.CallOption) (*AuthorizeCustomerResponse, error)
 	GetCustomer(ctx context.Context, in *GetCustomerRequest, opts ...grpc.CallOption) (*GetCustomerResponse, error)
 	EnableCustomer(ctx context.Context, in *EnableCustomerRequest, opts ...grpc.CallOption) (*EnableCustomerResponse, error)
 	DisableCustomer(ctx context.Context, in *DisableCustomerRequest, opts ...grpc.CallOption) (*DisableCustomerResponse, error)
@@ -39,6 +40,15 @@ func NewCustomersServiceClient(cc grpc.ClientConnInterface) CustomersServiceClie
 func (c *customersServiceClient) RegisterCustomer(ctx context.Context, in *RegisterCustomerRequest, opts ...grpc.CallOption) (*RegisterCustomerResponse, error) {
 	out := new(RegisterCustomerResponse)
 	err := c.cc.Invoke(ctx, "/customerspb.CustomersService/RegisterCustomer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customersServiceClient) AuthorizeCustomer(ctx context.Context, in *AuthorizeCustomerRequest, opts ...grpc.CallOption) (*AuthorizeCustomerResponse, error) {
+	out := new(AuthorizeCustomerResponse)
+	err := c.cc.Invoke(ctx, "/customerspb.CustomersService/AuthorizeCustomer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +87,7 @@ func (c *customersServiceClient) DisableCustomer(ctx context.Context, in *Disabl
 // for forward compatibility
 type CustomersServiceServer interface {
 	RegisterCustomer(context.Context, *RegisterCustomerRequest) (*RegisterCustomerResponse, error)
+	AuthorizeCustomer(context.Context, *AuthorizeCustomerRequest) (*AuthorizeCustomerResponse, error)
 	GetCustomer(context.Context, *GetCustomerRequest) (*GetCustomerResponse, error)
 	EnableCustomer(context.Context, *EnableCustomerRequest) (*EnableCustomerResponse, error)
 	DisableCustomer(context.Context, *DisableCustomerRequest) (*DisableCustomerResponse, error)
@@ -89,6 +100,9 @@ type UnimplementedCustomersServiceServer struct {
 
 func (UnimplementedCustomersServiceServer) RegisterCustomer(context.Context, *RegisterCustomerRequest) (*RegisterCustomerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterCustomer not implemented")
+}
+func (UnimplementedCustomersServiceServer) AuthorizeCustomer(context.Context, *AuthorizeCustomerRequest) (*AuthorizeCustomerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AuthorizeCustomer not implemented")
 }
 func (UnimplementedCustomersServiceServer) GetCustomer(context.Context, *GetCustomerRequest) (*GetCustomerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCustomer not implemented")
@@ -126,6 +140,24 @@ func _CustomersService_RegisterCustomer_Handler(srv interface{}, ctx context.Con
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CustomersServiceServer).RegisterCustomer(ctx, req.(*RegisterCustomerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomersService_AuthorizeCustomer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthorizeCustomerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomersServiceServer).AuthorizeCustomer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/customerspb.CustomersService/AuthorizeCustomer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomersServiceServer).AuthorizeCustomer(ctx, req.(*AuthorizeCustomerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -194,6 +226,10 @@ var CustomersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterCustomer",
 			Handler:    _CustomersService_RegisterCustomer_Handler,
+		},
+		{
+			MethodName: "AuthorizeCustomer",
+			Handler:    _CustomersService_AuthorizeCustomer_Handler,
 		},
 		{
 			MethodName: "GetCustomer",

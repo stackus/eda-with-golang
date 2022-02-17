@@ -8,6 +8,8 @@ var (
 	ErrShoppingCannotBeCancelled = fmt.Errorf("the shopping list cannot be cancelled")
 )
 
+type ShoppingListID string
+
 type ShoppingListStatus string
 
 const (
@@ -19,6 +21,14 @@ const (
 	ShoppingListCancelled ShoppingListStatus = "cancelled"
 )
 
+func (i ShoppingListID) String() string {
+	return string(i)
+}
+
+func ToShoppingListID(id string) ShoppingListID {
+	return ShoppingListID(id)
+}
+
 func (s ShoppingListStatus) String() string {
 	switch s {
 	case ShoppingListAvailable, ShoppingListAssigned, ShoppingListActive, ShoppingListCompleted, ShoppingListCancelled:
@@ -28,15 +38,32 @@ func (s ShoppingListStatus) String() string {
 	}
 }
 
+func ToShoppingListStatus(status string) ShoppingListStatus {
+	switch status {
+	case ShoppingListAvailable.String():
+		return ShoppingListAvailable
+	case ShoppingListAssigned.String():
+		return ShoppingListAssigned
+	case ShoppingListActive.String():
+		return ShoppingListActive
+	case ShoppingListCompleted.String():
+		return ShoppingListCompleted
+	case ShoppingListCancelled.String():
+		return ShoppingListCancelled
+	default:
+		return ShoppingListUnknown
+	}
+}
+
 type ShoppingList struct {
-	ID            string
+	ID            ShoppingListID
 	OrderID       string
-	Stops         []*Stop
-	AssignedBotID string
+	Stops         *Stops
+	AssignedBotID BotID
 	Status        ShoppingListStatus
 }
 
-func CreateShoppingList(id, orderID string) *ShoppingList {
+func CreateShopping(id ShoppingListID, orderID string) *ShoppingList {
 	return &ShoppingList{
 		ID:      id,
 		OrderID: orderID,
@@ -45,34 +72,30 @@ func CreateShoppingList(id, orderID string) *ShoppingList {
 }
 
 func (sl *ShoppingList) AddItem(store *Store, product *Product, quantity int) error {
-	for _, stop := range sl.Stops {
-		if stop.StoreID == store.ID {
-			stop.Items = append(stop.Items, &Item{
-				ID:       product.ID,
-				Name:     product.Name,
-				Quantity: quantity,
-			})
-			return nil
-		}
-	}
-	sl.Stops = append(sl.Stops, &Stop{
-		StoreID:       store.ID,
-		StoreName:     store.ID,
-		StoreLocation: store.Location,
-		Items: []*Item{
-			{
-				ID:       product.ID,
-				Name:     product.Name,
-				Quantity: quantity,
-			},
-		},
-	})
+	return sl.Stops.AddItem(store, product, quantity)
+}
+
+func (sl *ShoppingList) Cancel() error {
+	// validate status
+
+	sl.Status = ShoppingListCancelled
 
 	return nil
 }
 
-func (sl *ShoppingList) Cancel() error {
-	sl.Status = ShoppingListCancelled
+func (sl *ShoppingList) Assign(id BotID) error {
+	// validate status
+
+	sl.AssignedBotID = id
+	sl.Status = ShoppingListAssigned
+
+	return nil
+}
+
+func (sl *ShoppingList) Complete() error {
+	// validate status
+
+	sl.Status = ShoppingListCompleted
 
 	return nil
 }

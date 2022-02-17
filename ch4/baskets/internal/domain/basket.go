@@ -10,8 +10,9 @@ var (
 	ErrBasketCannotBeModified   = fmt.Errorf("the basket cannot be modified")
 	ErrBasketCannotBeCancelled  = fmt.Errorf("the basket cannot be cancelled")
 	ErrQuantityCannotBeNegative = fmt.Errorf("the item quantity cannot be negative")
-	ErrCardTokenCannotBeBlank   = fmt.Errorf("the card token cannot be blank")
-	ErrSmsNumberCannotBeBlank   = fmt.Errorf("the sms number cannot be blank")
+	ErrBasketIDCannotBeBlank    = fmt.Errorf("the basket id cannot be blank")
+	ErrPaymentIDCannotBeBlank   = fmt.Errorf("the payment id cannot be blank")
+	ErrCustomerIDCannotBeBlank  = fmt.Errorf("the customer id cannot be blank")
 )
 
 type BasketID string
@@ -39,21 +40,30 @@ func (s BasketStatus) String() string {
 }
 
 type Basket struct {
-	ID        BasketID
-	Items     []Item
-	CardToken string
-	SmsNumber string
-	Status    BasketStatus
+	ID         BasketID
+	CustomerID string
+	PaymentID  string
+	Items      []Item
+	Status     BasketStatus
 }
 
-func StartBasket(id BasketID) (basket *Basket) {
-	basket = &Basket{
-		ID:     id,
-		Status: BasketOpen,
-		Items:  []Item{},
+func StartBasket(id BasketID, customerID string) (*Basket, error) {
+	if id == "" {
+		return nil, ErrBasketIDCannotBeBlank
 	}
 
-	return
+	if customerID == "" {
+		return nil, ErrCustomerIDCannotBeBlank
+	}
+
+	basket := &Basket{
+		ID:         id,
+		CustomerID: customerID,
+		Status:     BasketOpen,
+		Items:      []Item{},
+	}
+
+	return basket, nil
 }
 
 func (b Basket) IsCancellable() bool {
@@ -75,7 +85,7 @@ func (b *Basket) Cancel() error {
 	return nil
 }
 
-func (b *Basket) Checkout(cardToken, smsNumber string) error {
+func (b *Basket) Checkout(paymentID string) error {
 	if !b.IsOpen() {
 		return ErrBasketCannotBeModified
 	}
@@ -84,16 +94,11 @@ func (b *Basket) Checkout(cardToken, smsNumber string) error {
 		return ErrBasketHasNoItems
 	}
 
-	if cardToken == "" {
-		return ErrCardTokenCannotBeBlank
+	if paymentID == "" {
+		return ErrPaymentIDCannotBeBlank
 	}
 
-	if smsNumber == "" {
-		return ErrSmsNumberCannotBeBlank
-	}
-
-	b.CardToken = cardToken
-	b.SmsNumber = smsNumber
+	b.PaymentID = paymentID
 	b.Status = BasketCheckedOut
 
 	return nil

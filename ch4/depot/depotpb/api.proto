@@ -5,29 +5,36 @@ package depotpb;
 import "depotpb/messages.proto";
 
 service DepotService {
-  rpc SubmitOrder(SubmitOrderRequest) returns (SubmitOrderResponse) {}
-  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {}
-  rpc SelectShoppingList(SelectShoppingListRequest) returns (SelectShoppingListResponse) {}
+  rpc CreateShoppingList(CreateShoppingListRequest) returns (CreateShoppingListResponse) {}
+  rpc CancelShoppingList(CancelShoppingListRequest) returns (CancelShoppingListResponse) {}
+  rpc AssignShoppingList(AssignShoppingListRequest) returns (AssignShoppingListResponse) {}
+  rpc CompleteShoppingList(CompleteShoppingListRequest) returns (CompleteShoppingListResponse) {}
 }
 
-message SubmitOrderRequest {
+message CreateShoppingListRequest {
   string order_id = 1;
   repeated OrderItem items = 2;
 }
 
-message SubmitOrderResponse {
+message CreateShoppingListResponse {
   string id = 1;
 }
 
-message CancelOrderRequest {
+message CancelShoppingListRequest {
   string id = 1;
 }
 
-message CancelOrderResponse {}
+message CancelShoppingListResponse {}
 
-message SelectShoppingListRequest {
-  string bot_id = 1;
-  string shopping_list_id = 2;
+message AssignShoppingListRequest {
+  string id = 1;
+  string bot_id = 2;
 }
 
-message SelectShoppingListResponse {}
+message AssignShoppingListResponse {}
+
+message CompleteShoppingListRequest {
+  string id = 1;
+}
+
+message CompleteShoppingListResponse {}

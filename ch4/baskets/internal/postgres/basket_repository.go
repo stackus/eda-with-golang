@@ -21,7 +21,7 @@ func NewBasketRepository(tableName string, db *sql.DB) BasketRepository {
 }
 
 func (r BasketRepository) Find(ctx context.Context, basketID domain.BasketID) (*domain.Basket, error) {
-	const query = "SELECT items, card_token, sms_number, status FROM %s WHERE id = $1 LIMIT 1"
+	const query = "SELECT customer_id, payment_id, items, status FROM %s WHERE id = $1 LIMIT 1"
 
 	basket := &domain.Basket{
 		ID: basketID,
@@ -29,7 +29,7 @@ func (r BasketRepository) Find(ctx context.Context, basketID domain.BasketID) (*
 	var items []byte
 	var status string
 
-	err := r.db.QueryRowContext(ctx, r.table(query), basketID.String()).Scan(&items, &basket.CardToken, &basket.SmsNumber, &status)
+	err := r.db.QueryRowContext(ctx, r.table(query), basketID.String()).Scan(&basket.CustomerID, &basket.PaymentID, &items, &status)
 	if err != nil {
 		return nil, err
 	}
@@ -48,27 +48,27 @@ func (r BasketRepository) Find(ctx context.Context, basketID domain.BasketID) (*
 }
 
 func (r BasketRepository) Save(ctx context.Context, basket *domain.Basket) error {
-	const query = "INSERT INTO %s (id, items, card_token, sms_number, status) VALUES ($1, $2, $3, $4, $5)"
+	const query = "INSERT INTO %s (id, customer_id, payment_id, items, status) VALUES ($1, $2, $3, $4, $5)"
 
 	items, err := json.Marshal(basket.Items)
 	if err != nil {
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID.String(), items, basket.CardToken, basket.SmsNumber, basket.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID.String(), basket.CustomerID, basket.PaymentID, items, basket.Status.String())
 
 	return err
 }
 
 func (r BasketRepository) Update(ctx context.Context, basket *domain.Basket) error {
-	const query = "UPDATE %s SET items = $1, card_token = $2, sms_number = $3, status = $4  WHERE id = $5"
+	const query = "UPDATE %s SET customer_id = $2, payment_id = $3, items = $4, status = $5  WHERE id = $1"
 
 	items, err := json.Marshal(basket.Items)
 	if err != nil {
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), items, basket.CardToken, basket.SmsNumber, basket.Status.String(), basket.ID.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID.String(), basket.CustomerID, basket.PaymentID, items, basket.Status.String())
 
 	return err
 }

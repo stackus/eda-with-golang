@@ -6,6 +6,7 @@ import "customerspb/messages.proto";
 
 service CustomersService {
   rpc RegisterCustomer(RegisterCustomerRequest) returns (RegisterCustomerResponse) {};
+  rpc AuthorizeCustomer(AuthorizeCustomerRequest) returns (AuthorizeCustomerResponse) {};
   rpc GetCustomer(GetCustomerRequest) returns (GetCustomerResponse) {};
   rpc EnableCustomer(EnableCustomerRequest) returns (EnableCustomerResponse) {};
   rpc DisableCustomer(DisableCustomerRequest) returns (DisableCustomerResponse) {};
@@ -18,6 +19,11 @@ message RegisterCustomerRequest {
 message RegisterCustomerResponse {
   string id = 1;
 }
+
+message AuthorizeCustomerRequest {
+  string id = 1;
+}
+message AuthorizeCustomerResponse {}
 
 message GetCustomerRequest {
   string id = 1;

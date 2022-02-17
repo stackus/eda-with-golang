@@ -20,7 +20,7 @@ type server struct {
 
 var _ orderingpb.OrderingServiceServer = (*server)(nil)
 
-func RegisterServer(_ context.Context, app application.App, registrar grpc.ServiceRegistrar) error {
+func RegisterServer(app application.App, registrar grpc.ServiceRegistrar) error {
 	orderingpb.RegisterOrderingServiceServer(registrar, server{app: app})
 	return nil
 }
@@ -34,23 +34,23 @@ func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrder
 	}
 
 	err := s.app.CreateOrder(ctx, commands.CreateOrder{
-		ID:        domain.OrderID(id),
-		Items:     items,
-		CardToken: request.CardToken,
-		SmsNumber: request.SmsNumber,
+		ID:         domain.ToOrderID(id),
+		CustomerID: request.GetCustomerId(),
+		PaymentID:  request.GetPaymentId(),
+		Items:      items,
 	})
 
 	return &orderingpb.CreateOrderResponse{Id: id}, err
 }
 
 func (s server) CancelOrder(ctx context.Context, request *orderingpb.CancelOrderRequest) (*orderingpb.CancelOrderResponse, error) {
-	err := s.app.CancelOrder(ctx, commands.CancelOrder{ID: domain.OrderID(request.GetId())})
+	err := s.app.CancelOrder(ctx, commands.CancelOrder{ID: domain.ToOrderID(request.GetId())})
 
 	return &orderingpb.CancelOrderResponse{}, err
 }
 
 func (s server) GetOrder(ctx context.Context, request *orderingpb.GetOrderRequest) (*orderingpb.GetOrderResponse, error) {
-	order, err := s.app.GetOrder(ctx, queries.GetOrder{ID: domain.OrderID(request.GetId())})
+	order, err := s.app.GetOrder(ctx, queries.GetOrder{ID: domain.ToOrderID(request.GetId())})
 	if err != nil {
 		return nil, err
 	}
@@ -67,11 +67,11 @@ func (s server) orderFromDomain(order *domain.Order) *orderingpb.Order {
 	}
 
 	return &orderingpb.Order{
-		Id:        order.ID.String(),
-		Items:     items,
-		CardToken: order.CardToken,
-		SmsNumber: order.SmsNumber,
-		Status:    order.Status.String(),
+		Id:         order.ID.String(),
+		CustomerId: order.CustomerID,
+		PaymentId:  order.PaymentID,
+		Items:      items,
+		Status:     order.Status.String(),
 	}
 }
 

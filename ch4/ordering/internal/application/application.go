@@ -36,11 +36,11 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(orders domain.OrderRepository, invoices domain.InvoiceRepository, shoppingLists domain.ShoppingListRepository) *Application {
+func New(orders domain.OrderRepository, customers domain.CustomerRepository, payments domain.PaymentRepository, invoices domain.InvoiceRepository, shopping domain.ShoppingRepository) *Application {
 	return &Application{
 		appCommands: appCommands{
-			CreateOrderHandler: commands.NewCreateOrderHandler(orders, invoices, shoppingLists),
-			CancelOrderHandler: commands.NewCancelOrderHandler(orders, invoices, shoppingLists),
+			CreateOrderHandler: commands.NewCreateOrderHandler(orders, customers, payments, shopping),
+			CancelOrderHandler: commands.NewCancelOrderHandler(orders, shopping),
 		},
 		appQueries: appQueries{
 			GetOrderHandler: queries.NewGetOrderHandler(orders),

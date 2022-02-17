@@ -4,9 +4,9 @@ package orderingpb;
 
 message Order {
   string id = 1;
-  repeated Item items = 2;
-  string card_token = 3;
-  string sms_number = 4;
+  string customer_id = 2;
+  string payment_id = 3;
+  repeated Item items = 4;
   string status = 5;
 }
 

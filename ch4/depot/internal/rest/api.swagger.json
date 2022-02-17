@@ -17,15 +17,15 @@
     "application/json"
   ],
   "paths": {
-    "/api/depot/orders": {
+    "/api/depot/shopping": {
       "post": {
-        "summary": "Submit an order for pickup",
-        "operationId": "submitOrder",
+        "summary": "Schedule shopping tasks for an order",
+        "operationId": "createShoppingList",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/depotpbSubmitOrderResponse"
+              "$ref": "#/definitions/depotpbCreateShoppingListResponse"
             }
           },
           "default": {
@@ -41,24 +41,24 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/depotpbSubmitOrderRequest"
+              "$ref": "#/definitions/depotpbCreateShoppingListRequest"
             }
           }
         ],
         "tags": [
-          "Order"
+          "ShoppingList"
         ]
       }
     },
-    "/api/depot/orders/{id}": {
+    "/api/depot/shopping/{id}": {
       "post": {
-        "summary": "Cancel an order",
-        "operationId": "cancelOrder",
+        "summary": "Cancel a shopping task",
+        "operationId": "cancelShoppingList",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/depotpbCancelOrderResponse"
+              "$ref": "#/definitions/depotpbCancelShoppingListResponse"
             }
           },
           "default": {
@@ -85,34 +85,105 @@
           }
         ],
         "tags": [
-          "Order"
+          "ShoppingList"
+        ]
+      }
+    },
+    "/api/depot/shopping/{id}/assign": {
+      "put": {
+        "summary": "Assign a shopping list to a bot",
+        "operationId": "assignShoppingList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/depotpbAssignShoppingListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "botId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "ShoppingList"
+        ]
+      }
+    },
+    "/api/depot/shopping/{id}/complete": {
+      "put": {
+        "summary": "Complete a shopping task",
+        "operationId": "ccompleteShoppingList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/depotpbCompleteShoppingListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "tags": [
+          "ShoppingList"
         ]
       }
     }
   },
   "definitions": {
-    "depotpbCancelOrderResponse": {
+    "depotpbAssignShoppingListResponse": {
       "type": "object"
     },
-    "depotpbOrderItem": {
-      "type": "object",
-      "properties": {
-        "productId": {
-          "type": "string"
-        },
-        "storeId": {
-          "type": "string"
-        },
-        "quantity": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "depotpbSelectShoppingListResponse": {
+    "depotpbCancelShoppingListResponse": {
       "type": "object"
     },
-    "depotpbSubmitOrderRequest": {
+    "depotpbCompleteShoppingListResponse": {
+      "type": "object"
+    },
+    "depotpbCreateShoppingListRequest": {
       "type": "object",
       "properties": {
         "orderId": {
@@ -126,11 +197,26 @@
         }
       }
     },
-    "depotpbSubmitOrderResponse": {
+    "depotpbCreateShoppingListResponse": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string"
+        }
+      }
+    },
+    "depotpbOrderItem": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "storeId": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

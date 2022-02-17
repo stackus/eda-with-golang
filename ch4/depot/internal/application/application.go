@@ -14,8 +14,10 @@ type (
 		Queries
 	}
 	Commands interface {
-		BuildShoppingList(ctx context.Context, cmd commands.BuildShoppingList) error
-		CancelOrder(ctx context.Context, cmd commands.CancelOrder) error
+		CreateShoppingList(ctx context.Context, cmd commands.CreateShoppingList) error
+		CancelShoppingList(ctx context.Context, cmd commands.CancelShoppingList) error
+		AssignShoppingList(ctx context.Context, cmd commands.AssignShoppingList) error
+		CompleteShoppingList(ctx context.Context, cmd commands.CompleteShoppingList) error
 	}
 	Queries interface {
 		GetShoppingList(ctx context.Context, list queries.GetShoppingList) (*domain.ShoppingList, error)
@@ -26,8 +28,10 @@ type (
 		appQueries
 	}
 	appCommands struct {
-		commands.BuildShoppingListHandler
-		commands.CancelOrderHandler
+		commands.CreateShoppingListHandler
+		commands.CancelShoppingListHandler
+		commands.AssignShoppingListHandler
+		commands.CompleteShoppingListHandler
 	}
 	appQueries struct {
 		queries.GetShoppingListHandler
@@ -36,14 +40,16 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(shoppingListRepo domain.ShoppingListRepository, storeRepo domain.StoreRepository, productRepo domain.ProductRepository) *Application {
+func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository) *Application {
 	return &Application{
 		appCommands: appCommands{
-			BuildShoppingListHandler: commands.NewSubmitOrderHandler(shoppingListRepo, storeRepo, productRepo),
-			CancelOrderHandler:       commands.NewCancelOrderHandler(shoppingListRepo),
+			CreateShoppingListHandler:   commands.NewCreateShoppingListHandler(shoppingLists, stores, products),
+			CancelShoppingListHandler:   commands.NewCancelShoppingListHandler(shoppingLists),
+			AssignShoppingListHandler:   commands.NewAssignShoppingListHandler(shoppingLists),
+			CompleteShoppingListHandler: commands.NewCompleteShoppingListHandler(shoppingLists),
 		},
 		appQueries: appQueries{
-			GetShoppingListHandler: queries.NewGetShoppingListHandler(shoppingListRepo),
+			GetShoppingListHandler: queries.NewGetShoppingListHandler(shoppingLists),
 		},
 	}
 }

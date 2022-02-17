@@ -27,10 +27,13 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	app := application.New(baskets, stores, products, orders)
 
 	// setup Driver adapters
-	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
+	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, app, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+		return err
+	}
+	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
 
