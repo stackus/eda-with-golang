@@ -19,9 +19,9 @@ func NewStoreRepository(conn *grpc.ClientConn) StoreRepository {
 	return StoreRepository{client: storespb.NewStoresServiceClient(conn)}
 }
 
-func (r StoreRepository) Find(ctx context.Context, storeID domain.StoreID) (*domain.Store, error) {
+func (r StoreRepository) Find(ctx context.Context, storeID string) (*domain.Store, error) {
 	resp, err := r.client.GetStore(ctx, &storespb.GetStoreRequest{
-		Id: storeID.String(),
+		Id: storeID,
 	})
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (r StoreRepository) Find(ctx context.Context, storeID domain.StoreID) (*dom
 
 func (r StoreRepository) storeToDomain(store *storespb.Store) *domain.Store {
 	return &domain.Store{
-		ID:       domain.StoreID(store.GetId()),
+		ID:       store.GetId(),
 		Name:     store.GetName(),
 		Location: store.GetLocation(),
 	}

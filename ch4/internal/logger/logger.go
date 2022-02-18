@@ -33,7 +33,6 @@ func New(cfg LogConfig) zerolog.Logger {
 			Level(logLevelToZero(cfg.LogLevel)).
 			With().
 			Timestamp().
-			Caller().
 			Logger()
 	default:
 		return zerolog.New(zerolog.NewConsoleWriter(func(w *zerolog.ConsoleWriter) {
@@ -42,7 +41,6 @@ func New(cfg LogConfig) zerolog.Logger {
 			Level(logLevelToZero(cfg.LogLevel)).
 			With().
 			Timestamp().
-			Caller().
 			Logger()
 	}
 }

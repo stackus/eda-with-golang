@@ -5,5 +5,5 @@ import (
 )
 
 type StoreRepository interface {
-	Find(ctx context.Context, id StoreID) (*Store, error)
+	Find(ctx context.Context, storeID string) (*Store, error)
 }

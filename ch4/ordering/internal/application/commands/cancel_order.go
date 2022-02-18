@@ -7,19 +7,22 @@ import (
 )
 
 type CancelOrder struct {
-	ID domain.OrderID
+	ID string
 }
 
 type CancelOrderHandler struct {
-	orders   domain.OrderRepository
-	invoices domain.InvoiceRepository
-	shopping domain.ShoppingRepository
+	orders        domain.OrderRepository
+	shopping      domain.ShoppingRepository
+	notifications domain.NotificationRepository
 }
 
-func NewCancelOrderHandler(orders domain.OrderRepository, shopping domain.ShoppingRepository) CancelOrderHandler {
+func NewCancelOrderHandler(orders domain.OrderRepository, shopping domain.ShoppingRepository,
+	notifications domain.NotificationRepository,
+) CancelOrderHandler {
 	return CancelOrderHandler{
-		orders:   orders,
-		shopping: shopping,
+		orders:        orders,
+		shopping:      shopping,
+		notifications: notifications,
 	}
 }
 
@@ -29,13 +32,15 @@ func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) er
 		return err
 	}
 
-	err = order.Cancel()
-	if err != nil {
+	if err = order.Cancel(); err != nil {
 		return err
 	}
 
-	err = h.shopping.Cancel(ctx, order.ShoppingID)
-	if err != nil {
+	if err = h.shopping.Cancel(ctx, order.ShoppingID); err != nil {
+		return err
+	}
+
+	if err = h.notifications.NotifyOrderCanceled(ctx, order.ID, order.CustomerID); err != nil {
 		return err
 	}
 

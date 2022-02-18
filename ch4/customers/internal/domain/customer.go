@@ -1,35 +1,25 @@
 package domain
 
 import (
-	"fmt"
+	"github.com/stackus/errors"
 )
 
-type CustomerID string
-
 type Customer struct {
-	ID        CustomerID
+	ID        string
 	Name      string
 	SmsNumber string
 	Enabled   bool
 }
 
 var (
-	ErrNameCannotBeBlank       = fmt.Errorf("the customer name cannot be blank")
-	ErrCustomerIDCannotBeBlank = fmt.Errorf("the customer id cannot be blank")
-	ErrSmsNumberCannotBeBlank  = fmt.Errorf("the SMS number cannot be blank")
-	ErrCustomerAlreadyEnabled  = fmt.Errorf("the customer is already enabled")
-	ErrCustomerAlreadyDisabled = fmt.Errorf("the customer is already disabled")
+	ErrNameCannotBeBlank       = errors.Wrap(errors.ErrBadRequest, "the customer name cannot be blank")
+	ErrCustomerIDCannotBeBlank = errors.Wrap(errors.ErrBadRequest, "the customer id cannot be blank")
+	ErrSmsNumberCannotBeBlank  = errors.Wrap(errors.ErrBadRequest, "the SMS number cannot be blank")
+	ErrCustomerAlreadyEnabled  = errors.Wrap(errors.ErrBadRequest, "the customer is already enabled")
+	ErrCustomerAlreadyDisabled = errors.Wrap(errors.ErrBadRequest, "the customer is already disabled")
 )
 
-func (i CustomerID) String() string {
-	return string(i)
-}
-
-func ToCustomerID(id string) CustomerID {
-	return CustomerID(id)
-}
-
-func RegisterCustomer(id CustomerID, name, smsNumber string) (*Customer, error) {
+func RegisterCustomer(id, name, smsNumber string) (*Customer, error) {
 	if id == "" {
 		return nil, ErrCustomerIDCannotBeBlank
 	}

@@ -7,8 +7,8 @@ import (
 )
 
 type AssignShoppingList struct {
-	ID    domain.ShoppingListID
-	BotID domain.BotID
+	ID    string
+	BotID string
 }
 
 type AssignShoppingListHandler struct {

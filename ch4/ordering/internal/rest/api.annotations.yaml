@@ -7,14 +7,5 @@ http:
       body: "*"
     - selector: orderingpb.OrderingService.GetOrder
       get: /api/ordering/{id}
-#    - selector: orderingpb.OrderingService.CancelOrder
-#      delete: /api/order/{id}
-#    - selector: orderingpb.OrderingService.CheckoutOrder
-#      post: /api/order/{id}/checkout
-#      body: "*"
-#    - selector: orderingpb.OrderingService.AddItem
-#      post: /api/order/{id}/addItem
-#      body: "*"
-#    - selector: orderingpb.OrderingService.RemoveItem
-#      post: /api/order/{id}/removeItem
-#      body: "*"
+    - selector: orderingpb.OrderingService.CancelOrder
+      delete: /api/ordering/{id}

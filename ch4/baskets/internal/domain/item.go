@@ -1,10 +1,10 @@
 package domain
 
 type Item struct {
-	StoreID      StoreID
-	ProductID    ProductID
+	StoreID      string
+	ProductID    string
 	StoreName    string
 	ProductName  string
-	ProductPrice Price
+	ProductPrice float64
 	Quantity     int
 }

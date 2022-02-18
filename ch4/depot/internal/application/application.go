@@ -20,7 +20,7 @@ type (
 		CompleteShoppingList(ctx context.Context, cmd commands.CompleteShoppingList) error
 	}
 	Queries interface {
-		GetShoppingList(ctx context.Context, list queries.GetShoppingList) (*domain.ShoppingList, error)
+		GetShoppingList(ctx context.Context, query queries.GetShoppingList) (*domain.ShoppingList, error)
 	}
 
 	Application struct {
@@ -40,13 +40,15 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository) *Application {
+func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository,
+	orders domain.OrderRepository,
+) *Application {
 	return &Application{
 		appCommands: appCommands{
 			CreateShoppingListHandler:   commands.NewCreateShoppingListHandler(shoppingLists, stores, products),
 			CancelShoppingListHandler:   commands.NewCancelShoppingListHandler(shoppingLists),
 			AssignShoppingListHandler:   commands.NewAssignShoppingListHandler(shoppingLists),
-			CompleteShoppingListHandler: commands.NewCompleteShoppingListHandler(shoppingLists),
+			CompleteShoppingListHandler: commands.NewCompleteShoppingListHandler(shoppingLists, orders),
 		},
 		appQueries: appQueries{
 			GetShoppingListHandler: queries.NewGetShoppingListHandler(shoppingLists),

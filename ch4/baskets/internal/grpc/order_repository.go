@@ -24,19 +24,19 @@ func (r OrderRepository) Save(ctx context.Context, basket *domain.Basket) (strin
 	items := make([]*orderingpb.Item, 0, len(basket.Items))
 	for _, item := range basket.Items {
 		items = append(items, &orderingpb.Item{
-			StoreId:     item.StoreID.String(),
-			ProductId:   item.ProductID.String(),
+			StoreId:     item.StoreID,
+			ProductId:   item.ProductID,
 			StoreName:   item.StoreName,
 			ProductName: item.ProductName,
-			Price:       item.ProductPrice.Float64(),
+			Price:       item.ProductPrice,
 			Quantity:    int32(item.Quantity),
 		})
 	}
 
 	resp, err := r.client.CreateOrder(ctx, &orderingpb.CreateOrderRequest{
-		Items:     items,
-		CardToken: basket.CardToken,
-		SmsNumber: basket.SmsNumber,
+		Items:      items,
+		CustomerId: basket.CustomerID,
+		PaymentId:  basket.PaymentID,
 	})
 	if err != nil {
 		return "", errors.Wrap(err, "saving order")

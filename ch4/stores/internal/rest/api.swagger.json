@@ -215,7 +215,7 @@
           "Participation"
         ]
       },
-      "post": {
+      "put": {
         "summary": "Enable store service participation",
         "operationId": "enableParticipation",
         "responses": {

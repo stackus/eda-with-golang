@@ -18,6 +18,8 @@ type (
 	}
 
 	AppConfig struct {
+		Environment     string
+		LogLevel        string `envconfig:"LOG_LEVEL" default:"DEBUG"`
 		PG              PGConfig
 		Rpc             rpc.RpcConfig
 		Web             web.WebConfig

@@ -7,7 +7,7 @@ import (
 )
 
 type CancelShoppingList struct {
-	ID domain.ShoppingListID
+	ID string
 }
 
 type CancelShoppingListHandler struct {

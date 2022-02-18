@@ -2,29 +2,58 @@ package application
 
 import (
 	"context"
+
+	"github.com/stackus/eda-with-golang/ch4/notifications/internal/models"
 )
 
 type (
 	OrderCreated struct {
-		SMSNumber string
-		OrderID   string
+		OrderID    string
+		CustomerID string
+	}
+
+	OrderCanceled struct {
+		OrderID    string
+		CustomerID string
+	}
+
+	OrderReady struct {
+		OrderID    string
+		CustomerID string
 	}
 
 	App interface {
 		NotifyOrderCreated(ctx context.Context, notify OrderCreated) error
+		NotifyOrderCanceled(ctx context.Context, notify OrderCanceled) error
+		NotifyOrderReady(ctx context.Context, notify OrderReady) error
 	}
 
 	Application struct {
+		customers models.CustomerRepository
 	}
 )
 
 var _ App = (*Application)(nil)
 
-func New() *Application {
-	return &Application{}
+func New(customers models.CustomerRepository) *Application {
+	return &Application{
+		customers: customers,
+	}
 }
 
 func (a Application) NotifyOrderCreated(ctx context.Context, notify OrderCreated) error {
+	// not implemented
+
+	return nil
+}
+
+func (a Application) NotifyOrderCanceled(ctx context.Context, notify OrderCanceled) error {
+	// not implemented
+
+	return nil
+}
+
+func (a Application) NotifyOrderReady(ctx context.Context, notify OrderReady) error {
 	// not implemented
 
 	return nil

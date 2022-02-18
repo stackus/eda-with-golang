@@ -15,7 +15,7 @@ services:
     depends_on:
       - nats
       - postgres
-    command: ["./wait-for-it.sh", "postgres:5432", "--", "/mallbots/monolith"]
+    command: ["./wait-for", "postgres:5432", "--", "/mallbots/monolith"]
   postgres:
     container_name: postgres
     hostname: postgres

@@ -1,7 +1,5 @@
 package domain
 
-type BotID string
-
 type BotStatus string
 
 const (
@@ -9,14 +7,6 @@ const (
 	BotIdle    BotStatus = "idle"
 	BotActive  BotStatus = "active"
 )
-
-func (i BotID) String() string {
-	return string(i)
-}
-
-func ToBotID(id string) BotID {
-	return BotID(id)
-}
 
 func (s BotStatus) String() string {
 	switch s {

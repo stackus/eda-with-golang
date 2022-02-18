@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Depot",
+    "title": "Depot Operations",
     "version": "1.0.0"
   },
   "tags": [

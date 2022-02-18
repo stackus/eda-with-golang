@@ -1,14 +1,15 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "orderingpb/messages.proto",
-    "version": "version not set"
+    "title": "Order Processing",
+    "version": "1.0.0"
   },
   "tags": [
     {
       "name": "OrderingService"
     }
   ],
+  "basePath": "/",
   "consumes": [
     "application/json"
   ],
@@ -18,7 +19,7 @@
   "paths": {
     "/api/ordering": {
       "post": {
-        "summary": "Start a new shopping order",
+        "summary": "Start a new order",
         "operationId": "createOrder",
         "responses": {
           "200": {
@@ -51,7 +52,7 @@
     },
     "/api/ordering/{id}": {
       "get": {
-        "summary": "Get a order",
+        "summary": "Get na order",
         "operationId": "getOrder",
         "responses": {
           "200": {
@@ -78,11 +79,43 @@
         "tags": [
           "Order"
         ]
+      },
+      "delete": {
+        "summary": "Cancel an order",
+        "operationId": "cancelOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderingpbCancelOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Order"
+        ]
       }
     }
   },
   "definitions": {
     "orderingpbCancelOrderResponse": {
+      "type": "object"
+    },
+    "orderingpbCompleteOrderResponse": {
       "type": "object"
     },
     "orderingpbCreateOrderRequest": {
@@ -165,6 +198,9 @@
           "type": "string"
         }
       }
+    },
+    "orderingpbReadyOrderResponse": {
+      "type": "object"
     },
     "protobufAny": {
       "type": "object",

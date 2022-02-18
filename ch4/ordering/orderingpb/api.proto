@@ -8,6 +8,8 @@ service OrderingService {
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {};
   rpc GetOrder(GetOrderRequest) returns (GetOrderResponse) {};
   rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {};
+  rpc ReadyOrder(ReadyOrderRequest) returns (ReadyOrderResponse) {};
+  rpc CompleteOrder(CompleteOrderRequest) returns (CompleteOrderResponse) {};
 }
 
 message CreateOrderRequest {
@@ -33,3 +35,15 @@ message CancelOrderRequest {
 }
 
 message CancelOrderResponse {}
+
+message ReadyOrderRequest {
+  string id = 1;
+}
+
+message ReadyOrderResponse {}
+
+message CompleteOrderRequest {
+  string id = 1;
+}
+
+message CompleteOrderResponse {}

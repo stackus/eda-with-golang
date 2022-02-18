@@ -10,33 +10,33 @@ import (
 
 type (
 	StartBasket struct {
-		ID         domain.BasketID
+		ID         string
 		CustomerID string
 	}
 
 	CancelBasket struct {
-		ID domain.BasketID
+		ID string
 	}
 
 	CheckoutBasket struct {
-		ID        domain.BasketID
+		ID        string
 		PaymentID string
 	}
 
 	AddItem struct {
-		ID        domain.BasketID
-		ProductID domain.ProductID
+		ID        string
+		ProductID string
 		Quantity  int
 	}
 
 	RemoveItem struct {
-		ID        domain.BasketID
-		ProductID domain.ProductID
+		ID        string
+		ProductID string
 		Quantity  int
 	}
 
 	GetBasket struct {
-		ID domain.BasketID
+		ID string
 	}
 
 	App interface {

@@ -25,8 +25,8 @@ func (r ShoppingRepository) Create(ctx context.Context, order *domain.Order) (st
 		items = append(items, r.itemFromDomain(item))
 	}
 
-	response, err := r.client.ScheduleShopping(ctx, &depotpb.ScheduleShoppingRequest{
-		OrderId: order.ID.String(),
+	response, err := r.client.CreateShoppingList(ctx, &depotpb.CreateShoppingListRequest{
+		OrderId: order.ID,
 		Items:   items,
 	})
 	if err != nil {

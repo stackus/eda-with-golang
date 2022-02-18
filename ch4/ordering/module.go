@@ -6,6 +6,7 @@ import (
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/grpc"
+	"github.com/stackus/eda-with-golang/ch4/ordering/internal/logging"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/postgres"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/rest"
 )
@@ -23,9 +24,12 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	payments := grpc.NewPaymentRepository(conn)
 	invoices := grpc.NewInvoiceRepository(conn)
 	shopping := grpc.NewShoppingListRepository(conn)
+	notifications := grpc.NewNotificationRepository(conn)
 
 	// setup application
-	app := application.New(orders, customers, payments, invoices, shopping)
+	var app application.App
+	app = application.New(orders, customers, payments, invoices, shopping, notifications)
+	app = logging.NewApplication(app, mono.Logger())
 
 	// setup Driver adapters
 	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {

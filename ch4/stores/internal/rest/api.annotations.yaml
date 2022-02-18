@@ -10,7 +10,7 @@ http:
     - selector: storespb.StoresService.GetStore
       get: /api/stores/{id}
     - selector: storespb.StoresService.EnableParticipation
-      post: /api/stores/{id}/participating
+      put: /api/stores/{id}/participating
       body: "*"
     - selector: storespb.StoresService.DisableParticipation
       delete: /api/stores/{id}/participating

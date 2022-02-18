@@ -53,9 +53,9 @@ func (r InvoiceRepository) Save(ctx context.Context, invoice *models.Invoice) er
 }
 
 func (r InvoiceRepository) Update(ctx context.Context, invoice *models.Invoice) error {
-	const query = "UPDATE %s SET amount = $1, status = $3 WHERE id = $3"
+	const query = "UPDATE %s SET amount = $2, status = $3 WHERE id = $1"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), invoice.Amount, invoice.Status.String(), invoice.ID)
+	_, err := r.db.ExecContext(ctx, r.table(query), invoice.ID, invoice.Amount, invoice.Status.String())
 
 	return err
 }

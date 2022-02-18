@@ -1,11 +1,18 @@
 openapiOptions:
+  file:
+    - file: "customerspb/messages.proto"
+      option:
+        info:
+          title: Customers
+          version: "1.0.0"
+        basePath: /
   method:
     - method: customerspb.CustomersService.RegisterCustomer
       option:
         operationId: createCustomer
         tags:
           - Customer
-        summary: Start a new shopping customer
+        summary: Create a new customer
     - method: customerspb.CustomersService.GetCustomer
       option:
         operationId: getCustomer

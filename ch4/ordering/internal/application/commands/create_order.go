@@ -9,25 +9,29 @@ import (
 )
 
 type CreateOrder struct {
-	ID         domain.OrderID
+	ID         string
 	CustomerID string
 	PaymentID  string
 	Items      []*domain.Item
 }
 
 type CreateOrderHandler struct {
-	orders    domain.OrderRepository
-	customers domain.CustomerRepository
-	payments  domain.PaymentRepository
-	shopping  domain.ShoppingRepository
+	orders        domain.OrderRepository
+	customers     domain.CustomerRepository
+	payments      domain.PaymentRepository
+	shopping      domain.ShoppingRepository
+	notifications domain.NotificationRepository
 }
 
-func NewCreateOrderHandler(orders domain.OrderRepository, customers domain.CustomerRepository, payments domain.PaymentRepository, shopping domain.ShoppingRepository) CreateOrderHandler {
+func NewCreateOrderHandler(orders domain.OrderRepository, customers domain.CustomerRepository,
+	payments domain.PaymentRepository, shopping domain.ShoppingRepository, notifications domain.NotificationRepository,
+) CreateOrderHandler {
 	return CreateOrderHandler{
-		orders:    orders,
-		customers: customers,
-		payments:  payments,
-		shopping:  shopping,
+		orders:        orders,
+		customers:     customers,
+		payments:      payments,
+		shopping:      shopping,
+		notifications: notifications,
 	}
 }
 
@@ -48,13 +52,14 @@ func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) er
 	}
 
 	// scheduleShopping
-	if shoppingID, err := h.shopping.Create(ctx, order); err != nil {
+	if order.ShoppingID, err = h.shopping.Create(ctx, order); err != nil {
 		return errors.Wrap(err, "order shopping scheduling")
-	} else {
-		order.ShoppingID = shoppingID
 	}
 
-	// inProgressOrder
+	// notifyOrderCreated
+	if err = h.notifications.NotifyOrderCreated(ctx, order.ID, order.CustomerID); err != nil {
+		return err
+	}
 
 	return errors.Wrap(h.orders.Save(ctx, order), "create order command")
 }

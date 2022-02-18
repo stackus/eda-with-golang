@@ -9,7 +9,6 @@ import (
 	"github.com/stackus/eda-with-golang/ch4/depot/depotpb"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/application/commands"
-	"github.com/stackus/eda-with-golang/ch4/depot/internal/domain"
 )
 
 type server struct {
@@ -33,7 +32,7 @@ func (s server) CreateShoppingList(ctx context.Context, request *depotpb.CreateS
 	}
 
 	err := s.app.CreateShoppingList(ctx, commands.CreateShoppingList{
-		ID:      domain.ToShoppingListID(id),
+		ID:      id,
 		OrderID: request.GetOrderId(),
 		Items:   items,
 	})
@@ -43,7 +42,7 @@ func (s server) CreateShoppingList(ctx context.Context, request *depotpb.CreateS
 
 func (s server) CancelShoppingList(ctx context.Context, request *depotpb.CancelShoppingListRequest) (*depotpb.CancelShoppingListResponse, error) {
 	err := s.app.CancelShoppingList(ctx, commands.CancelShoppingList{
-		ID: domain.ToShoppingListID(request.GetId()),
+		ID: request.GetId(),
 	})
 
 	return &depotpb.CancelShoppingListResponse{}, err
@@ -51,14 +50,14 @@ func (s server) CancelShoppingList(ctx context.Context, request *depotpb.CancelS
 
 func (s server) AssignShoppingList(ctx context.Context, request *depotpb.AssignShoppingListRequest) (*depotpb.AssignShoppingListResponse, error) {
 	err := s.app.AssignShoppingList(ctx, commands.AssignShoppingList{
-		ID:    domain.ToShoppingListID(request.GetId()),
-		BotID: domain.ToBotID(request.GetBotId()),
+		ID:    request.GetId(),
+		BotID: request.GetBotId(),
 	})
 	return &depotpb.AssignShoppingListResponse{}, err
 }
 
 func (s server) CompleteShoppingList(ctx context.Context, request *depotpb.CompleteShoppingListRequest) (*depotpb.CompleteShoppingListResponse, error) {
-	err := s.app.CompleteShoppingList(ctx, commands.CompleteShoppingList{ID: domain.ToShoppingListID(request.GetId())})
+	err := s.app.CompleteShoppingList(ctx, commands.CompleteShoppingList{ID: request.GetId()})
 	return &depotpb.CompleteShoppingListResponse{}, err
 }
 

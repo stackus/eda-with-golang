@@ -37,13 +37,11 @@ func (r ParticipatingStoreRepository) FindAll(ctx context.Context) (stores []*do
 
 	for rows.Next() {
 		store := &domain.Store{}
-		var location string
-		err := rows.Scan(&store.ID, &store.Name, &location, &store.Participating)
+		err := rows.Scan(&store.ID, &store.Name, &store.Location, &store.Participating)
 		if err != nil {
 			return nil, errors.Wrap(err, "scanning participating store")
 		}
 
-		store.Location = domain.NewLocation(location)
 		stores = append(stores, store)
 	}
 

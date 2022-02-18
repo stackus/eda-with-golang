@@ -1,12 +1,12 @@
 package domain
 
 import (
-	"fmt"
+	"github.com/stackus/errors"
 )
 
 var (
-	ErrProductNameIsBlank     = fmt.Errorf("the product name cannot be blank")
-	ErrProductPriceIsNegative = fmt.Errorf("the product price cannot be negative")
+	ErrProductNameIsBlank     = errors.Wrap(errors.ErrBadRequest, "the product name cannot be blank")
+	ErrProductPriceIsNegative = errors.Wrap(errors.ErrBadRequest, "the product price cannot be negative")
 )
 
 type Product struct {

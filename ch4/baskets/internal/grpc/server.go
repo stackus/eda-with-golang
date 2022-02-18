@@ -23,26 +23,31 @@ func RegisterServer(app application.App, registrar grpc.ServiceRegistrar) error 
 	return nil
 }
 
-func (s server) StartBasket(ctx context.Context, _ *basketspb.StartBasketRequest) (*basketspb.StartBasketResponse, error) {
+func (s server) StartBasket(ctx context.Context, request *basketspb.StartBasketRequest) (*basketspb.StartBasketResponse,
+	error,
+) {
 	basketID := uuid.New().String()
 	err := s.app.StartBasket(ctx, application.StartBasket{
-		ID: domain.BasketID(basketID),
+		ID:         basketID,
+		CustomerID: request.GetCustomerId(),
 	})
 
 	return &basketspb.StartBasketResponse{Id: basketID}, err
 }
 
-func (s server) CancelBasket(ctx context.Context, request *basketspb.CancelBasketRequest) (*basketspb.CancelBasketResponse, error) {
+func (s server) CancelBasket(ctx context.Context, request *basketspb.CancelBasketRequest,
+) (*basketspb.CancelBasketResponse, error) {
 	err := s.app.CancelBasket(ctx, application.CancelBasket{
-		ID: domain.BasketID(request.GetId()),
+		ID: request.GetId(),
 	})
 
 	return &basketspb.CancelBasketResponse{}, err
 }
 
-func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutBasketRequest) (*basketspb.CheckoutBasketResponse, error) {
+func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutBasketRequest,
+) (*basketspb.CheckoutBasketResponse, error) {
 	err := s.app.CheckoutBasket(ctx, application.CheckoutBasket{
-		ID:        domain.BasketID(request.GetId()),
+		ID:        request.GetId(),
 		PaymentID: request.GetPaymentId(),
 	})
 
@@ -51,27 +56,31 @@ func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutB
 
 func (s server) AddItem(ctx context.Context, request *basketspb.AddItemRequest) (*basketspb.AddItemResponse, error) {
 	err := s.app.AddItem(ctx, application.AddItem{
-		ID:        domain.BasketID(request.GetId()),
-		ProductID: domain.ProductID(request.GetProductId()),
+		ID:        request.GetId(),
+		ProductID: request.GetProductId(),
 		Quantity:  int(request.GetQuantity()),
 	})
 
 	return &basketspb.AddItemResponse{}, err
 }
 
-func (s server) RemoveItem(ctx context.Context, request *basketspb.RemoveItemRequest) (*basketspb.RemoveItemResponse, error) {
+func (s server) RemoveItem(ctx context.Context, request *basketspb.RemoveItemRequest) (*basketspb.RemoveItemResponse,
+	error,
+) {
 	err := s.app.RemoveItem(ctx, application.RemoveItem{
-		ID:        domain.BasketID(request.GetId()),
-		ProductID: domain.ProductID(request.GetProductId()),
+		ID:        request.GetId(),
+		ProductID: request.GetProductId(),
 		Quantity:  int(request.GetQuantity()),
 	})
 
 	return &basketspb.RemoveItemResponse{}, err
 }
 
-func (s server) GetBasket(ctx context.Context, request *basketspb.GetBasketRequest) (*basketspb.GetBasketResponse, error) {
+func (s server) GetBasket(ctx context.Context, request *basketspb.GetBasketRequest) (*basketspb.GetBasketResponse,
+	error,
+) {
 	basket, err := s.app.GetBasket(ctx, application.GetBasket{
-		ID: domain.BasketID(request.GetId()),
+		ID: request.GetId(),
 	})
 	if err != nil {
 		return nil, err
@@ -84,18 +93,18 @@ func (s server) GetBasket(ctx context.Context, request *basketspb.GetBasketReque
 
 func (s server) basketFromDomain(basket *domain.Basket) *basketspb.Basket {
 	protoBasket := &basketspb.Basket{
-		Id: basket.ID.String(),
+		Id: basket.ID,
 	}
 
 	protoBasket.Items = make([]*basketspb.Item, 0, len(basket.Items))
 
 	for _, item := range basket.Items {
 		protoBasket.Items = append(protoBasket.Items, &basketspb.Item{
-			StoreId:      item.StoreID.String(),
+			StoreId:      item.StoreID,
 			StoreName:    item.StoreName,
-			ProductId:    item.ProductID.String(),
+			ProductId:    item.ProductID,
 			ProductName:  item.ProductName,
-			ProductPrice: item.ProductPrice.Float64(),
+			ProductPrice: item.ProductPrice,
 			Quantity:     int32(item.Quantity),
 		})
 	}

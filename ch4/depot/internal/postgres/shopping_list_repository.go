@@ -25,7 +25,7 @@ func NewShoppingListRepository(tableName string, db *sql.DB) ShoppingListReposit
 	}
 }
 
-func (r ShoppingListRepository) Find(ctx context.Context, id domain.ShoppingListID) (*domain.ShoppingList, error) {
+func (r ShoppingListRepository) Find(ctx context.Context, id string) (*domain.ShoppingList, error) {
 	const query = "SELECT order_id, stops, assigned_bot_id, status FROM %s WHERE id = $1 LIMIT 1"
 
 	shoppingList := &domain.ShoppingList{
@@ -36,7 +36,7 @@ func (r ShoppingListRepository) Find(ctx context.Context, id domain.ShoppingList
 
 	err := r.db.QueryRowContext(ctx, r.table(query), id).Scan(&shoppingList.OrderID, &stops, &shoppingList.AssignedBotID, &status)
 	if err != nil {
-		return nil, errors.Wrap(err, "scanning shopping list")
+		return nil, errors.ErrInternalServerError.Err(err)
 	}
 
 	shoppingList.Status = domain.ToShoppingListStatus(status)
@@ -46,7 +46,7 @@ func (r ShoppingListRepository) Find(ctx context.Context, id domain.ShoppingList
 
 	err = json.Unmarshal(stops, &shoppingList.Stops)
 	if err != nil {
-		return nil, errors.Wrap(err, "unmarshalling shopping list stops")
+		return nil, errors.ErrInternalServerError.Err(err)
 	}
 
 	return shoppingList, nil
@@ -63,43 +63,43 @@ func (r ShoppingListRepository) FindByOrderID(ctx context.Context, orderID strin
 
 	err := r.db.QueryRowContext(ctx, r.table(query), orderID).Scan(&shoppingList.ID, &stops, &shoppingList.AssignedBotID, &status)
 	if err != nil {
-		return nil, errors.Wrap(err, "scanning shopping list")
+		return nil, errors.ErrInternalServerError.Err(err)
 	}
 
 	shoppingList.Status = domain.ToShoppingListStatus(status)
 
 	err = json.Unmarshal(stops, &shoppingList.Stops)
 	if err != nil {
-		return nil, errors.Wrap(err, "unmarshalling shopping list stops")
+		return nil, errors.ErrInternalServerError.Err(err)
 	}
 
 	return shoppingList, nil
 }
 
 func (r ShoppingListRepository) Save(ctx context.Context, list *domain.ShoppingList) error {
-	const query = "INSERT INTO %s (id, stops, assigned_bot_id, status) VALUES ($1, $2, $3, $4)"
+	const query = "INSERT INTO %s (id, order_id, stops, assigned_bot_id, status) VALUES ($1, $2, $3, $4, $5)"
 
 	stops, err := json.Marshal(list.Stops)
 	if err != nil {
-		return errors.Wrap(err, "marshalling shopping list stops")
+		return errors.ErrInternalServerError.Err(err)
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), list.OrderID, stops, list.AssignedBotID, list.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), list.ID, list.OrderID, stops, list.AssignedBotID, list.Status.String())
 
-	return errors.Wrap(err, "saving shopping list")
+	return errors.ErrInternalServerError.Err(err)
 }
 
 func (r ShoppingListRepository) Update(ctx context.Context, list *domain.ShoppingList) error {
-	const query = "UPDATE %s SET stops = $1, assigned_bot_id = $2, status = $3 WHERE id = $4"
+	const query = "UPDATE %s SET stops = $2, assigned_bot_id = $3, status = $4 WHERE id = $1"
 
 	stops, err := json.Marshal(list.Stops)
 	if err != nil {
-		return errors.Wrap(err, "marshalling shopping list stops")
+		return errors.ErrInternalServerError.Err(err)
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), stops, list.AssignedBotID, list.Status.String(), list.OrderID)
+	_, err = r.db.ExecContext(ctx, r.table(query), list.ID, stops, list.AssignedBotID, list.Status.String())
 
-	return errors.Wrap(err, "updating shopping list")
+	return errors.ErrInternalServerError.Err(err)
 }
 
 func (r ShoppingListRepository) table(query string) string {

@@ -111,7 +111,7 @@
       }
     },
     "/api/baskets/{id}/addItem": {
-      "post": {
+      "put": {
         "summary": "Add or add quantity to an item in the shopping basket",
         "operationId": "addItem",
         "responses": {
@@ -159,7 +159,7 @@
       }
     },
     "/api/baskets/{id}/checkout": {
-      "post": {
+      "put": {
         "summary": "Checkout with a shopping basket",
         "operationId": "checkoutBasket",
         "responses": {
@@ -203,7 +203,7 @@
       }
     },
     "/api/baskets/{id}/removeItem": {
-      "post": {
+      "put": {
         "summary": "Remove or remove quantity to an item in the shopping basket",
         "operationId": "removeItem",
         "responses": {

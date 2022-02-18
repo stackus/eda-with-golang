@@ -12,13 +12,17 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/stackus/eda-with-golang/ch4/baskets"
+	"github.com/stackus/eda-with-golang/ch4/customers"
 	"github.com/stackus/eda-with-golang/ch4/depot"
 	"github.com/stackus/eda-with-golang/ch4/internal/config"
 	"github.com/stackus/eda-with-golang/ch4/internal/egress"
+	"github.com/stackus/eda-with-golang/ch4/internal/logger"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
 	"github.com/stackus/eda-with-golang/ch4/internal/rpc"
 	"github.com/stackus/eda-with-golang/ch4/internal/web"
+	"github.com/stackus/eda-with-golang/ch4/notifications"
 	"github.com/stackus/eda-with-golang/ch4/ordering"
+	"github.com/stackus/eda-with-golang/ch4/payments"
 	"github.com/stackus/eda-with-golang/ch4/stores"
 )
 
@@ -50,7 +54,10 @@ func run() (err error) {
 			return
 		}
 	}(m.db)
-
+	m.logger = logger.New(logger.LogConfig{
+		Environment: cfg.Environment,
+		LogLevel:    logger.Level(cfg.LogLevel),
+	})
 	m.rpc = initRpc(cfg.Rpc)
 	m.mux = initMux(cfg.Web)
 	m.waiter = egress.New(egress.CatchSignals())
@@ -58,9 +65,12 @@ func run() (err error) {
 	// init modules
 	m.modules = []monolith.Module{
 		&baskets.Module{},
+		&customers.Module{},
 		&depot.Module{},
-		&stores.Module{},
+		&notifications.Module{},
 		&ordering.Module{},
+		&payments.Module{},
+		&stores.Module{},
 	}
 
 	if err = m.startupModules(); err != nil {

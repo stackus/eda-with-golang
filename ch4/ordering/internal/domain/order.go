@@ -1,20 +1,18 @@
 package domain
 
 import (
-	"fmt"
+	"github.com/stackus/errors"
 )
 
 var (
-	ErrOrderHasNoItems         = fmt.Errorf("the order has no items")
-	ErrOrderCannotBeCancelled  = fmt.Errorf("the order cannot be cancelled")
-	ErrCustomerIDCannotBeBlank = fmt.Errorf("the customer id cannot be blank")
-	ErrPaymentIDCannotBeBlank  = fmt.Errorf("the payment id cannot be blank")
+	ErrOrderHasNoItems         = errors.Wrap(errors.ErrBadRequest, "the order has no items")
+	ErrOrderCannotBeCancelled  = errors.Wrap(errors.ErrBadRequest, "the order cannot be cancelled")
+	ErrCustomerIDCannotBeBlank = errors.Wrap(errors.ErrBadRequest, "the customer id cannot be blank")
+	ErrPaymentIDCannotBeBlank  = errors.Wrap(errors.ErrBadRequest, "the payment id cannot be blank")
 )
 
-type OrderID string
-
 type Order struct {
-	ID         OrderID
+	ID         string
 	CustomerID string
 	PaymentID  string
 	InvoiceID  string
@@ -23,15 +21,7 @@ type Order struct {
 	Status     OrderStatus
 }
 
-func (i OrderID) String() string {
-	return string(i)
-}
-
-func ToOrderID(id string) OrderID {
-	return OrderID(id)
-}
-
-func CreateOrder(id OrderID, customerID, paymentID string, items []*Item) (*Order, error) {
+func CreateOrder(id, customerID, paymentID string, items []*Item) (*Order, error) {
 	if len(items) == 0 {
 		return nil, ErrOrderHasNoItems
 	}
@@ -65,11 +55,29 @@ func (o *Order) Cancel() error {
 	return nil
 }
 
+func (o *Order) Ready() error {
+	// validate status
+
+	o.Status = OrderReady
+
+	return nil
+}
+
+func (o *Order) Complete() error {
+	// validate invoice exists
+
+	// validate status
+
+	o.Status = OrderCompleted
+
+	return nil
+}
+
 func (o Order) GetTotal() float64 {
 	var total float64
 
 	for _, item := range o.Items {
-		total += item.Price
+		total += item.Price * float64(item.Quantity)
 	}
 
 	return total

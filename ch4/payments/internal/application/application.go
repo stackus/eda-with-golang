@@ -21,8 +21,8 @@ type (
 
 	CreateInvoice struct {
 		ID        string
-		PaymentID string
 		OrderID   string
+		PaymentID string
 		Amount    float64
 	}
 
@@ -51,15 +51,18 @@ type (
 	Application struct {
 		invoices models.InvoiceRepository
 		payments models.PaymentRepository
+		orders   models.OrderRepository
 	}
 )
 
 var _ App = (*Application)(nil)
 
-func New(invoices models.InvoiceRepository, payments models.PaymentRepository) *Application {
+func New(invoices models.InvoiceRepository, payments models.PaymentRepository, orders models.OrderRepository,
+) *Application {
 	return &Application{
 		invoices: invoices,
 		payments: payments,
+		orders:   orders,
 	}
 }
 
@@ -110,6 +113,10 @@ func (a Application) PayInvoice(ctx context.Context, pay PayInvoice) error {
 	}
 
 	invoice.Status = models.InvoicePaid
+
+	if err = a.orders.Complete(ctx, invoice.OrderID); err != nil {
+		return err
+	}
 
 	return a.invoices.Update(ctx, invoice)
 }

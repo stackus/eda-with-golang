@@ -11,13 +11,13 @@ type GetShoppingList struct {
 }
 
 type GetShoppingListHandler struct {
-	repo domain.ShoppingListRepository
+	shoppingLists domain.ShoppingListRepository
 }
 
-func NewGetShoppingListHandler(repo domain.ShoppingListRepository) GetShoppingListHandler {
-	return GetShoppingListHandler{repo: repo}
+func NewGetShoppingListHandler(shoppingLists domain.ShoppingListRepository) GetShoppingListHandler {
+	return GetShoppingListHandler{shoppingLists: shoppingLists}
 }
 
 func (h GetShoppingListHandler) GetShoppingList(ctx context.Context, query GetShoppingList) (*domain.ShoppingList, error) {
-	return nil, nil
+	return h.shoppingLists.Find(ctx, query.ID)
 }

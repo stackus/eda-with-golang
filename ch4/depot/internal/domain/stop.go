@@ -5,17 +5,16 @@ type Stops map[string]*Stop
 type Stop struct {
 	StoreName     string
 	StoreLocation string
-	Items         *Items
+	Items         Items
 }
 
-func (s *Stops) AddItem(store *Store, product *Product, quantity int) error {
-	if _, exists := (*s)[store.ID]; !exists {
-		(*s)[store.ID] = &Stop{
-			StoreName:     store.Name,
-			StoreLocation: store.Location,
-			Items:         &Items{},
+func (s *Stop) AddItem(product *Product, quantity int) error {
+	if _, exists := s.Items[product.ID]; !exists {
+		s.Items[product.ID] = &Item{
+			ProductName: product.Name,
+			Quantity:    quantity,
 		}
 	}
 
-	return (*s)[store.ID].Items.AddItem(product, quantity)
+	return nil
 }

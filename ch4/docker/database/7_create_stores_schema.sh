@@ -38,6 +38,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
   CREATE TRIGGER created_at_products_trgr BEFORE UPDATE ON stores.products FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
   CREATE TRIGGER updated_at_products_trgr BEFORE UPDATE ON stores.products FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
-  GRANT USAGE ON SCHEMA store TO mallbots_user;
-  GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA store TO mallbots_user;
+  GRANT USAGE ON SCHEMA stores TO mallbots_user;
+  GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA stores TO mallbots_user;
 EOSQL

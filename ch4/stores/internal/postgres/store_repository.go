@@ -27,14 +27,11 @@ func (r StoreRepository) Find(ctx context.Context, storeID string) (*domain.Stor
 	store := &domain.Store{
 		ID: storeID,
 	}
-	var location string
 
-	err := r.db.QueryRowContext(ctx, r.table(query), storeID).Scan(&store.Name, &location, &store.Participating)
+	err := r.db.QueryRowContext(ctx, r.table(query), storeID).Scan(&store.Name, &store.Location, &store.Participating)
 	if err != nil {
 		return nil, errors.Wrap(err, "scanning store")
 	}
-
-	store.Location = domain.NewLocation(location)
 
 	return store, nil
 }
@@ -55,13 +52,11 @@ func (r StoreRepository) FindAll(ctx context.Context) (stores []*domain.Store, e
 
 	for rows.Next() {
 		store := &domain.Store{}
-		var location string
-		err := rows.Scan(&store.ID, &store.Name, &location, &store.Participating)
+		err := rows.Scan(&store.ID, &store.Name, &store.Location, &store.Participating)
 		if err != nil {
 			return nil, errors.Wrap(err, "scanning store")
 		}
 
-		store.Location = domain.NewLocation(location)
 		stores = append(stores, store)
 	}
 
@@ -88,13 +83,11 @@ func (r StoreRepository) FindParticipatingStores(ctx context.Context) (stores []
 
 	for rows.Next() {
 		store := &domain.Store{}
-		var location string
-		err := rows.Scan(&store.ID, &store.Name, &location, &store.Participating)
+		err := rows.Scan(&store.ID, &store.Name, &store.Location, &store.Participating)
 		if err != nil {
 			return nil, errors.Wrap(err, "scanning participating store")
 		}
 
-		store.Location = domain.NewLocation(location)
 		stores = append(stores, store)
 	}
 
@@ -108,15 +101,15 @@ func (r StoreRepository) FindParticipatingStores(ctx context.Context) (stores []
 func (r StoreRepository) Save(ctx context.Context, store *domain.Store) error {
 	const query = "INSERT INTO %s (id, name, location, participating) VALUES ($1, $2, $3, $4)"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), store.ID, store.Name, store.Location.String(), store.Participating)
+	_, err := r.db.ExecContext(ctx, r.table(query), store.ID, store.Name, store.Location, store.Participating)
 
 	return errors.Wrap(err, "inserting store")
 }
 
 func (r StoreRepository) Update(ctx context.Context, store *domain.Store) error {
-	const query = "UPDATE %s SET name = $1, location = $2, participating = $3 WHERE id = $4"
+	const query = "UPDATE %s SET name = $2, location = $3, participating = $4 WHERE id = $1"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), store.Name, store.Location.String(), store.Participating, store.ID)
+	_, err := r.db.ExecContext(ctx, r.table(query), store.ID, store.Name, store.Location, store.Participating)
 
 	return errors.Wrap(err, "updating store")
 }

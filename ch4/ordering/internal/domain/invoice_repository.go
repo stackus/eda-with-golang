@@ -5,7 +5,6 @@ import (
 )
 
 type InvoiceRepository interface {
-	Save(ctx context.Context, orderID OrderID, amount float64) (string, error)
-	Update(ctx context.Context, invoiceID string, amount float64) error
+	Save(ctx context.Context, orderID, paymentID string, amount float64) (string, error)
 	Delete(ctx context.Context, invoiceID string) error
 }

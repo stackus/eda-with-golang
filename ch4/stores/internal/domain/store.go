@@ -1,24 +1,24 @@
 package domain
 
 import (
-	"fmt"
+	"github.com/stackus/errors"
 )
 
 var (
-	ErrStoreNameIsBlank               = fmt.Errorf("the store name cannot be blank")
-	ErrStoreLocationIsBlank           = fmt.Errorf("the store location cannot be blank")
-	ErrStoreIsAlreadyParticipating    = fmt.Errorf("the store is already participating")
-	ErrStoreIsAlreadyNotParticipating = fmt.Errorf("the store is already not participating")
+	ErrStoreNameIsBlank               = errors.Wrap(errors.ErrBadRequest, "the store name cannot be blank")
+	ErrStoreLocationIsBlank           = errors.Wrap(errors.ErrBadRequest, "the store location cannot be blank")
+	ErrStoreIsAlreadyParticipating    = errors.Wrap(errors.ErrBadRequest, "the store is already participating")
+	ErrStoreIsAlreadyNotParticipating = errors.Wrap(errors.ErrBadRequest, "the store is already not participating")
 )
 
 type Store struct {
 	ID            string
 	Name          string
-	Location      Location
+	Location      string
 	Participating bool
 }
 
-func CreateStore(id, name string, location Location) (store *Store, err error) {
+func CreateStore(id, name, location string) (store *Store, err error) {
 	if name == "" {
 		return nil, ErrStoreNameIsBlank
 	}

@@ -3,7 +3,7 @@ openapiOptions:
     - file: "depotpb/messages.proto"
       option:
         info:
-          title: Depot
+          title: Depot Operations
           version: "1.0.0"
         basePath: /
   method:

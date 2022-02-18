@@ -10,11 +10,11 @@ http:
     - selector: basketspb.BasketService.CancelBasket
       delete: /api/baskets/{id}
     - selector: basketspb.BasketService.CheckoutBasket
-      post: /api/baskets/{id}/checkout
+      put: /api/baskets/{id}/checkout
       body: "*"
     - selector: basketspb.BasketService.AddItem
-      post: /api/baskets/{id}/addItem
+      put: /api/baskets/{id}/addItem
       body: "*"
     - selector: basketspb.BasketService.RemoveItem
-      post: /api/baskets/{id}/removeItem
+      put: /api/baskets/{id}/removeItem
       body: "*"

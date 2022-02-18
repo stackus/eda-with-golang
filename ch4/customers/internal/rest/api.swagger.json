@@ -1,14 +1,15 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "customerspb/messages.proto",
-    "version": "version not set"
+    "title": "Customers",
+    "version": "1.0.0"
   },
   "tags": [
     {
       "name": "CustomersService"
     }
   ],
+  "basePath": "/",
   "consumes": [
     "application/json"
   ],
@@ -18,7 +19,7 @@
   "paths": {
     "/api/customers": {
       "post": {
-        "summary": "Start a new shopping customer",
+        "summary": "Create a new customer",
         "operationId": "createCustomer",
         "responses": {
           "200": {

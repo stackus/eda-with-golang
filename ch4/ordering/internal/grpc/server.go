@@ -25,7 +25,8 @@ func RegisterServer(app application.App, registrar grpc.ServiceRegistrar) error 
 	return nil
 }
 
-func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrderRequest) (*orderingpb.CreateOrderResponse, error) {
+func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrderRequest,
+) (*orderingpb.CreateOrderResponse, error) {
 	id := uuid.New().String()
 
 	items := make([]*domain.Item, 0, len(request.Items))
@@ -34,7 +35,7 @@ func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrder
 	}
 
 	err := s.app.CreateOrder(ctx, commands.CreateOrder{
-		ID:         domain.ToOrderID(id),
+		ID:         id,
 		CustomerID: request.GetCustomerId(),
 		PaymentID:  request.GetPaymentId(),
 		Items:      items,
@@ -43,14 +44,29 @@ func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrder
 	return &orderingpb.CreateOrderResponse{Id: id}, err
 }
 
-func (s server) CancelOrder(ctx context.Context, request *orderingpb.CancelOrderRequest) (*orderingpb.CancelOrderResponse, error) {
-	err := s.app.CancelOrder(ctx, commands.CancelOrder{ID: domain.ToOrderID(request.GetId())})
+func (s server) CancelOrder(ctx context.Context, request *orderingpb.CancelOrderRequest,
+) (*orderingpb.CancelOrderResponse, error) {
+	err := s.app.CancelOrder(ctx, commands.CancelOrder{ID: request.GetId()})
 
 	return &orderingpb.CancelOrderResponse{}, err
 }
 
-func (s server) GetOrder(ctx context.Context, request *orderingpb.GetOrderRequest) (*orderingpb.GetOrderResponse, error) {
-	order, err := s.app.GetOrder(ctx, queries.GetOrder{ID: domain.ToOrderID(request.GetId())})
+func (s server) ReadyOrder(ctx context.Context, request *orderingpb.ReadyOrderRequest) (*orderingpb.ReadyOrderResponse,
+	error,
+) {
+	err := s.app.ReadyOrder(ctx, commands.ReadyOrder{ID: request.GetId()})
+	return &orderingpb.ReadyOrderResponse{}, err
+}
+
+func (s server) CompleteOrder(ctx context.Context, request *orderingpb.CompleteOrderRequest,
+) (*orderingpb.CompleteOrderResponse, error) {
+	err := s.app.CompleteOrder(ctx, commands.CompleteOrder{ID: request.GetId()})
+	return &orderingpb.CompleteOrderResponse{}, err
+}
+
+func (s server) GetOrder(ctx context.Context, request *orderingpb.GetOrderRequest) (*orderingpb.GetOrderResponse, error,
+) {
+	order, err := s.app.GetOrder(ctx, queries.GetOrder{ID: request.GetId()})
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +83,7 @@ func (s server) orderFromDomain(order *domain.Order) *orderingpb.Order {
 	}
 
 	return &orderingpb.Order{
-		Id:         order.ID.String(),
+		Id:         order.ID,
 		CustomerId: order.CustomerID,
 		PaymentId:  order.PaymentID,
 		Items:      items,

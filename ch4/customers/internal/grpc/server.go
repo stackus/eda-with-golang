@@ -26,7 +26,7 @@ func RegisterServer(app application.App, registrar grpc.ServiceRegistrar) error 
 func (s server) RegisterCustomer(ctx context.Context, request *customerspb.RegisterCustomerRequest) (*customerspb.RegisterCustomerResponse, error) {
 	id := uuid.New().String()
 	err := s.app.RegisterCustomer(ctx, application.RegisterCustomer{
-		ID:        s.customerIDToDomain(id),
+		ID:        id,
 		Name:      request.GetName(),
 		SmsNumber: request.GetSmsNumber(),
 	})
@@ -35,7 +35,7 @@ func (s server) RegisterCustomer(ctx context.Context, request *customerspb.Regis
 
 func (s server) AuthorizeCustomer(ctx context.Context, request *customerspb.AuthorizeCustomerRequest) (*customerspb.AuthorizeCustomerResponse, error) {
 	err := s.app.AuthorizeCustomer(ctx, application.AuthorizeCustomer{
-		ID: domain.ToCustomerID(request.GetId()),
+		ID: request.GetId(),
 	})
 
 	return &customerspb.AuthorizeCustomerResponse{}, err
@@ -43,7 +43,7 @@ func (s server) AuthorizeCustomer(ctx context.Context, request *customerspb.Auth
 
 func (s server) GetCustomer(ctx context.Context, request *customerspb.GetCustomerRequest) (*customerspb.GetCustomerResponse, error) {
 	customer, err := s.app.GetCustomer(ctx, application.GetCustomer{
-		ID: s.customerIDToDomain(request.GetId()),
+		ID: request.GetId(),
 	})
 	if err != nil {
 		return nil, err
@@ -55,22 +55,18 @@ func (s server) GetCustomer(ctx context.Context, request *customerspb.GetCustome
 }
 
 func (s server) EnableCustomer(ctx context.Context, request *customerspb.EnableCustomerRequest) (*customerspb.EnableCustomerResponse, error) {
-	err := s.app.EnableCustomer(ctx, application.EnableCustomer{ID: s.customerIDToDomain(request.GetId())})
+	err := s.app.EnableCustomer(ctx, application.EnableCustomer{ID: request.GetId()})
 	return &customerspb.EnableCustomerResponse{}, err
 }
 
 func (s server) DisableCustomer(ctx context.Context, request *customerspb.DisableCustomerRequest) (*customerspb.DisableCustomerResponse, error) {
-	err := s.app.DisableCustomer(ctx, application.DisableCustomer{ID: s.customerIDToDomain(request.GetId())})
+	err := s.app.DisableCustomer(ctx, application.DisableCustomer{ID: request.GetId()})
 	return &customerspb.DisableCustomerResponse{}, err
-}
-
-func (s server) customerIDToDomain(id string) domain.CustomerID {
-	return domain.CustomerID(id)
 }
 
 func (s server) customerFromDomain(customer *domain.Customer) *customerspb.Customer {
 	return &customerspb.Customer{
-		Id:        customer.ID.String(),
+		Id:        customer.ID,
 		Name:      customer.Name,
 		SmsNumber: customer.SmsNumber,
 		Enabled:   customer.Enabled,

@@ -1,21 +1,20 @@
 package domain
 
 import (
-	"fmt"
 	"sort"
+
+	"github.com/stackus/errors"
 )
 
 var (
-	ErrBasketHasNoItems         = fmt.Errorf("the basket has no items")
-	ErrBasketCannotBeModified   = fmt.Errorf("the basket cannot be modified")
-	ErrBasketCannotBeCancelled  = fmt.Errorf("the basket cannot be cancelled")
-	ErrQuantityCannotBeNegative = fmt.Errorf("the item quantity cannot be negative")
-	ErrBasketIDCannotBeBlank    = fmt.Errorf("the basket id cannot be blank")
-	ErrPaymentIDCannotBeBlank   = fmt.Errorf("the payment id cannot be blank")
-	ErrCustomerIDCannotBeBlank  = fmt.Errorf("the customer id cannot be blank")
+	ErrBasketHasNoItems         = errors.Wrap(errors.ErrBadRequest, "the basket has no items")
+	ErrBasketCannotBeModified   = errors.Wrap(errors.ErrBadRequest, "the basket cannot be modified")
+	ErrBasketCannotBeCancelled  = errors.Wrap(errors.ErrBadRequest, "the basket cannot be cancelled")
+	ErrQuantityCannotBeNegative = errors.Wrap(errors.ErrBadRequest, "the item quantity cannot be negative")
+	ErrBasketIDCannotBeBlank    = errors.Wrap(errors.ErrBadRequest, "the basket id cannot be blank")
+	ErrPaymentIDCannotBeBlank   = errors.Wrap(errors.ErrBadRequest, "the payment id cannot be blank")
+	ErrCustomerIDCannotBeBlank  = errors.Wrap(errors.ErrBadRequest, "the customer id cannot be blank")
 )
-
-type BasketID string
 
 type BasketStatus string
 
@@ -25,10 +24,6 @@ const (
 	BasketCancelled  BasketStatus = "cancelled"
 	BasketCheckedOut BasketStatus = "checked_out"
 )
-
-func (i BasketID) String() string {
-	return string(i)
-}
 
 func (s BasketStatus) String() string {
 	switch s {
@@ -40,14 +35,14 @@ func (s BasketStatus) String() string {
 }
 
 type Basket struct {
-	ID         BasketID
+	ID         string
 	CustomerID string
 	PaymentID  string
 	Items      []Item
 	Status     BasketStatus
 }
 
-func StartBasket(id BasketID, customerID string) (*Basket, error) {
+func StartBasket(id, customerID string) (*Basket, error) {
 	if id == "" {
 		return nil, ErrBasketIDCannotBeBlank
 	}

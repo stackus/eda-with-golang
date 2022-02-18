@@ -5,6 +5,7 @@ import (
 
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/grpc"
+	"github.com/stackus/eda-with-golang/ch4/depot/internal/logging"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/postgres"
 	"github.com/stackus/eda-with-golang/ch4/depot/internal/rest"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
@@ -21,9 +22,12 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	}
 	stores := grpc.NewStoreRepository(conn)
 	products := grpc.NewProductRepository(conn)
+	orders := grpc.NewOrderRepository(conn)
 
 	// setup application
-	app := application.New(shoppingLists, stores, products)
+	var app application.App
+	app = application.New(shoppingLists, stores, products, orders)
+	app = logging.NewApplication(app, mono.Logger())
 
 	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {

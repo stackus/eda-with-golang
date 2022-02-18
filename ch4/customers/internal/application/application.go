@@ -10,25 +10,25 @@ import (
 
 type (
 	RegisterCustomer struct {
-		ID        domain.CustomerID
+		ID        string
 		Name      string
 		SmsNumber string
 	}
 
 	AuthorizeCustomer struct {
-		ID domain.CustomerID
+		ID string
 	}
 
 	GetCustomer struct {
-		ID domain.CustomerID
+		ID string
 	}
 
 	EnableCustomer struct {
-		ID domain.CustomerID
+		ID string
 	}
 
 	DisableCustomer struct {
-		ID domain.CustomerID
+		ID string
 	}
 
 	App interface {

@@ -7,16 +7,19 @@ import (
 )
 
 type CompleteShoppingList struct {
-	ID domain.ShoppingListID
+	ID string
 }
 
 type CompleteShoppingListHandler struct {
 	shoppingLists domain.ShoppingListRepository
+	orders        domain.OrderRepository
 }
 
-func NewCompleteShoppingListHandler(shoppingLists domain.ShoppingListRepository) CompleteShoppingListHandler {
+func NewCompleteShoppingListHandler(shoppingLists domain.ShoppingListRepository, orders domain.OrderRepository,
+) CompleteShoppingListHandler {
 	return CompleteShoppingListHandler{
 		shoppingLists: shoppingLists,
+		orders:        orders,
 	}
 }
 
@@ -27,6 +30,11 @@ func (h CompleteShoppingListHandler) CompleteShoppingList(ctx context.Context, c
 	}
 
 	err = list.Complete()
+	if err != nil {
+		return err
+	}
+
+	err = h.orders.Ready(ctx, list.OrderID)
 	if err != nil {
 		return err
 	}

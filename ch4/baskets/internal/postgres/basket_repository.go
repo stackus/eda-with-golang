@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/stackus/errors"
+
 	"github.com/stackus/eda-with-golang/ch4/baskets/internal/domain"
 )
 
@@ -20,7 +22,7 @@ func NewBasketRepository(tableName string, db *sql.DB) BasketRepository {
 	return BasketRepository{tableName: tableName, db: db}
 }
 
-func (r BasketRepository) Find(ctx context.Context, basketID domain.BasketID) (*domain.Basket, error) {
+func (r BasketRepository) Find(ctx context.Context, basketID string) (*domain.Basket, error) {
 	const query = "SELECT customer_id, payment_id, items, status FROM %s WHERE id = $1 LIMIT 1"
 
 	basket := &domain.Basket{
@@ -29,19 +31,19 @@ func (r BasketRepository) Find(ctx context.Context, basketID domain.BasketID) (*
 	var items []byte
 	var status string
 
-	err := r.db.QueryRowContext(ctx, r.table(query), basketID.String()).Scan(&basket.CustomerID, &basket.PaymentID, &items, &status)
+	err := r.db.QueryRowContext(ctx, r.table(query), basketID).Scan(&basket.CustomerID, &basket.PaymentID, &items, &status)
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternalServerError.Err(err)
 	}
 
 	basket.Status, err = r.statusToDomain(status)
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternalServerError.Err(err)
 	}
 
 	err = json.Unmarshal(items, &basket.Items)
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternalServerError.Err(err)
 	}
 
 	return basket, nil
@@ -52,12 +54,12 @@ func (r BasketRepository) Save(ctx context.Context, basket *domain.Basket) error
 
 	items, err := json.Marshal(basket.Items)
 	if err != nil {
-		return err
+		return errors.ErrInternalServerError.Err(err)
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID.String(), basket.CustomerID, basket.PaymentID, items, basket.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID, basket.CustomerID, basket.PaymentID, items, basket.Status.String())
 
-	return err
+	return errors.ErrInternalServerError.Err(err)
 }
 
 func (r BasketRepository) Update(ctx context.Context, basket *domain.Basket) error {
@@ -65,12 +67,12 @@ func (r BasketRepository) Update(ctx context.Context, basket *domain.Basket) err
 
 	items, err := json.Marshal(basket.Items)
 	if err != nil {
-		return err
+		return errors.ErrInternalServerError.Err(err)
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID.String(), basket.CustomerID, basket.PaymentID, items, basket.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), basket.ID, basket.CustomerID, basket.PaymentID, items, basket.Status.String())
 
-	return err
+	return errors.ErrInternalServerError.Err(err)
 }
 
 func (r BasketRepository) DeleteBasket(ctx context.Context, basketID string) error {
@@ -78,7 +80,7 @@ func (r BasketRepository) DeleteBasket(ctx context.Context, basketID string) err
 
 	_, err := r.db.ExecContext(ctx, r.table(query), basketID)
 
-	return err
+	return errors.ErrInternalServerError.Err(err)
 }
 
 func (r BasketRepository) table(query string) string {

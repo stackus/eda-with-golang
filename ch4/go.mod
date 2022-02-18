@@ -11,7 +11,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.26.1
 	github.com/stackus/dotenv v0.0.0-20220115081434-d24b54e36d10
-	github.com/stackus/errors v0.0.3
+	github.com/stackus/errors v0.1.4
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.43.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0

@@ -31,8 +31,8 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_PaymentsService_CreateInvoice_0(ctx context.Context, marshaler runtime.Marshaler, client PaymentsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CreateInvoiceRequest
+func request_PaymentsService_AuthorizePayment_0(ctx context.Context, marshaler runtime.Marshaler, client PaymentsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq AuthorizePaymentRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -43,13 +43,13 @@ func request_PaymentsService_CreateInvoice_0(ctx context.Context, marshaler runt
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.CreateInvoice(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.AuthorizePayment(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_PaymentsService_CreateInvoice_0(ctx context.Context, marshaler runtime.Marshaler, server PaymentsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CreateInvoiceRequest
+func local_request_PaymentsService_AuthorizePayment_0(ctx context.Context, marshaler runtime.Marshaler, server PaymentsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq AuthorizePaymentRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -60,47 +60,13 @@ func local_request_PaymentsService_CreateInvoice_0(ctx context.Context, marshale
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.CreateInvoice(ctx, &protoReq)
+	msg, err := server.AuthorizePayment(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
-func request_PaymentsService_AdjustInvoice_0(ctx context.Context, marshaler runtime.Marshaler, client PaymentsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq AdjustInvoiceRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
-	}
-
-	protoReq.Id, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
-	}
-
-	msg, err := client.AdjustInvoice(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_PaymentsService_AdjustInvoice_0(ctx context.Context, marshaler runtime.Marshaler, server PaymentsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq AdjustInvoiceRequest
+func request_PaymentsService_PayInvoice_0(ctx context.Context, marshaler runtime.Marshaler, client PaymentsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq PayInvoiceRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -128,14 +94,22 @@ func local_request_PaymentsService_AdjustInvoice_0(ctx context.Context, marshale
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
-	msg, err := server.AdjustInvoice(ctx, &protoReq)
+	msg, err := client.PayInvoice(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func request_PaymentsService_CancelInvoice_0(ctx context.Context, marshaler runtime.Marshaler, client PaymentsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CancelInvoiceRequest
+func local_request_PaymentsService_PayInvoice_0(ctx context.Context, marshaler runtime.Marshaler, server PaymentsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq PayInvoiceRequest
 	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 
 	var (
 		val string
@@ -154,33 +128,7 @@ func request_PaymentsService_CancelInvoice_0(ctx context.Context, marshaler runt
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
-	msg, err := client.CancelInvoice(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_PaymentsService_CancelInvoice_0(ctx context.Context, marshaler runtime.Marshaler, server PaymentsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CancelInvoiceRequest
-	var metadata runtime.ServerMetadata
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
-	}
-
-	protoReq.Id, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
-	}
-
-	msg, err := server.CancelInvoice(ctx, &protoReq)
+	msg, err := server.PayInvoice(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -191,18 +139,18 @@ func local_request_PaymentsService_CancelInvoice_0(ctx context.Context, marshale
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterPaymentsServiceHandlerFromEndpoint instead.
 func RegisterPaymentsServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server PaymentsServiceServer) error {
 
-	mux.Handle("POST", pattern_PaymentsService_CreateInvoice_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_PaymentsService_AuthorizePayment_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/paymentspb.PaymentsService/CreateInvoice", runtime.WithHTTPPathPattern("/api/payments"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/paymentspb.PaymentsService/AuthorizePayment", runtime.WithHTTPPathPattern("/api/payments"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_PaymentsService_CreateInvoice_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_PaymentsService_AuthorizePayment_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -210,22 +158,22 @@ func RegisterPaymentsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 			return
 		}
 
-		forward_PaymentsService_CreateInvoice_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_PaymentsService_AuthorizePayment_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_PaymentsService_AdjustInvoice_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_PaymentsService_PayInvoice_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/paymentspb.PaymentsService/AdjustInvoice", runtime.WithHTTPPathPattern("/api/payments/{id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/paymentspb.PaymentsService/PayInvoice", runtime.WithHTTPPathPattern("/api/payments/invoices/{id}/pay"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_PaymentsService_AdjustInvoice_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_PaymentsService_PayInvoice_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -233,30 +181,7 @@ func RegisterPaymentsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 			return
 		}
 
-		forward_PaymentsService_AdjustInvoice_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("DELETE", pattern_PaymentsService_CancelInvoice_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/paymentspb.PaymentsService/CancelInvoice", runtime.WithHTTPPathPattern("/api/payments/{id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_PaymentsService_CancelInvoice_0(rctx, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_PaymentsService_CancelInvoice_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_PaymentsService_PayInvoice_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -301,63 +226,43 @@ func RegisterPaymentsServiceHandler(ctx context.Context, mux *runtime.ServeMux, 
 // "PaymentsServiceClient" to call the correct interceptors.
 func RegisterPaymentsServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client PaymentsServiceClient) error {
 
-	mux.Handle("POST", pattern_PaymentsService_CreateInvoice_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_PaymentsService_AuthorizePayment_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/paymentspb.PaymentsService/CreateInvoice", runtime.WithHTTPPathPattern("/api/payments"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/paymentspb.PaymentsService/AuthorizePayment", runtime.WithHTTPPathPattern("/api/payments"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_PaymentsService_CreateInvoice_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_PaymentsService_AuthorizePayment_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_PaymentsService_CreateInvoice_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_PaymentsService_AuthorizePayment_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_PaymentsService_AdjustInvoice_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_PaymentsService_PayInvoice_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/paymentspb.PaymentsService/AdjustInvoice", runtime.WithHTTPPathPattern("/api/payments/{id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/paymentspb.PaymentsService/PayInvoice", runtime.WithHTTPPathPattern("/api/payments/invoices/{id}/pay"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_PaymentsService_AdjustInvoice_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_PaymentsService_PayInvoice_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_PaymentsService_AdjustInvoice_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("DELETE", pattern_PaymentsService_CancelInvoice_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/paymentspb.PaymentsService/CancelInvoice", runtime.WithHTTPPathPattern("/api/payments/{id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_PaymentsService_CancelInvoice_0(rctx, inboundMarshaler, client, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_PaymentsService_CancelInvoice_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_PaymentsService_PayInvoice_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -365,17 +270,13 @@ func RegisterPaymentsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 }
 
 var (
-	pattern_PaymentsService_CreateInvoice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"api", "payments"}, ""))
+	pattern_PaymentsService_AuthorizePayment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"api", "payments"}, ""))
 
-	pattern_PaymentsService_AdjustInvoice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"api", "payments", "id"}, ""))
-
-	pattern_PaymentsService_CancelInvoice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"api", "payments", "id"}, ""))
+	pattern_PaymentsService_PayInvoice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "payments", "invoices", "id", "pay"}, ""))
 )
 
 var (
-	forward_PaymentsService_CreateInvoice_0 = runtime.ForwardResponseMessage
+	forward_PaymentsService_AuthorizePayment_0 = runtime.ForwardResponseMessage
 
-	forward_PaymentsService_AdjustInvoice_0 = runtime.ForwardResponseMessage
-
-	forward_PaymentsService_CancelInvoice_0 = runtime.ForwardResponseMessage
+	forward_PaymentsService_PayInvoice_0 = runtime.ForwardResponseMessage
 )

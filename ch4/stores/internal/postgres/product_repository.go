@@ -37,7 +37,7 @@ func (r ProductRepository) FindProduct(ctx context.Context, id string) (*domain.
 }
 
 func (r ProductRepository) AddProduct(ctx context.Context, product *domain.Product) error {
-	const query = "INSERT INTO %s (id, store_id, name, description, sku, price) VALUES ($1, $2, $3, $4, $5)"
+	const query = "INSERT INTO %s (id, store_id, name, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)"
 
 	_, err := r.db.ExecContext(ctx, r.table(query), product.ID, product.StoreID, product.Name, product.Description, product.SKU, product.Price)
 

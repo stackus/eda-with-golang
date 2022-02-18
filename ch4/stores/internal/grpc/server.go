@@ -162,7 +162,7 @@ func (s server) storeFromDomain(store *domain.Store) *storespb.Store {
 	return &storespb.Store{
 		Id:            store.ID,
 		Name:          store.Name,
-		Location:      store.Location.String(),
+		Location:      store.Location,
 		Participating: store.Participating,
 	}
 }

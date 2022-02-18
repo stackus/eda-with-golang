@@ -9,7 +9,7 @@ import (
 )
 
 type CreateShoppingList struct {
-	ID      domain.ShoppingListID
+	ID      string
 	OrderID string
 	Items   []OrderItem
 }

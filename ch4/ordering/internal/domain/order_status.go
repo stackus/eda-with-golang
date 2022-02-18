@@ -6,13 +6,14 @@ const (
 	OrderUnknown   OrderStatus = ""
 	OrderPending   OrderStatus = "pending"
 	OrderInProcess OrderStatus = "in-progress"
+	OrderReady     OrderStatus = "ready"
 	OrderCompleted OrderStatus = "completed"
 	OrderCancelled OrderStatus = "cancelled"
 )
 
 func (s OrderStatus) String() string {
 	switch s {
-	case OrderPending, OrderCompleted, OrderCancelled:
+	case OrderPending, OrderInProcess, OrderReady, OrderCompleted, OrderCancelled:
 		return string(s)
 	default:
 		return ""
@@ -25,6 +26,8 @@ func ToOrderStatus(status string) OrderStatus {
 		return OrderPending
 	case OrderInProcess.String():
 		return OrderInProcess
+	case OrderReady.String():
+		return OrderReady
 	case OrderCancelled.String():
 		return OrderCancelled
 	case OrderCompleted.String():

@@ -30,7 +30,7 @@ func (r CustomerRepository) Save(ctx context.Context, customer *domain.Customer)
 	return err
 }
 
-func (r CustomerRepository) Find(ctx context.Context, customerID domain.CustomerID) (*domain.Customer, error) {
+func (r CustomerRepository) Find(ctx context.Context, customerID string) (*domain.Customer, error) {
 	const query = "SELECT name, sms_number, enabled FROM %s WHERE id = $1 LIMIT 1"
 
 	customer := &domain.Customer{

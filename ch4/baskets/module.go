@@ -5,6 +5,7 @@ import (
 
 	"github.com/stackus/eda-with-golang/ch4/baskets/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/baskets/internal/grpc"
+	"github.com/stackus/eda-with-golang/ch4/baskets/internal/logging"
 	"github.com/stackus/eda-with-golang/ch4/baskets/internal/postgres"
 	"github.com/stackus/eda-with-golang/ch4/baskets/internal/rest"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
@@ -14,7 +15,7 @@ type Module struct{}
 
 func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	// setup Driven adapters
-	baskets := postgres.NewBasketRepository("basket.baskets", mono.DB())
+	baskets := postgres.NewBasketRepository("baskets.baskets", mono.DB())
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
 		return err
@@ -24,7 +25,9 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	orders := grpc.NewOrderRepository(conn)
 
 	// setup application
-	app := application.New(baskets, stores, products, orders)
+	var app application.App
+	app = application.New(baskets, stores, products, orders)
+	app = logging.NewApplication(app, mono.Logger())
 
 	// setup Driver adapters
 	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {

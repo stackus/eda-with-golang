@@ -1,14 +1,12 @@
 package domain
 
 import (
-	"fmt"
+	"github.com/stackus/errors"
 )
 
 var (
-	ErrShoppingCannotBeCancelled = fmt.Errorf("the shopping list cannot be cancelled")
+	ErrShoppingCannotBeCancelled = errors.Wrap(errors.ErrBadRequest, "the shopping list cannot be cancelled")
 )
-
-type ShoppingListID string
 
 type ShoppingListStatus string
 
@@ -20,14 +18,6 @@ const (
 	ShoppingListCompleted ShoppingListStatus = "completed"
 	ShoppingListCancelled ShoppingListStatus = "cancelled"
 )
-
-func (i ShoppingListID) String() string {
-	return string(i)
-}
-
-func ToShoppingListID(id string) ShoppingListID {
-	return ShoppingListID(id)
-}
 
 func (s ShoppingListStatus) String() string {
 	switch s {
@@ -56,23 +46,32 @@ func ToShoppingListStatus(status string) ShoppingListStatus {
 }
 
 type ShoppingList struct {
-	ID            ShoppingListID
+	ID            string
 	OrderID       string
-	Stops         *Stops
-	AssignedBotID BotID
+	Stops         Stops
+	AssignedBotID string
 	Status        ShoppingListStatus
 }
 
-func CreateShopping(id ShoppingListID, orderID string) *ShoppingList {
+func CreateShopping(id, orderID string) *ShoppingList {
 	return &ShoppingList{
 		ID:      id,
 		OrderID: orderID,
 		Status:  ShoppingListAvailable,
+		Stops:   make(Stops),
 	}
 }
 
 func (sl *ShoppingList) AddItem(store *Store, product *Product, quantity int) error {
-	return sl.Stops.AddItem(store, product, quantity)
+	if _, exists := sl.Stops[store.ID]; !exists {
+		sl.Stops[store.ID] = &Stop{
+			StoreName:     store.Name,
+			StoreLocation: store.Location,
+			Items:         make(Items),
+		}
+	}
+
+	return sl.Stops[store.ID].AddItem(product, quantity)
 }
 
 func (sl *ShoppingList) Cancel() error {
@@ -83,7 +82,7 @@ func (sl *ShoppingList) Cancel() error {
 	return nil
 }
 
-func (sl *ShoppingList) Assign(id BotID) error {
+func (sl *ShoppingList) Assign(id string) error {
 	// validate status
 
 	sl.AssignedBotID = id

@@ -29,8 +29,8 @@ message ConfirmPaymentRequest {
 message ConfirmPaymentResponse {}
 
 message CreateInvoiceRequest {
-  string payment_id = 1;
-  string order_id = 2;
+  string order_id = 1;
+  string payment_id = 2;
   double amount = 3;
 }
 message CreateInvoiceResponse {

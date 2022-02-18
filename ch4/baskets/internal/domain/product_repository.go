@@ -5,5 +5,5 @@ import (
 )
 
 type ProductRepository interface {
-	Find(ctx context.Context, productID ProductID) (*Product, error)
+	Find(ctx context.Context, productID string) (*Product, error)
 }
