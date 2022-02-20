@@ -27,7 +27,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup application
 	var app application.App
 	app = application.New(shoppingLists, stores, products, orders)
-	app = logging.NewApplication(app, mono.Logger())
+	app = logging.LogApplicationAccess(app, mono.Logger())
 
 	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {

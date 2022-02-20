@@ -18,7 +18,7 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 
 	var app application.App
 	app = application.New(customers)
-	app = logging.NewApplication(app, mono.Logger())
+	app = logging.LogApplicationAccess(app, mono.Logger())
 
 	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {
 		return err

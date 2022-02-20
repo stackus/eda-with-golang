@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackus/errors"
 
+	"github.com/stackus/eda-with-golang/ch4/payments/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/payments/internal/models"
 )
 
@@ -15,7 +16,7 @@ type InvoiceRepository struct {
 	db        *sql.DB
 }
 
-var _ models.InvoiceRepository = (*InvoiceRepository)(nil)
+var _ application.InvoiceRepository = (*InvoiceRepository)(nil)
 
 func NewInvoiceRepository(tableName string, db *sql.DB) InvoiceRepository {
 	return InvoiceRepository{

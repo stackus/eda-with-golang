@@ -374,8 +374,8 @@ github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/spf13/viper v1.7.0/go.mod h1:8WkrPz2fc9jxqZNCJI/76HCieCp4Q8HaLFoCha5qpdg=
 github.com/stackus/dotenv v0.0.0-20220115081434-d24b54e36d10 h1:z0Vp04+mLfWyj9VPzoEX9Adkbu21JVEkg05djjn8zLI=
 github.com/stackus/dotenv v0.0.0-20220115081434-d24b54e36d10/go.mod h1:+zTLFeTOJkiI6favYN9c9q2u9/kGbV57iIPbgkLVWrU=
-github.com/stackus/errors v0.1.4 h1:D+bjIvw27y1KRRL+9qaHskj8iWlAewhPvVPOVVr+7lc=
-github.com/stackus/errors v0.1.4/go.mod h1:STqk7YsxsPwkoFmz2Q7/VuskeyPhqUi+mCGm9hYRxOM=
+github.com/stackus/errors v0.1.5 h1:YYEPJcA4xeSL6x0ph4IMKpCbdXgchgrchf9Y1nCoeow=
+github.com/stackus/errors v0.1.5/go.mod h1:STqk7YsxsPwkoFmz2Q7/VuskeyPhqUi+mCGm9hYRxOM=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=

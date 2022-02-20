@@ -6,14 +6,14 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/stackus/eda-with-golang/ch4/ordering/orderingpb"
-	"github.com/stackus/eda-with-golang/ch4/payments/internal/models"
+	"github.com/stackus/eda-with-golang/ch4/payments/internal/application"
 )
 
 type OrderRepository struct {
 	client orderingpb.OrderingServiceClient
 }
 
-var _ models.OrderRepository = (*OrderRepository)(nil)
+var _ application.OrderRepository = (*OrderRepository)(nil)
 
 func NewOrderRepository(conn *grpc.ClientConn) OrderRepository {
 	return OrderRepository{

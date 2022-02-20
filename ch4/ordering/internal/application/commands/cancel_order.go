@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/eda-with-golang/ch4/internal/ddd"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/domain"
 )
 
@@ -11,18 +12,18 @@ type CancelOrder struct {
 }
 
 type CancelOrderHandler struct {
-	orders        domain.OrderRepository
-	shopping      domain.ShoppingRepository
-	notifications domain.NotificationRepository
+	orders          domain.OrderRepository
+	shopping        domain.ShoppingRepository
+	domainPublisher ddd.EventPublisher
 }
 
 func NewCancelOrderHandler(orders domain.OrderRepository, shopping domain.ShoppingRepository,
-	notifications domain.NotificationRepository,
+	domainPublisher ddd.EventPublisher,
 ) CancelOrderHandler {
 	return CancelOrderHandler{
-		orders:        orders,
-		shopping:      shopping,
-		notifications: notifications,
+		orders:          orders,
+		shopping:        shopping,
+		domainPublisher: domainPublisher,
 	}
 }
 
@@ -40,9 +41,14 @@ func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) er
 		return err
 	}
 
-	if err = h.notifications.NotifyOrderCanceled(ctx, order.ID, order.CustomerID); err != nil {
+	if err = h.orders.Update(ctx, order); err != nil {
 		return err
 	}
 
-	return h.orders.Update(ctx, order)
+	// publish domain events
+	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -15,10 +15,10 @@ import (
 	"github.com/stackus/eda-with-golang/ch4/customers"
 	"github.com/stackus/eda-with-golang/ch4/depot"
 	"github.com/stackus/eda-with-golang/ch4/internal/config"
-	"github.com/stackus/eda-with-golang/ch4/internal/egress"
 	"github.com/stackus/eda-with-golang/ch4/internal/logger"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
 	"github.com/stackus/eda-with-golang/ch4/internal/rpc"
+	"github.com/stackus/eda-with-golang/ch4/internal/waiter"
 	"github.com/stackus/eda-with-golang/ch4/internal/web"
 	"github.com/stackus/eda-with-golang/ch4/notifications"
 	"github.com/stackus/eda-with-golang/ch4/ordering"
@@ -60,7 +60,7 @@ func run() (err error) {
 	})
 	m.rpc = initRpc(cfg.Rpc)
 	m.mux = initMux(cfg.Web)
-	m.waiter = egress.New(egress.CatchSignals())
+	m.waiter = waiter.New(waiter.CatchSignals())
 
 	// init modules
 	m.modules = []monolith.Module{

@@ -13,7 +13,7 @@ services:
     env_file:
       - docker/.env
     depends_on:
-      - nats
+#      - nats
       - postgres
     command: ["./wait-for", "postgres:5432", "--", "/mallbots/monolith"]
   postgres:
@@ -28,14 +28,14 @@ services:
     volumes:
       - 'pgdata:/var/lib/postgresql/data'
       - './docker/database:/docker-entrypoint-initdb.d'
-  nats:
-    container_name: nats
-    hostname: nats
-    image: nats:2-alpine
-    ports:
-      - '4222:4222'
-    command:
-      - -js
+#  nats:
+#    container_name: nats
+#    hostname: nats
+#    image: nats:2-alpine
+#    ports:
+#      - '4222:4222'
+#    command:
+#      - -js
 
 volumes:
   pgdata:

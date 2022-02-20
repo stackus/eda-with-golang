@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/stackus/eda-with-golang/ch4/internal/config"
-	"github.com/stackus/eda-with-golang/ch4/internal/egress"
+	"github.com/stackus/eda-with-golang/ch4/internal/waiter"
 )
 
 type Monolith interface {
@@ -18,7 +18,7 @@ type Monolith interface {
 	Logger() zerolog.Logger
 	Mux() *chi.Mux
 	RPC() *grpc.Server
-	Waiter() egress.Waiter
+	Waiter() waiter.Waiter
 }
 
 type Module interface {

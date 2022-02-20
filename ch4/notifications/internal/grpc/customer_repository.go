@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/stackus/eda-with-golang/ch4/customers/customerspb"
+	"github.com/stackus/eda-with-golang/ch4/notifications/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/notifications/internal/models"
 )
 
@@ -13,7 +14,7 @@ type CustomerRepository struct {
 	client customerspb.CustomersServiceClient
 }
 
-var _ models.CustomerRepository = (*CustomerRepository)(nil)
+var _ application.CustomerRepository = (*CustomerRepository)(nil)
 
 func NewCustomerRepository(conn *grpc.ClientConn) CustomerRepository {
 	return CustomerRepository{

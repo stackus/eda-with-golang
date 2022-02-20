@@ -2,8 +2,6 @@ package application
 
 import (
 	"context"
-
-	"github.com/stackus/eda-with-golang/ch4/notifications/internal/models"
 )
 
 type (
@@ -29,13 +27,13 @@ type (
 	}
 
 	Application struct {
-		customers models.CustomerRepository
+		customers CustomerRepository
 	}
 )
 
 var _ App = (*Application)(nil)
 
-func New(customers models.CustomerRepository) *Application {
+func New(customers CustomerRepository) *Application {
 	return &Application{
 		customers: customers,
 	}

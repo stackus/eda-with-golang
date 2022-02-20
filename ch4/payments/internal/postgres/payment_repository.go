@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/stackus/eda-with-golang/ch4/payments/internal/application"
 	"github.com/stackus/eda-with-golang/ch4/payments/internal/models"
 )
 
@@ -13,7 +14,7 @@ type PaymentRepository struct {
 	db        *sql.DB
 }
 
-var _ models.PaymentRepository = (*PaymentRepository)(nil)
+var _ application.PaymentRepository = (*PaymentRepository)(nil)
 
 func NewPaymentRepository(tableName string, db *sql.DB) PaymentRepository {
 	return PaymentRepository{

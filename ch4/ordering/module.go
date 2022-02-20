@@ -3,8 +3,10 @@ package ordering
 import (
 	"context"
 
+	"github.com/stackus/eda-with-golang/ch4/internal/ddd"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application"
+	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application/handlers"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/grpc"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/logging"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/postgres"
@@ -15,6 +17,7 @@ type Module struct{}
 
 func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup Driven adapters
+	domainDispatcher := ddd.NewEventDispatcher()
 	orders := postgres.NewOrderRepository("ordering.orders", mono.DB())
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
@@ -28,8 +31,10 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 
 	// setup application
 	var app application.App
-	app = application.New(orders, customers, payments, invoices, shopping, notifications)
-	app = logging.NewApplication(app, mono.Logger())
+	app = application.New(orders, customers, payments, invoices, shopping, domainDispatcher)
+	app = logging.LogApplicationAccess(app, mono.Logger())
+	// setup application handlers
+	handlers.RegisterNotificationHandlers(domainDispatcher, notifications)
 
 	// setup Driver adapters
 	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {

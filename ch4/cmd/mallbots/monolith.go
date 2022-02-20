@@ -14,8 +14,8 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/stackus/eda-with-golang/ch4/internal/config"
-	"github.com/stackus/eda-with-golang/ch4/internal/egress"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
+	"github.com/stackus/eda-with-golang/ch4/internal/waiter"
 )
 
 type app struct {
@@ -25,7 +25,7 @@ type app struct {
 	modules []monolith.Module
 	mux     *chi.Mux
 	rpc     *grpc.Server
-	waiter  egress.Waiter
+	waiter  waiter.Waiter
 }
 
 func (a *app) Config() config.AppConfig {
@@ -48,7 +48,7 @@ func (a *app) RPC() *grpc.Server {
 	return a.rpc
 }
 
-func (a *app) Waiter() egress.Waiter {
+func (a *app) Waiter() waiter.Waiter {
 	return a.waiter
 }
 

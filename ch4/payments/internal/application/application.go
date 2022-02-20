@@ -49,15 +49,15 @@ type (
 	}
 
 	Application struct {
-		invoices models.InvoiceRepository
-		payments models.PaymentRepository
-		orders   models.OrderRepository
+		invoices InvoiceRepository
+		payments PaymentRepository
+		orders   OrderRepository
 	}
 )
 
 var _ App = (*Application)(nil)
 
-func New(invoices models.InvoiceRepository, payments models.PaymentRepository, orders models.OrderRepository,
+func New(invoices InvoiceRepository, payments PaymentRepository, orders OrderRepository,
 ) *Application {
 	return &Application{
 		invoices: invoices,
