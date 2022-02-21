@@ -49,7 +49,7 @@ func New(orders domain.OrderRepository, customers domain.CustomerRepository, pay
 			CreateOrderHandler:   commands.NewCreateOrderHandler(orders, customers, payments, shopping, domainPublisher),
 			CancelOrderHandler:   commands.NewCancelOrderHandler(orders, shopping, domainPublisher),
 			ReadyOrderHandler:    commands.NewReadyOrderHandler(orders, invoices, domainPublisher),
-			CompleteOrderHandler: commands.NewCompleteOrderHandler(orders),
+			CompleteOrderHandler: commands.NewCompleteOrderHandler(orders, domainPublisher),
 		},
 		appQueries: appQueries{
 			GetOrderHandler: queries.NewGetOrderHandler(orders),

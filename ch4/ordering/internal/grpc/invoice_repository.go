@@ -19,17 +19,13 @@ func NewInvoiceRepository(conn *grpc.ClientConn) InvoiceRepository {
 	return InvoiceRepository{client: paymentspb.NewPaymentsServiceClient(conn)}
 }
 
-func (r InvoiceRepository) Save(ctx context.Context, orderID, paymentID string, amount float64) (string, error) {
-	resp, err := r.client.CreateInvoice(ctx, &paymentspb.CreateInvoiceRequest{
+func (r InvoiceRepository) Save(ctx context.Context, orderID, paymentID string, amount float64) error {
+	_, err := r.client.CreateInvoice(ctx, &paymentspb.CreateInvoiceRequest{
 		OrderId:   orderID,
 		PaymentId: paymentID,
 		Amount:    amount,
 	})
-	if err != nil {
-		return "", err
-	}
-
-	return resp.GetId(), nil
+	return err
 }
 
 func (r InvoiceRepository) Delete(ctx context.Context, invoiceID string) error {

@@ -5,5 +5,5 @@ import (
 )
 
 type OrderRepository interface {
-	Complete(ctx context.Context, orderID string) error
+	Complete(ctx context.Context, invoiceID, orderID string) error
 }

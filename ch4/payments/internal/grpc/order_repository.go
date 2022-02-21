@@ -21,7 +21,10 @@ func NewOrderRepository(conn *grpc.ClientConn) OrderRepository {
 	}
 }
 
-func (r OrderRepository) Complete(ctx context.Context, orderID string) error {
-	_, err := r.client.CompleteOrder(ctx, &orderingpb.CompleteOrderRequest{Id: orderID})
+func (r OrderRepository) Complete(ctx context.Context, invoiceID, orderID string) error {
+	_, err := r.client.CompleteOrder(ctx, &orderingpb.CompleteOrderRequest{
+		Id:        orderID,
+		InvoiceId: invoiceID,
+	})
 	return err
 }

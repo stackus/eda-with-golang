@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -9,16 +9,15 @@ import (
 
 type NotificationHandlers struct {
 	notifications domain.NotificationRepository
+	ignoreUnimplementedDomainEvents
 }
 
-func RegisterNotificationHandlers(domainSubscriber ddd.EventSubscriber, notifications domain.NotificationRepository) {
-	handlers := NotificationHandlers{
+var _ DomainEventHandlers = (*NotificationHandlers)(nil)
+
+func NewNotificationHandlers(notifications domain.NotificationRepository) *NotificationHandlers {
+	return &NotificationHandlers{
 		notifications: notifications,
 	}
-
-	domainSubscriber.Subscribe(domain.OrderCreated{}, handlers.OnOrderCreated)
-	domainSubscriber.Subscribe(domain.OrderReadied{}, handlers.OnOrderReadied)
-	domainSubscriber.Subscribe(domain.OrderCanceled{}, handlers.OnOrderCanceled)
 }
 
 func (h NotificationHandlers) OnOrderCreated(ctx context.Context, event ddd.Event) error {

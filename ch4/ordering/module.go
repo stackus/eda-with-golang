@@ -6,8 +6,8 @@ import (
 	"github.com/stackus/eda-with-golang/ch4/internal/ddd"
 	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application/handlers"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/grpc"
+	"github.com/stackus/eda-with-golang/ch4/ordering/internal/handlers"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/logging"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/postgres"
 	"github.com/stackus/eda-with-golang/ch4/ordering/internal/rest"
@@ -34,7 +34,14 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	app = application.New(orders, customers, payments, invoices, shopping, domainDispatcher)
 	app = logging.LogApplicationAccess(app, mono.Logger())
 	// setup application handlers
-	handlers.RegisterNotificationHandlers(domainDispatcher, notifications)
+	notificationHandlers := logging.LogDomainEventHandlerAccess(
+		application.NewNotificationHandlers(notifications),
+		mono.Logger(),
+	)
+	invoiceHandlers := logging.LogDomainEventHandlerAccess(
+		application.NewInvoiceHandlers(invoices),
+		mono.Logger(),
+	)
 
 	// setup Driver adapters
 	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {
@@ -46,6 +53,8 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
+	handlers.RegisterNotificationHandlers(notificationHandlers, domainDispatcher)
+	handlers.RegisterInvoiceHandlers(invoiceHandlers, domainDispatcher)
 
 	return nil
 }

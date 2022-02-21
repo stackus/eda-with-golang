@@ -78,11 +78,12 @@ func (o *Order) Ready() error {
 	return nil
 }
 
-func (o *Order) Complete() error {
+func (o *Order) Complete(invoiceID string) error {
 	// validate invoice exists
 
 	// validate status
 
+	o.InvoiceID = invoiceID
 	o.Status = OrderIsCompleted
 
 	o.AddEvent(&OrderCompleted{

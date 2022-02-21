@@ -41,10 +41,6 @@ func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error
 		return err
 	}
 
-	if order.InvoiceID, err = h.invoices.Save(ctx, order.ID, order.PaymentID, order.GetTotal()); err != nil {
-		return err
-	}
-
 	// publish domain events
 	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
 		return err

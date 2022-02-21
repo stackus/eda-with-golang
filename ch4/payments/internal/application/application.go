@@ -114,7 +114,7 @@ func (a Application) PayInvoice(ctx context.Context, pay PayInvoice) error {
 
 	invoice.Status = models.InvoicePaid
 
-	if err = a.orders.Complete(ctx, invoice.OrderID); err != nil {
+	if err = a.orders.Complete(ctx, invoice.ID, invoice.OrderID); err != nil {
 		return err
 	}
 
