@@ -18,21 +18,17 @@ type ignoreUnimplementedDomainEvents struct{}
 var _ DomainEventHandlers = (*ignoreUnimplementedDomainEvents)(nil)
 
 func (ignoreUnimplementedDomainEvents) OnShoppingListCreated(ctx context.Context, event ddd.Event) error {
-	// TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (ignoreUnimplementedDomainEvents) OnShoppingListCanceled(ctx context.Context, event ddd.Event) error {
-	// TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (ignoreUnimplementedDomainEvents) OnShoppingListAssigned(ctx context.Context, event ddd.Event) error {
-	// TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (ignoreUnimplementedDomainEvents) OnShoppingListCompleted(ctx context.Context, event ddd.Event) error {
-	// TODO implement me
-	panic("implement me")
+	return nil
 }

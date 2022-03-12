@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/stackus/eda-with-golang/ch5/depot/internal/domain"
+	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
 )
 
 type CancelShoppingList struct {
@@ -11,12 +12,15 @@ type CancelShoppingList struct {
 }
 
 type CancelShoppingListHandler struct {
-	shoppingLists domain.ShoppingListRepository
+	shoppingLists   domain.ShoppingListRepository
+	domainPublisher ddd.EventPublisher
 }
 
-func NewCancelShoppingListHandler(shoppingLists domain.ShoppingListRepository) CancelShoppingListHandler {
+func NewCancelShoppingListHandler(shoppingLists domain.ShoppingListRepository, domainPublisher ddd.EventPublisher,
+) CancelShoppingListHandler {
 	return CancelShoppingListHandler{
-		shoppingLists: shoppingLists,
+		shoppingLists:   shoppingLists,
+		domainPublisher: domainPublisher,
 	}
 }
 
@@ -31,5 +35,14 @@ func (h CancelShoppingListHandler) CancelShoppingList(ctx context.Context, cmd C
 		return err
 	}
 
-	return h.shoppingLists.Update(ctx, list)
+	if err = h.shoppingLists.Update(ctx, list); err != nil {
+		return err
+	}
+
+	// publish domain events
+	if err = h.domainPublisher.Publish(ctx, list.GetEvents()...); err != nil {
+		return err
+	}
+
+	return nil
 }

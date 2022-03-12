@@ -6,6 +6,7 @@ import (
 	"github.com/stackus/eda-with-golang/ch5/depot/internal/application/commands"
 	"github.com/stackus/eda-with-golang/ch5/depot/internal/application/queries"
 	"github.com/stackus/eda-with-golang/ch5/depot/internal/domain"
+	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
 )
 
 type (
@@ -41,14 +42,14 @@ type (
 var _ App = (*Application)(nil)
 
 func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository,
-	orders domain.OrderRepository,
+	domainPublisher ddd.EventPublisher,
 ) *Application {
 	return &Application{
 		appCommands: appCommands{
-			CreateShoppingListHandler:   commands.NewCreateShoppingListHandler(shoppingLists, stores, products),
-			CancelShoppingListHandler:   commands.NewCancelShoppingListHandler(shoppingLists),
-			AssignShoppingListHandler:   commands.NewAssignShoppingListHandler(shoppingLists),
-			CompleteShoppingListHandler: commands.NewCompleteShoppingListHandler(shoppingLists, orders),
+			CreateShoppingListHandler:   commands.NewCreateShoppingListHandler(shoppingLists, stores, products, domainPublisher),
+			CancelShoppingListHandler:   commands.NewCancelShoppingListHandler(shoppingLists, domainPublisher),
+			AssignShoppingListHandler:   commands.NewAssignShoppingListHandler(shoppingLists, domainPublisher),
+			CompleteShoppingListHandler: commands.NewCompleteShoppingListHandler(shoppingLists, domainPublisher),
 		},
 		appQueries: appQueries{
 			GetShoppingListHandler: queries.NewGetShoppingListHandler(shoppingLists),

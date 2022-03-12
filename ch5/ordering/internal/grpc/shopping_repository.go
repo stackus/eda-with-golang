@@ -37,8 +37,8 @@ func (r ShoppingRepository) Create(ctx context.Context, order *domain.Order) (st
 }
 
 func (r ShoppingRepository) Cancel(ctx context.Context, shoppingID string) error {
-	// TODO implement me
-	panic("implement me")
+	_, err := r.client.CancelShoppingList(ctx, &depotpb.CancelShoppingListRequest{Id: shoppingID})
+	return err
 }
 
 func (r ShoppingRepository) itemFromDomain(item *domain.Item) *depotpb.OrderItem {
