@@ -253,6 +253,49 @@
         ]
       }
     },
+    "/api/stores/{id}/rebrand": {
+      "put": {
+        "operationId": "rebrandStore",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storespbRebrandStoreResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Store"
+        ]
+      }
+    },
     "/api/stores/{storeId}/products": {
       "get": {
         "summary": "Get a list of store products",
@@ -470,6 +513,9 @@
           "format": "double"
         }
       }
+    },
+    "storespbRebrandStoreResponse": {
+      "type": "object"
     },
     "storespbRemoveProductResponse": {
       "type": "object"

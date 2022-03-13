@@ -1,9 +1,12 @@
 package domain
 
 import (
+	"context"
+
 	"github.com/stackus/errors"
 
 	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
+	"github.com/stackus/eda-with-golang/ch6/internal/es"
 )
 
 const ProductAggregate = "stores.Product"
@@ -14,7 +17,7 @@ var (
 )
 
 type Product struct {
-	ddd.Aggregate
+	es.Aggregate
 	StoreID     string
 	Name        string
 	Description string
@@ -24,7 +27,7 @@ type Product struct {
 
 func NewProduct(id string) *Product {
 	return &Product{
-		Aggregate: ddd.NewAggregate(id, ProductAggregate),
+		Aggregate: es.NewAggregate(id, ProductAggregate),
 	}
 }
 
@@ -38,23 +41,39 @@ func CreateProduct(id, storeID, name, description, sku string, price float64) (*
 	}
 
 	product := NewProduct(id)
-	product.StoreID = storeID
-	product.Name = name
-	product.Description = description
-	product.SKU = sku
-	product.Price = price
 
-	product.AddEvent(ProductAddedEvent, &ProductAdded{
-		Product: product,
+	product.AddEvent(&ProductAdded{
+		StoreID:     storeID,
+		Name:        name,
+		Description: description,
+		SKU:         sku,
+		Price:       price,
 	})
 
 	return product, nil
 }
 
 func (p *Product) Remove() error {
-	p.AddEvent(ProductRemovedEvent, &ProductRemoved{
-		Product: p,
-	})
+	p.AddEvent(&ProductRemoved{})
+
+	return nil
+}
+
+func (p *Product) ApplyEvent(ctx context.Context, event ddd.Event) error {
+	switch payload := event.Payload().(type) {
+	case *ProductAdded:
+		p.StoreID = payload.StoreID
+		p.Name = payload.Name
+		p.Description = payload.Description
+		p.SKU = payload.SKU
+		p.Price = payload.Price
+
+	case *ProductRemoved:
+		// noop
+
+	default:
+		return errors.ErrInternal.Msgf("%T received the expected event payload %T", p, event.Payload())
+	}
 
 	return nil
 }

@@ -7,5 +7,5 @@ import (
 )
 
 func RegisterOrderHandlers(orderHandlers application.DomainEventHandlers, domainSubscriber ddd.EventSubscriber) {
-	domainSubscriber.Subscribe(domain.ShoppingListCompletedEvent, orderHandlers.OnShoppingListCompleted)
+	domainSubscriber.Subscribe(domain.ShoppingListCompleted{}, orderHandlers.OnShoppingListCompleted)
 }

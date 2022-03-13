@@ -6,7 +6,7 @@ import (
 )
 
 type EventSubscriber interface {
-	Subscribe(eventName string, handler EventHandler)
+	Subscribe(payload EventPayload, handler EventHandler)
 }
 
 type EventPublisher interface {
@@ -29,16 +29,16 @@ func NewEventDispatcher() *EventDispatcher {
 	}
 }
 
-func (h *EventDispatcher) Subscribe(eventName string, handler EventHandler) {
+func (h *EventDispatcher) Subscribe(payload EventPayload, handler EventHandler) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	h.handlers[eventName] = append(h.handlers[eventName], handler)
+	h.handlers[payload.EventName()] = append(h.handlers[payload.EventName()], handler)
 }
 
 func (h *EventDispatcher) Publish(ctx context.Context, events ...Event) error {
 	for _, event := range events {
-		for _, handler := range h.handlers[event.EventName()] {
+		for _, handler := range h.handlers[event.Name()] {
 			err := handler(ctx, event)
 			if err != nil {
 				return err

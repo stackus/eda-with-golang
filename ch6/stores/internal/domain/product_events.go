@@ -1,14 +1,15 @@
 package domain
 
-const (
-	ProductAddedEvent   = "stores.ProductAdded"
-	ProductRemovedEvent = "stores.ProductRemoved"
-)
-
 type ProductAdded struct {
-	Product *Product
+	StoreID     string
+	Name        string
+	Description string
+	SKU         string
+	Price       float64
 }
 
-type ProductRemoved struct {
-	Product *Product
-}
+func (ProductAdded) EventName() string { return "stores.ProductAdded" }
+
+type ProductRemoved struct{}
+
+func (ProductRemoved) EventName() string { return "stores.ProductRemoved" }

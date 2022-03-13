@@ -18,7 +18,7 @@ type BasketItemRemoved struct {
 	Item   Item
 }
 
-func (BasketItemRemoved) EventName() string { return "baskets.BasketItemAdded" }
+func (BasketItemRemoved) EventName() string { return "baskets.BasketItemRemoved" }
 
 type BasketCanceled struct {
 	Basket *Basket

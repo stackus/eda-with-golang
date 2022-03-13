@@ -5,7 +5,6 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
 	"github.com/stackus/eda-with-golang/ch6/stores/internal/domain"
 )
 
@@ -19,18 +18,14 @@ type AddProduct struct {
 }
 
 type AddProductHandler struct {
-	stores          domain.StoreRepository
-	products        domain.ProductRepository
-	domainPublisher ddd.EventPublisher
+	stores   domain.StoreRepository
+	products domain.ProductRepository
 }
 
-func NewAddProductHandler(stores domain.StoreRepository, products domain.ProductRepository,
-	domainPublisher ddd.EventPublisher,
-) AddProductHandler {
+func NewAddProductHandler(stores domain.StoreRepository, products domain.ProductRepository) AddProductHandler {
 	return AddProductHandler{
-		stores:          stores,
-		products:        products,
-		domainPublisher: domainPublisher,
+		stores:   stores,
+		products: products,
 	}
 }
 
@@ -47,11 +42,6 @@ func (h AddProductHandler) AddProduct(ctx context.Context, cmd AddProduct) error
 
 	if err = h.products.Save(ctx, product); err != nil {
 		return errors.Wrap(err, "error adding product")
-	}
-
-	// publish domain events
-	if err = h.domainPublisher.Publish(ctx, product.GetEvents()...); err != nil {
-		return err
 	}
 
 	return nil

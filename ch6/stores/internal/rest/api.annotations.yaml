@@ -14,6 +14,9 @@ http:
       body: "*"
     - selector: storespb.StoresService.DisableParticipation
       delete: /api/stores/{id}/participating
+    - selector: storespb.StoresService.RebrandStore
+      put: /api/stores/{id}/rebrand
+      body: "*"
     - selector: storespb.StoresService.GetParticipatingStores
       get: /api/stores/participating
     - selector: storespb.StoresService.AddProduct

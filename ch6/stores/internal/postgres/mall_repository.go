@@ -10,18 +10,45 @@ import (
 	"github.com/stackus/eda-with-golang/ch6/stores/internal/domain"
 )
 
-type StoreRepository struct {
+type MallRepository struct {
 	tableName string
 	db        *sql.DB
 }
 
-var _ domain.StoreRepository = (*StoreRepository)(nil)
+var _ domain.MallRepository = (*MallRepository)(nil)
 
-func NewStoreRepository(tableName string, db *sql.DB) StoreRepository {
-	return StoreRepository{tableName: tableName, db: db}
+func NewMallRepository(tableName string, db *sql.DB) MallRepository {
+	return MallRepository{
+		tableName: tableName,
+		db:        db,
+	}
 }
 
-func (r StoreRepository) Find(ctx context.Context, storeID string) (*domain.Store, error) {
+func (r MallRepository) AddStore(ctx context.Context, storeID, name, location string) error {
+	const query = "INSERT INTO %s (id, name, location, participating) VALUES ($1, $2, $3, $4)"
+
+	_, err := r.db.ExecContext(ctx, r.table(query), storeID, name, location, false)
+
+	return err
+}
+
+func (r MallRepository) SetStoreParticipation(ctx context.Context, storeID string, participating bool) error {
+	const query = "UPDATE %s SET participating = $2 WHERE id = $1"
+
+	_, err := r.db.ExecContext(ctx, r.table(query), storeID, participating)
+
+	return err
+}
+
+func (r MallRepository) RenameStore(ctx context.Context, storeID, name string) error {
+	const query = "UPDATE %s SET name = $2 WHERE id = $1"
+
+	_, err := r.db.ExecContext(ctx, r.table(query), storeID, name)
+
+	return err
+}
+
+func (r MallRepository) Find(ctx context.Context, storeID string) (*domain.Store, error) {
 	const query = "SELECT name, location, participating FROM %s WHERE id = $1 LIMIT 1"
 
 	store := domain.NewStore(storeID)
@@ -34,7 +61,7 @@ func (r StoreRepository) Find(ctx context.Context, storeID string) (*domain.Stor
 	return store, nil
 }
 
-func (r StoreRepository) FindAll(ctx context.Context) (stores []*domain.Store, err error) {
+func (r MallRepository) All(ctx context.Context) (stores []*domain.Store, err error) {
 	const query = "SELECT id, name, location, participating FROM %s"
 
 	rows, err := r.db.QueryContext(ctx, r.table(query))
@@ -71,7 +98,7 @@ func (r StoreRepository) FindAll(ctx context.Context) (stores []*domain.Store, e
 	return stores, nil
 }
 
-func (r StoreRepository) FindParticipatingStores(ctx context.Context) (stores []*domain.Store, err error) {
+func (r MallRepository) AllParticipating(ctx context.Context) (stores []*domain.Store, err error) {
 	const query = "SELECT id, name, location, participating FROM %s WHERE participating is true"
 
 	rows, err := r.db.QueryContext(ctx, r.table(query))
@@ -108,30 +135,6 @@ func (r StoreRepository) FindParticipatingStores(ctx context.Context) (stores []
 	return stores, nil
 }
 
-func (r StoreRepository) Save(ctx context.Context, store *domain.Store) error {
-	const query = "INSERT INTO %s (id, name, location, participating) VALUES ($1, $2, $3, $4)"
-
-	_, err := r.db.ExecContext(ctx, r.table(query), store.ID(), store.Name, store.Location, store.Participating)
-
-	return errors.Wrap(err, "inserting store")
-}
-
-func (r StoreRepository) Update(ctx context.Context, store *domain.Store) error {
-	const query = "UPDATE %s SET name = $2, location = $3, participating = $4 WHERE id = $1"
-
-	_, err := r.db.ExecContext(ctx, r.table(query), store.ID(), store.Name, store.Location, store.Participating)
-
-	return errors.Wrap(err, "updating store")
-}
-
-func (r StoreRepository) Delete(ctx context.Context, storeID string) error {
-	const query = "DELETE FROM %s WHERE id = $1 LIMIT 1"
-
-	_, err := r.db.ExecContext(ctx, r.table(query), storeID)
-
-	return errors.Wrap(err, "deleting store")
-}
-
-func (r StoreRepository) table(query string) string {
+func (r MallRepository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
 }

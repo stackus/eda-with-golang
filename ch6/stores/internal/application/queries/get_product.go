@@ -11,13 +11,13 @@ type GetProduct struct {
 }
 
 type GetProductHandler struct {
-	products domain.ProductRepository
+	catalog domain.CatalogRepository
 }
 
-func NewGetProductHandler(products domain.ProductRepository) GetProductHandler {
-	return GetProductHandler{products: products}
+func NewGetProductHandler(catalog domain.CatalogRepository) GetProductHandler {
+	return GetProductHandler{catalog: catalog}
 }
 
 func (h GetProductHandler) GetProduct(ctx context.Context, query GetProduct) (*domain.Product, error) {
-	return h.products.Find(ctx, query.ID)
+	return h.catalog.Find(ctx, query.ID)
 }

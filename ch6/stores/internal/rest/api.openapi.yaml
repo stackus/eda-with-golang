@@ -37,6 +37,11 @@ openapiOptions:
         tags:
           - Participation
         summary: Disable store service participation
+    - method: storespb.StoresService.RebrandStore
+      option:
+        operationId: rebrandStore
+        tags:
+          - Store
     - method: storespb.StoresService.GetParticipatingStores
       option:
         operationId: getParticipatingStores

@@ -5,44 +5,50 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/stackus/eda-with-golang/ch6/internal/registry"
 )
 
 type (
 	EventHandler func(ctx context.Context, event Event) error
 
-	EventPayload interface{}
+	EventPayload interface {
+		EventName() string
+	}
 
 	Event interface {
 		ID() string
-		EventName() string
+		Name() string
 		Payload() EventPayload
-		Occurred() time.Time
+		OccurredAt() time.Time
 		AggregateName() string
 		AggregateID() string
+		AggregateVersion() int
 		Metadata() map[string]interface{}
 	}
 
 	EventOption func(*event)
 
 	event struct {
-		id            string
-		name          string
-		payload       EventPayload
-		occurred      time.Time
-		aggregateName string
-		aggregateID   string
-		metadata      map[string]interface{}
+		id               string
+		name             string
+		payload          EventPayload
+		occurredAt       time.Time
+		aggregateName    string
+		aggregateID      string
+		aggregateVersion int
+		metadata         map[string]interface{}
 	}
 )
 
 var _ Event = (*event)(nil)
 
-func NewEvent(name string, payload EventPayload, options ...EventOption) event {
+func NewEvent(payload EventPayload, options ...EventOption) Event {
 	evt := event{
-		id:       uuid.New().String(),
-		name:     name,
-		payload:  payload,
-		occurred: time.Now(),
+		id:         uuid.New().String(),
+		name:       payload.EventName(),
+		payload:    payload,
+		occurredAt: time.Now(),
 	}
 
 	for _, option := range options {
@@ -56,7 +62,7 @@ func (e event) ID() string {
 	return e.id
 }
 
-func (e event) EventName() string {
+func (e event) Name() string {
 	return e.name
 }
 
@@ -64,8 +70,8 @@ func (e event) Payload() EventPayload {
 	return e.payload
 }
 
-func (e event) Occurred() time.Time {
-	return e.occurred
+func (e event) OccurredAt() time.Time {
+	return e.occurredAt
 }
 
 func (e event) AggregateName() string {
@@ -76,25 +82,14 @@ func (e event) AggregateID() string {
 	return e.aggregateID
 }
 
+func (e event) AggregateVersion() int {
+	return e.aggregateVersion
+}
+
 func (e event) Metadata() map[string]interface{} {
 	return e.metadata
 }
 
-func WithEventID(id string) EventOption {
-	return func(e *event) {
-		e.id = id
-	}
-}
-
-func WithOccurred(occurred time.Time) EventOption {
-	return func(e *event) {
-		e.occurred = occurred
-	}
-}
-
-func WithAggregateInfo(name, id string) EventOption {
-	return func(e *event) {
-		e.aggregateID = id
-		e.aggregateName = name
-	}
+func RegisterEventPayload(cd registry.Codec, payload EventPayload) error {
+	return cd.Register(payload.EventName(), payload)
 }

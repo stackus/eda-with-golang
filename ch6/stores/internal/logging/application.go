@@ -43,6 +43,12 @@ func (a Application) DisableParticipation(ctx context.Context, cmd commands.Disa
 	return a.App.DisableParticipation(ctx, cmd)
 }
 
+func (a Application) RebrandStore(ctx context.Context, cmd commands.RebrandStore) (err error) {
+	a.logger.Info().Msg("--> Stores.RebrandStore")
+	defer func() { a.logger.Info().Err(err).Msg("<-- Stores.RebrandStore") }()
+	return a.App.RebrandStore(ctx, cmd)
+}
+
 func (a Application) AddProduct(ctx context.Context, cmd commands.AddProduct) (err error) {
 	a.logger.Info().Msg("--> Stores.AddProduct")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Stores.AddProduct") }()

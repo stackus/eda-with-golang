@@ -1,9 +1,12 @@
 package domain
 
 import (
+	"context"
+
 	"github.com/stackus/errors"
 
 	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
+	"github.com/stackus/eda-with-golang/ch6/internal/es"
 )
 
 const StoreAggregate = "stores.Store"
@@ -16,7 +19,7 @@ var (
 )
 
 type Store struct {
-	ddd.Aggregate
+	es.Aggregate
 	Name          string
 	Location      string
 	Participating bool
@@ -24,7 +27,7 @@ type Store struct {
 
 func NewStore(id string) *Store {
 	return &Store{
-		Aggregate: ddd.NewAggregate(id, StoreAggregate),
+		Aggregate: es.NewAggregate(id, StoreAggregate),
 	}
 }
 
@@ -41,8 +44,9 @@ func CreateStore(id, name, location string) (*Store, error) {
 	store.Name = name
 	store.Location = location
 
-	store.AddEvent(StoreCreatedEvent, &StoreCreated{
-		Store: store,
+	store.AddEvent(&StoreCreated{
+		Name:     name,
+		Location: location,
 	})
 
 	return store, nil
@@ -53,11 +57,7 @@ func (s *Store) EnableParticipation() (err error) {
 		return ErrStoreIsAlreadyParticipating
 	}
 
-	s.Participating = true
-
-	s.AddEvent(StoreParticipationEnabledEvent, &StoreParticipationEnabled{
-		Store: s,
-	})
+	s.AddEvent(&StoreParticipationEnabled{})
 
 	return
 }
@@ -67,11 +67,37 @@ func (s *Store) DisableParticipation() (err error) {
 		return ErrStoreIsAlreadyNotParticipating
 	}
 
-	s.Participating = false
-
-	s.AddEvent(StoreParticipationDisabledEvent, &StoreParticipationDisabled{
-		Store: s,
-	})
+	s.AddEvent(&StoreParticipationDisabled{})
 
 	return
+}
+
+func (s *Store) Rebrand(name string) error {
+	s.AddEvent(&StoreRebranded{
+		Name: name,
+	})
+
+	return nil
+}
+
+func (s *Store) ApplyEvent(_ context.Context, event ddd.Event) error {
+	switch payload := event.Payload().(type) {
+	case *StoreCreated:
+		s.Name = payload.Name
+		s.Location = payload.Location
+
+	case *StoreParticipationEnabled:
+		s.Participating = true
+
+	case *StoreParticipationDisabled:
+		s.Participating = false
+
+	case *StoreRebranded:
+		s.Name = payload.Name
+
+	default:
+		return errors.ErrInternal.Msgf("%T received the expected event payload %T", s, event.Payload())
+	}
+
+	return nil
 }

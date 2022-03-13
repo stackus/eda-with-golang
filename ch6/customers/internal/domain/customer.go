@@ -48,7 +48,7 @@ func RegisterCustomer(id, name, smsNumber string) (*Customer, error) {
 	customer.SmsNumber = smsNumber
 	customer.Enabled = true
 
-	customer.AddEvent(CustomerRegisteredEvent, &CustomerRegistered{
+	customer.AddEvent(&CustomerRegistered{
 		Customer: customer,
 	})
 
@@ -60,7 +60,7 @@ func (c *Customer) Authorize( /* TODO authorize what? */ ) error {
 		return ErrCustomerNotAuthorized
 	}
 
-	c.AddEvent(CustomerAuthorizedEvent, &CustomerAuthorized{
+	c.AddEvent(&CustomerAuthorized{
 		Customer: c,
 	})
 
@@ -74,7 +74,7 @@ func (c *Customer) Enable() error {
 
 	c.Enabled = true
 
-	c.AddEvent(CustomerEnabledEvent, &CustomerEnabled{
+	c.AddEvent(&CustomerEnabled{
 		Customer: c,
 	})
 
@@ -88,7 +88,7 @@ func (c *Customer) Disable() error {
 
 	c.Enabled = false
 
-	c.AddEvent(CustomerDisabledEvent, &CustomerDisabled{
+	c.AddEvent(&CustomerDisabled{
 		Customer: c,
 	})
 

@@ -33,7 +33,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	)
 	orderHandlers := logging.LogDomainEventHandlerAccess(
 		application.NewOrderHandlers(orders),
-		mono.Logger(),
+		"Order", mono.Logger(),
 	)
 
 	// setup Driver adapters

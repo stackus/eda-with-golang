@@ -10,16 +10,18 @@ type JSONCodec struct {
 	r registry.Registry
 }
 
+var _ registry.Codec = (*JSONCodec)(nil)
+
 func NewJSONCodec(r registry.Registry) *JSONCodec {
 	return &JSONCodec{r: r}
 }
 
-func (c JSONCodec) Register(name string, v interface{}, options ...registry.UnmarshalOption) error {
-	return c.r.Register(name, v, c.marshal, c.unmarshal, options)
+func (c JSONCodec) Register(name string, v interface{}, options ...registry.BuildOption) error {
+	return registry.Register(c.r, name, v, c.marshal, c.unmarshal, options)
 }
 
-func (c JSONCodec) RegisterFactory(name string, fn func() interface{}, options ...registry.UnmarshalOption) error {
-	return c.r.RegisterFactory(name, fn, c.marshal, c.unmarshal, options)
+func (c JSONCodec) RegisterFactory(name string, fn func() interface{}, options ...registry.BuildOption) error {
+	return registry.RegisterFactory(c.r, name, fn, c.marshal, c.unmarshal, options)
 }
 
 func (JSONCodec) marshal(v interface{}) ([]byte, error) {

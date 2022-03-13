@@ -95,6 +95,16 @@ func (s server) DisableParticipation(ctx context.Context, request *storespb.Disa
 	return &storespb.DisableParticipationResponse{}, nil
 }
 
+func (s server) RebrandStore(ctx context.Context, request *storespb.RebrandStoreRequest,
+) (*storespb.RebrandStoreResponse, error) {
+	err := s.app.RebrandStore(ctx, commands.RebrandStore{
+		ID:   request.GetId(),
+		Name: request.GetName(),
+	})
+
+	return &storespb.RebrandStoreResponse{}, err
+}
+
 func (s server) GetParticipatingStores(ctx context.Context, request *storespb.GetParticipatingStoresRequest,
 ) (*storespb.GetParticipatingStoresResponse, error) {
 	stores, err := s.app.GetParticipatingStores(ctx, queries.GetParticipatingStores{})

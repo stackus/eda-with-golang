@@ -34,7 +34,7 @@ func CreateShopping(id, orderID string) *ShoppingList {
 	shoppingList.Status = ShoppingListIsAvailable
 	shoppingList.Stops = make(Stops)
 
-	shoppingList.AddEvent(ShoppingListCreatedEvent, &ShoppingListCreated{
+	shoppingList.AddEvent(&ShoppingListCreated{
 		ShoppingList: shoppingList,
 	})
 
@@ -69,7 +69,7 @@ func (sl *ShoppingList) Cancel() error {
 
 	sl.Status = ShoppingListIsCanceled
 
-	sl.AddEvent(ShoppingListCanceledEvent, &ShoppingListCanceled{
+	sl.AddEvent(&ShoppingListCanceled{
 		ShoppingList: sl,
 	})
 
@@ -88,7 +88,7 @@ func (sl *ShoppingList) Assign(id string) error {
 	sl.AssignedBotID = id
 	sl.Status = ShoppingListIsAssigned
 
-	sl.AddEvent(ShoppingListAssignedEvent, &ShoppingListAssigned{
+	sl.AddEvent(&ShoppingListAssigned{
 		ShoppingList: sl,
 		BotID:        id,
 	})
@@ -107,7 +107,7 @@ func (sl *ShoppingList) Complete() error {
 
 	sl.Status = ShoppingListIsCompleted
 
-	sl.AddEvent(ShoppingListCompletedEvent, &ShoppingListCompleted{
+	sl.AddEvent(&ShoppingListCompleted{
 		ShoppingList: sl,
 	})
 

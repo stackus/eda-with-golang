@@ -7,5 +7,5 @@ import (
 )
 
 func RegisterInvoiceHandlers(invoiceHandlers application.DomainEventHandlers, domainSubscriber ddd.EventSubscriber) {
-	domainSubscriber.Subscribe(domain.OrderReadiedEvent, invoiceHandlers.OnOrderReadied)
+	domainSubscriber.Subscribe(domain.OrderReadied{}, invoiceHandlers.OnOrderReadied)
 }

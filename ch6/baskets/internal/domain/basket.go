@@ -47,7 +47,7 @@ func StartBasket(id, customerID string) (*Basket, error) {
 	basket.CustomerID = customerID
 	basket.Status = BasketIsOpen
 
-	basket.AddEvent(BasketStartedEvent, &BasketStarted{
+	basket.AddEvent(&BasketStarted{
 		Basket: basket,
 	})
 
@@ -70,7 +70,7 @@ func (b *Basket) Cancel() error {
 	b.Status = BasketIsCanceled
 	b.Items = []Item{}
 
-	b.AddEvent(BasketCanceledEvent, &BasketCanceled{
+	b.AddEvent(&BasketCanceled{
 		Basket: b,
 	})
 
@@ -93,7 +93,7 @@ func (b *Basket) Checkout(paymentID string) error {
 	b.PaymentID = paymentID
 	b.Status = BasketIsCheckedOut
 
-	b.AddEvent(BasketCheckedOutEvent, &BasketCheckedOut{
+	b.AddEvent(&BasketCheckedOut{
 		Basket: b,
 	})
 
@@ -138,7 +138,7 @@ func (b *Basket) AddItem(store *Store, product *Product, quantity int) error {
 		})
 	}
 
-	b.AddEvent(BasketItemAddedEvent, &BasketItemAdded{
+	b.AddEvent(&BasketItemAdded{
 		Basket: b,
 		Item:   item,
 	})
@@ -165,7 +165,7 @@ func (b *Basket) RemoveItem(product *Product, quantity int) error {
 			b.Items = append(b.Items[:i], b.Items[i+1:]...)
 		}
 
-		b.AddEvent(BasketItemRemovedEvent, &BasketItemRemoved{
+		b.AddEvent(&BasketItemRemoved{
 			Basket: b,
 			Item:   item,
 		})

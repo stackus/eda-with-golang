@@ -1,9 +1,39 @@
 package ddd
 
-type Entity struct {
-	ID string
+type IDed interface {
+	ID() string
 }
 
-func (e Entity) GetID() string {
-	return e.ID
+type Entity struct {
+	id   string
+	name string
+}
+
+var _ interface {
+	IDed
+	IDer
+	Namer
+} = (*Entity)(nil)
+
+func NewEntity(id, name string) Entity {
+	return Entity{
+		id:   id,
+		name: name,
+	}
+}
+
+func (e Entity) ID() string {
+	return e.id
+}
+
+func (e Entity) EntityName() string {
+	return e.name
+}
+
+func (e *Entity) setID(id string) {
+	e.id = id
+}
+
+func (e *Entity) setName(name string) {
+	e.name = name
 }

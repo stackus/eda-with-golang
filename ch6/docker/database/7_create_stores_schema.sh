@@ -42,11 +42,23 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
   (
       entity_name    text        NOT NULL,
       entity_id      text        NOT NULL,
-      event_version  int         NOT NULL,
+      entity_version int         NOT NULL,
+      event_id       text        NOT NULL,
       event_name     text        NOT NULL,
       event_data     bytea       NOT NULL,
-      created_at     timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      PRIMARY KEY (entity_name, entity_id, event_version)
+      occurred_at    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (entity_name, entity_id, entity_version)
+  );
+
+  CREATE TABLE stores.snapshots
+  (
+      entity_name      text        NOT NULL,
+      entity_id        text        NOT NULL,
+      snapshot_name    text        NOT NULL,
+      snapshot_data    bytea       NOT NULL,
+      snapshot_version int         NOT NULL,
+      modified_at      timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (entity_name, entity_id)
   );
 
   GRANT USAGE ON SCHEMA stores TO mallbots_user;

@@ -51,30 +51,6 @@ func (r ShoppingListRepository) Find(ctx context.Context, id string) (*domain.Sh
 	return shoppingList, nil
 }
 
-// func (r ShoppingListRepository) FindByOrderID(ctx context.Context, orderID string) (*domain.ShoppingList, error) {
-// 	const query = "SELECT id, stops, assigned_bot_id, status FROM %s WHERE order_id = $1 LIMIT 1"
-//
-// 	shoppingList := &domain.ShoppingList{
-// 		OrderID: orderID,
-// 	}
-// 	var stops []byte
-// 	var status string
-//
-// 	err := r.db.QueryRowContext(ctx, r.table(query), orderID).Scan(&shoppingList.ID, &stops, &shoppingList.AssignedBotID, &status)
-// 	if err != nil {
-// 		return nil, errors.ErrInternalServerError.Err(err)
-// 	}
-//
-// 	shoppingList.Status = domain.ToShoppingListStatus(status)
-//
-// 	err = json.Unmarshal(stops, &shoppingList.Stops)
-// 	if err != nil {
-// 		return nil, errors.ErrInternalServerError.Err(err)
-// 	}
-//
-// 	return shoppingList, nil
-// }
-
 func (r ShoppingListRepository) Save(ctx context.Context, list *domain.ShoppingList) error {
 	const query = "INSERT INTO %s (id, order_id, stops, assigned_bot_id, status) VALUES ($1, $2, $3, $4, $5)"
 

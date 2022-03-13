@@ -9,7 +9,7 @@ import (
 func RegisterNotificationHandlers(notificationHandlers application.DomainEventHandlers,
 	domainSubscriber ddd.EventSubscriber,
 ) {
-	domainSubscriber.Subscribe(domain.OrderCreatedEvent, notificationHandlers.OnOrderCreated)
-	domainSubscriber.Subscribe(domain.OrderReadiedEvent, notificationHandlers.OnOrderReadied)
-	domainSubscriber.Subscribe(domain.OrderCanceledEvent, notificationHandlers.OnOrderCanceled)
+	domainSubscriber.Subscribe(domain.OrderCreated{}, notificationHandlers.OnOrderCreated)
+	domainSubscriber.Subscribe(domain.OrderReadied{}, notificationHandlers.OnOrderReadied)
+	domainSubscriber.Subscribe(domain.OrderCanceled{}, notificationHandlers.OnOrderCanceled)
 }

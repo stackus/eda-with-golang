@@ -27,6 +27,7 @@ type StoresServiceClient interface {
 	GetStores(ctx context.Context, in *GetStoresRequest, opts ...grpc.CallOption) (*GetStoresResponse, error)
 	EnableParticipation(ctx context.Context, in *EnableParticipationRequest, opts ...grpc.CallOption) (*EnableParticipationResponse, error)
 	DisableParticipation(ctx context.Context, in *DisableParticipationRequest, opts ...grpc.CallOption) (*DisableParticipationResponse, error)
+	RebrandStore(ctx context.Context, in *RebrandStoreRequest, opts ...grpc.CallOption) (*RebrandStoreResponse, error)
 	GetParticipatingStores(ctx context.Context, in *GetParticipatingStoresRequest, opts ...grpc.CallOption) (*GetParticipatingStoresResponse, error)
 	AddProduct(ctx context.Context, in *AddProductRequest, opts ...grpc.CallOption) (*AddProductResponse, error)
 	RemoveProduct(ctx context.Context, in *RemoveProductRequest, opts ...grpc.CallOption) (*RemoveProductResponse, error)
@@ -87,6 +88,15 @@ func (c *storesServiceClient) DisableParticipation(ctx context.Context, in *Disa
 	return out, nil
 }
 
+func (c *storesServiceClient) RebrandStore(ctx context.Context, in *RebrandStoreRequest, opts ...grpc.CallOption) (*RebrandStoreResponse, error) {
+	out := new(RebrandStoreResponse)
+	err := c.cc.Invoke(ctx, "/storespb.StoresService/RebrandStore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *storesServiceClient) GetParticipatingStores(ctx context.Context, in *GetParticipatingStoresRequest, opts ...grpc.CallOption) (*GetParticipatingStoresResponse, error) {
 	out := new(GetParticipatingStoresResponse)
 	err := c.cc.Invoke(ctx, "/storespb.StoresService/GetParticipatingStores", in, out, opts...)
@@ -141,6 +151,7 @@ type StoresServiceServer interface {
 	GetStores(context.Context, *GetStoresRequest) (*GetStoresResponse, error)
 	EnableParticipation(context.Context, *EnableParticipationRequest) (*EnableParticipationResponse, error)
 	DisableParticipation(context.Context, *DisableParticipationRequest) (*DisableParticipationResponse, error)
+	RebrandStore(context.Context, *RebrandStoreRequest) (*RebrandStoreResponse, error)
 	GetParticipatingStores(context.Context, *GetParticipatingStoresRequest) (*GetParticipatingStoresResponse, error)
 	AddProduct(context.Context, *AddProductRequest) (*AddProductResponse, error)
 	RemoveProduct(context.Context, *RemoveProductRequest) (*RemoveProductResponse, error)
@@ -167,6 +178,9 @@ func (UnimplementedStoresServiceServer) EnableParticipation(context.Context, *En
 }
 func (UnimplementedStoresServiceServer) DisableParticipation(context.Context, *DisableParticipationRequest) (*DisableParticipationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DisableParticipation not implemented")
+}
+func (UnimplementedStoresServiceServer) RebrandStore(context.Context, *RebrandStoreRequest) (*RebrandStoreResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RebrandStore not implemented")
 }
 func (UnimplementedStoresServiceServer) GetParticipatingStores(context.Context, *GetParticipatingStoresRequest) (*GetParticipatingStoresResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetParticipatingStores not implemented")
@@ -282,6 +296,24 @@ func _StoresService_DisableParticipation_Handler(srv interface{}, ctx context.Co
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StoresServiceServer).DisableParticipation(ctx, req.(*DisableParticipationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StoresService_RebrandStore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RebrandStoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StoresServiceServer).RebrandStore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/storespb.StoresService/RebrandStore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StoresServiceServer).RebrandStore(ctx, req.(*RebrandStoreRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -402,6 +434,10 @@ var StoresService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DisableParticipation",
 			Handler:    _StoresService_DisableParticipation_Handler,
+		},
+		{
+			MethodName: "RebrandStore",
+			Handler:    _StoresService_RebrandStore_Handler,
 		},
 		{
 			MethodName: "GetParticipatingStores",

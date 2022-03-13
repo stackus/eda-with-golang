@@ -10,6 +10,7 @@ service StoresService {
   rpc GetStores(GetStoresRequest) returns (GetStoresResponse) {};
   rpc EnableParticipation(EnableParticipationRequest) returns (EnableParticipationResponse) {};
   rpc DisableParticipation(DisableParticipationRequest) returns (DisableParticipationResponse) {};
+  rpc RebrandStore(RebrandStoreRequest) returns (RebrandStoreResponse) {};
   rpc GetParticipatingStores(GetParticipatingStoresRequest) returns (GetParticipatingStoresResponse) {};
   rpc AddProduct(AddProductRequest) returns (AddProductResponse) {};
   rpc RemoveProduct(RemoveProductRequest) returns (RemoveProductResponse) {};
@@ -49,6 +50,13 @@ message EnableParticipationResponse {}
 message DisableParticipationRequest {
   string id = 1;
 }
+
+message RebrandStoreRequest {
+  string id = 1;
+  string name = 2;
+}
+
+message RebrandStoreResponse {}
 
 message DisableParticipationResponse {}
 

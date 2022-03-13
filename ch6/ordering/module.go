@@ -36,11 +36,11 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup application handlers
 	notificationHandlers := logging.LogDomainEventHandlerAccess(
 		application.NewNotificationHandlers(notifications),
-		mono.Logger(),
+		"Notification", mono.Logger(),
 	)
 	invoiceHandlers := logging.LogDomainEventHandlerAccess(
 		application.NewInvoiceHandlers(invoices),
-		mono.Logger(),
+		"Invoice", mono.Logger(),
 	)
 
 	// setup Driver adapters
