@@ -1,6 +1,6 @@
 package ddd
 
-type IDed interface {
+type IDer interface {
 	ID() string
 }
 
@@ -10,9 +10,9 @@ type Entity struct {
 }
 
 var _ interface {
-	IDed
 	IDer
-	Namer
+	IDSetter
+	NameSetter
 } = (*Entity)(nil)
 
 func NewEntity(id, name string) Entity {

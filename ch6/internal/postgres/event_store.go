@@ -58,25 +58,22 @@ func (s EventStore) Load(ctx context.Context, aggregate es.EventSourcedAggregate
 			return err
 		}
 
-		var v interface{}
-		v, err = s.registry.Unmarshal(eventName, payloadData)
+		var payload interface{}
+		payload, err = s.registry.Unmarshal(eventName, payloadData)
 		if err != nil {
 			return err
 		}
 
-		if payload, ok := v.(ddd.EventPayload); !ok {
-			return fmt.Errorf("`%s` did not return as an event payload", eventName)
-		} else {
-			event := ddd.NewEvent(
-				payload,
-				ddd.WithEventID(eventID),
-				ddd.WithAggregateInfo(aggregateName, aggregateID),
-				ddd.WithAggregateVersion(aggregateVersion),
-				ddd.WithOccurredAt(occurredAt),
-			)
-			if err = es.LoadEvent(ctx, aggregate, event); err != nil {
-				return err
-			}
+		event := ddd.NewEvent(
+			eventName,
+			payload,
+			ddd.WithEventID(eventID),
+			ddd.WithAggregateInfo(aggregateName, aggregateID),
+			ddd.WithAggregateVersion(aggregateVersion),
+			ddd.WithOccurredAt(occurredAt),
+		)
+		if err = es.LoadEvent(aggregate, event); err != nil {
+			return err
 		}
 	}
 
@@ -113,13 +110,13 @@ func (s EventStore) Save(ctx context.Context, aggregate es.EventSourcedAggregate
 	for _, event := range aggregate.GetEvents() {
 		var payloadData []byte
 
-		payloadData, err = s.registry.Marshal(event.Name(), event.Payload())
+		payloadData, err = s.registry.Marshal(event.EventName(), event.Payload())
 		if err != nil {
 			return err
 		}
 		if _, err = tx.ExecContext(
 			ctx, s.table(query),
-			aggregateName, aggregateID, event.AggregateVersion(), event.ID(), event.Name(), payloadData, event.OccurredAt(),
+			aggregateName, aggregateID, event.AggregateVersion(), event.ID(), event.EventName(), payloadData, event.OccurredAt(),
 		); err != nil {
 			return err
 		}

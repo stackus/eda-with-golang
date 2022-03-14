@@ -6,30 +6,30 @@ import (
 	"github.com/stackus/eda-with-golang/ch6/internal/registry"
 )
 
-type IDer interface {
+type IDSetter interface {
 	setID(string)
 }
 
 func SetID(id string) registry.BuildOption {
 	return func(v interface{}) error {
-		if e, ok := v.(IDer); ok {
+		if e, ok := v.(IDSetter); ok {
 			e.setID(id)
 			return nil
 		}
-		return fmt.Errorf("%T does not implement setID(string)", v)
+		return fmt.Errorf("%T does not have the method setID(string)", v)
 	}
 }
 
-type Namer interface {
+type NameSetter interface {
 	setName(string)
 }
 
 func SetName(name string) registry.BuildOption {
 	return func(v interface{}) error {
-		if e, ok := v.(Namer); ok {
+		if e, ok := v.(NameSetter); ok {
 			e.setName(name)
 			return nil
 		}
-		return fmt.Errorf("%T does not implement setName(string)", v)
+		return fmt.Errorf("%T does not have the method setName(string)", v)
 	}
 }

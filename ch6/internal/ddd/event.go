@@ -5,20 +5,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-
-	"github.com/stackus/eda-with-golang/ch6/internal/registry"
 )
 
 type (
 	EventHandler func(ctx context.Context, event Event) error
 
-	EventPayload interface {
-		EventName() string
-	}
+	EventPayload interface{}
 
 	Event interface {
 		ID() string
-		Name() string
+		EventName() string
 		Payload() EventPayload
 		OccurredAt() time.Time
 		AggregateName() string
@@ -43,10 +39,10 @@ type (
 
 var _ Event = (*event)(nil)
 
-func NewEvent(payload EventPayload, options ...EventOption) Event {
+func NewEvent(name string, payload EventPayload, options ...EventOption) Event {
 	evt := event{
 		id:         uuid.New().String(),
-		name:       payload.EventName(),
+		name:       name,
 		payload:    payload,
 		occurredAt: time.Now(),
 	}
@@ -62,7 +58,7 @@ func (e event) ID() string {
 	return e.id
 }
 
-func (e event) Name() string {
+func (e event) EventName() string {
 	return e.name
 }
 
@@ -88,8 +84,4 @@ func (e event) AggregateVersion() int {
 
 func (e event) Metadata() map[string]interface{} {
 	return e.metadata
-}
-
-func RegisterEventPayload(cd registry.Codec, payload EventPayload) error {
-	return cd.Register(payload.EventName(), payload)
 }

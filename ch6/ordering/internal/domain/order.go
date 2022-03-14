@@ -50,12 +50,14 @@ func CreateOrder(id, customerID, paymentID string, items []*Item) (*Order, error
 	order.Items = items
 	order.Status = OrderIsPending
 
-	order.AddEvent(&OrderCreated{
+	order.AddEvent(OrderCreatedEvent, &OrderCreated{
 		Order: order,
 	})
 
 	return order, nil
 }
+
+func (Order) Key() string { return OrderAggregate }
 
 func (o *Order) Cancel() error {
 	if o.Status != OrderIsPending {
@@ -64,7 +66,7 @@ func (o *Order) Cancel() error {
 
 	o.Status = OrderIsCancelled
 
-	o.AddEvent(&OrderCanceled{
+	o.AddEvent(OrderCanceledEvent, &OrderCanceled{
 		Order: o,
 	})
 	return nil
@@ -75,7 +77,7 @@ func (o *Order) Ready() error {
 
 	o.Status = OrderIsReady
 
-	o.AddEvent(&OrderReadied{
+	o.AddEvent(OrderReadiedEvent, &OrderReadied{
 		Order: o,
 	})
 
@@ -90,7 +92,7 @@ func (o *Order) Complete(invoiceID string) error {
 	o.InvoiceID = invoiceID
 	o.Status = OrderIsCompleted
 
-	o.AddEvent(&OrderCompleted{
+	o.AddEvent(OrderCompletedEvent, &OrderCompleted{
 		Order: o,
 	})
 

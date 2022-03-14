@@ -6,16 +6,18 @@ import (
 )
 
 type (
+	Registerable interface {
+		Key() string
+	}
+
 	Marshaller   func(v interface{}) ([]byte, error)
 	Unmarshaller func(d []byte, v interface{}) error
 
-	BuildOption func(v interface{}) error
-
 	Registry interface {
-		Build(name string, options ...BuildOption) (interface{}, error)
-		Marshal(name string, v interface{}) ([]byte, error)
-		Unmarshal(name string, data []byte, options ...BuildOption) (interface{}, error)
-		register(name string, fn func() interface{}, m Marshaller, u Unmarshaller, o []BuildOption) error
+		Build(key string, options ...BuildOption) (interface{}, error)
+		Marshal(key string, v interface{}) ([]byte, error)
+		Unmarshal(key string, data []byte, options ...BuildOption) (interface{}, error)
+		register(key string, fn func() interface{}, m Marshaller, u Unmarshaller, o []BuildOption) error
 	}
 )
 
@@ -37,21 +39,21 @@ func New() *registry {
 	}
 }
 
-func (r *registry) Marshal(name string, v interface{}) ([]byte, error) {
-	if reg, exists := r.registered[name]; !exists {
-		return nil, fmt.Errorf("nothing has been registered with the name `%s`", name)
-	} else {
-		return reg.marshaller(v)
+func (r *registry) Marshal(key string, v interface{}) ([]byte, error) {
+	reg, exists := r.registered[key]
+	if !exists {
+		return nil, fmt.Errorf("nothing has been registered with the key `%s`", key)
 	}
+	return reg.marshaller(v)
 }
 
-func (r *registry) Unmarshal(name string, data []byte, options ...BuildOption) (interface{}, error) {
-	v, err := r.Build(name, options...)
+func (r *registry) Unmarshal(key string, data []byte, options ...BuildOption) (interface{}, error) {
+	v, err := r.Build(key, options...)
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.registered[name].unmarshaller(data, v)
+	err = r.registered[key].unmarshaller(data, v)
 	if err != nil {
 		return nil, err
 	}
@@ -59,34 +61,35 @@ func (r *registry) Unmarshal(name string, data []byte, options ...BuildOption) (
 	return v, nil
 }
 
-func (r *registry) Build(name string, options ...BuildOption) (interface{}, error) {
-	if reg, exists := r.registered[name]; !exists {
-		return nil, fmt.Errorf("nothing has been registered with the name `%s`", name)
-	} else {
-		v := reg.factory()
-		uos := append(r.registered[name].options, options...)
-
-		for _, option := range uos {
-			err := option(v)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		return v, nil
+func (r *registry) Build(key string, options ...BuildOption) (interface{}, error) {
+	reg, exists := r.registered[key]
+	if !exists {
+		return nil, fmt.Errorf("nothing has been registered with the key `%s`", key)
 	}
+
+	v := reg.factory()
+	uos := append(r.registered[key].options, options...)
+
+	for _, option := range uos {
+		err := option(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return v, nil
 }
 
-func (r *registry) register(name string, fn func() interface{}, m Marshaller, u Unmarshaller, o []BuildOption,
+func (r *registry) register(key string, fn func() interface{}, m Marshaller, u Unmarshaller, o []BuildOption,
 ) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, exists := r.registered[name]; exists {
-		return fmt.Errorf("something with the name `%s` has already been registered", name)
+	if _, exists := r.registered[key]; exists {
+		return fmt.Errorf("something with the key `%s` has already been registered", key)
 	}
 
-	r.registered[name] = registered{
+	r.registered[key] = registered{
 		factory:      fn,
 		marshaller:   m,
 		unmarshaller: u,

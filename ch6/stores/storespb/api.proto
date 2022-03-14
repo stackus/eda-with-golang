@@ -6,16 +6,20 @@ import "storespb/messages.proto";
 
 service StoresService {
   rpc CreateStore(CreateStoreRequest) returns (CreateStoreResponse) {};
-  rpc GetStore(GetStoreRequest) returns (GetStoreResponse) {};
-  rpc GetStores(GetStoresRequest) returns (GetStoresResponse) {};
   rpc EnableParticipation(EnableParticipationRequest) returns (EnableParticipationResponse) {};
   rpc DisableParticipation(DisableParticipationRequest) returns (DisableParticipationResponse) {};
   rpc RebrandStore(RebrandStoreRequest) returns (RebrandStoreResponse) {};
+  rpc GetStore(GetStoreRequest) returns (GetStoreResponse) {};
+  rpc GetStores(GetStoresRequest) returns (GetStoresResponse) {};
   rpc GetParticipatingStores(GetParticipatingStoresRequest) returns (GetParticipatingStoresResponse) {};
+
   rpc AddProduct(AddProductRequest) returns (AddProductResponse) {};
+  rpc RebrandProduct(RebrandProductRequest) returns (RebrandProductResponse) {};
+  rpc IncreaseProductPrice(IncreaseProductPriceRequest) returns (IncreaseProductPriceResponse) {};
+  rpc DecreaseProductPrice(DecreaseProductPriceRequest) returns (DecreaseProductPriceResponse) {};
   rpc RemoveProduct(RemoveProductRequest) returns (RemoveProductResponse) {};
-  rpc GetCatalog(GetCatalogRequest) returns (GetCatalogResponse) {};
   rpc GetProduct(GetProductRequest) returns (GetProductResponse) {};
+  rpc GetCatalog(GetCatalogRequest) returns (GetCatalogResponse) {};
 }
 
 message CreateStoreRequest {
@@ -26,6 +30,25 @@ message CreateStoreRequest {
 message CreateStoreResponse {
   string id = 1;
 }
+
+message EnableParticipationRequest {
+  string id = 1;
+}
+
+message EnableParticipationResponse {}
+
+message DisableParticipationRequest {
+  string id = 1;
+}
+
+message DisableParticipationResponse {}
+
+message RebrandStoreRequest {
+  string id = 1;
+  string name = 2;
+}
+
+message RebrandStoreResponse {}
 
 message GetStoreRequest {
   string id = 1;
@@ -40,25 +63,6 @@ message GetStoresRequest {}
 message GetStoresResponse {
   repeated Store stores = 1;
 }
-
-message EnableParticipationRequest {
-  string id = 1;
-}
-
-message EnableParticipationResponse {}
-
-message DisableParticipationRequest {
-  string id = 1;
-}
-
-message RebrandStoreRequest {
-  string id = 1;
-  string name = 2;
-}
-
-message RebrandStoreResponse {}
-
-message DisableParticipationResponse {}
 
 message GetParticipatingStoresRequest {}
 
@@ -77,6 +81,28 @@ message AddProductRequest {
 message AddProductResponse {
   string id = 1;
 }
+
+message RebrandProductRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message RebrandProductResponse {}
+
+message IncreaseProductPriceRequest {
+  string id = 1;
+  double price = 2;
+}
+
+message IncreaseProductPriceResponse {}
+
+message DecreaseProductPriceRequest {
+  string id = 1;
+  double price = 2;
+}
+
+message DecreaseProductPriceResponse {}
 
 message RemoveProductRequest {
   string id = 1;

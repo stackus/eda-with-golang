@@ -55,6 +55,24 @@ func (a Application) AddProduct(ctx context.Context, cmd commands.AddProduct) (e
 	return a.App.AddProduct(ctx, cmd)
 }
 
+func (a Application) RebrandProduct(ctx context.Context, cmd commands.RebrandProduct) (err error) {
+	a.logger.Info().Msg("--> Products.RebrandProduct")
+	defer func() { a.logger.Info().Err(err).Msg("<-- Products.RebrandProduct") }()
+	return a.App.RebrandProduct(ctx, cmd)
+}
+
+func (a Application) IncreaseProductPrice(ctx context.Context, cmd commands.IncreaseProductPrice) (err error) {
+	a.logger.Info().Msg("--> Products.IncreaseProductPrice")
+	defer func() { a.logger.Info().Err(err).Msg("<-- Products.IncreaseProductPrice") }()
+	return a.App.IncreaseProductPrice(ctx, cmd)
+}
+
+func (a Application) DecreaseProductPrice(ctx context.Context, cmd commands.DecreaseProductPrice) (err error) {
+	a.logger.Info().Msg("--> Products.DecreaseProductPrice")
+	defer func() { a.logger.Info().Err(err).Msg("<-- Products.DecreaseProductPrice") }()
+	return a.App.DecreaseProductPrice(ctx, cmd)
+}
+
 func (a Application) RemoveProduct(ctx context.Context, cmd commands.RemoveProduct) (err error) {
 	a.logger.Info().Msg("--> Stores.RemoveProduct")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Stores.RemoveProduct") }()

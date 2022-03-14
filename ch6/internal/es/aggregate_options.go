@@ -6,16 +6,16 @@ import (
 	"github.com/stackus/eda-with-golang/ch6/internal/registry"
 )
 
-type Versioner interface {
+type VersionSetter interface {
 	setVersion(int)
 }
 
 func SetVersion(version int) registry.BuildOption {
 	return func(v interface{}) error {
-		if agg, ok := v.(Versioner); ok {
+		if agg, ok := v.(VersionSetter); ok {
 			agg.setVersion(version)
 			return nil
 		}
-		return fmt.Errorf("%T does not implement setVersion(int)", v)
+		return fmt.Errorf("%T does not have the method setVersion(int)", v)
 	}
 }

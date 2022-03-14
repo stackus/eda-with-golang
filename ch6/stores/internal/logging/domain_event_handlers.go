@@ -56,6 +56,24 @@ func (h DomainEventHandlers) OnProductAdded(ctx context.Context, event ddd.Event
 	return h.DomainEventHandlers.OnProductAdded(ctx, event)
 }
 
+func (h DomainEventHandlers) OnProductRebranded(ctx context.Context, event ddd.Event) (err error) {
+	h.logger.Info().Msgf("--> Stores.%s.OnProductRebranded", h.label)
+	defer func() { h.logger.Info().Err(err).Msgf("<-- Stores.%s.OnProductRebranded", h.label) }()
+	return h.DomainEventHandlers.OnProductRebranded(ctx, event)
+}
+
+func (h DomainEventHandlers) OnProductPriceIncreased(ctx context.Context, event ddd.Event) (err error) {
+	h.logger.Info().Msgf("--> Stores.%s.OnProductPriceIncreased", h.label)
+	defer func() { h.logger.Info().Err(err).Msgf("<-- Stores.%s.OnProductPriceIncreased", h.label) }()
+	return h.DomainEventHandlers.OnProductPriceIncreased(ctx, event)
+}
+
+func (h DomainEventHandlers) OnProductPriceDecreased(ctx context.Context, event ddd.Event) (err error) {
+	h.logger.Info().Msgf("--> Stores.%s.OnProductPriceDecreased", h.label)
+	defer func() { h.logger.Info().Err(err).Msgf("<-- Stores.%s.OnProductPriceDecreased", h.label) }()
+	return h.DomainEventHandlers.OnProductPriceDecreased(ctx, event)
+}
+
 func (h DomainEventHandlers) OnProductRemoved(ctx context.Context, event ddd.Event) (err error) {
 	h.logger.Info().Msgf("--> Stores.%s.OnProductRemoved", h.label)
 	defer func() { h.logger.Info().Err(err).Msgf("<-- Stores.%s.OnProductRemoved", h.label) }()

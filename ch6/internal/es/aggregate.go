@@ -1,23 +1,12 @@
 package es
 
 import (
-	"context"
-	"fmt"
-
 	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
 )
 
-type Versioned interface {
+type Versioner interface {
 	Version() int
 	PendingVersion() int
-}
-
-type EventApplied interface {
-	ApplyEvent(context.Context, ddd.Event) error
-}
-
-type EventCommitted interface {
-	CommitEvents()
 }
 
 type Aggregate struct {
@@ -26,9 +15,9 @@ type Aggregate struct {
 }
 
 var _ interface {
-	EventCommitted
-	Versioned
+	EventCommitter
 	Versioner
+	VersionSetter
 } = (*Aggregate)(nil)
 
 func NewAggregate(id, name string) Aggregate {
@@ -38,9 +27,9 @@ func NewAggregate(id, name string) Aggregate {
 	}
 }
 
-func (a *Aggregate) AddEvent(payload ddd.EventPayload, options ...ddd.EventOption) {
+func (a *Aggregate) AddEvent(name string, payload ddd.EventPayload, options ...ddd.EventOption) {
 	options = append(options, ddd.WithAggregateVersion(a.PendingVersion()+1))
-	a.Aggregate.AddEvent(payload, options...)
+	a.Aggregate.AddEvent(name, payload, options...)
 }
 
 func (a *Aggregate) CommitEvents() {
@@ -58,21 +47,4 @@ func (a Aggregate) PendingVersion() int {
 
 func (a *Aggregate) setVersion(version int) {
 	a.version = version
-}
-
-func LoadEvent(ctx context.Context, v interface{}, event ddd.Event) error {
-	type loader interface {
-		EventApplied
-		Versioner
-	}
-
-	if agg, ok := v.(loader); !ok {
-		return fmt.Errorf("%T does not have the method implemented to load events", v)
-	} else {
-		if err := agg.ApplyEvent(ctx, event); err != nil {
-			return err
-		}
-		agg.setVersion(event.AggregateVersion())
-	}
-	return nil
 }

@@ -11,7 +11,11 @@ type DomainEventHandlers interface {
 	OnStoreParticipationEnabled(ctx context.Context, event ddd.Event) error
 	OnStoreParticipationDisabled(ctx context.Context, event ddd.Event) error
 	OnStoreRebranded(ctx context.Context, event ddd.Event) error
+
 	OnProductAdded(ctx context.Context, event ddd.Event) error
+	OnProductRebranded(ctx context.Context, event ddd.Event) error
+	OnProductPriceIncreased(ctx context.Context, event ddd.Event) error
+	OnProductPriceDecreased(ctx context.Context, event ddd.Event) error
 	OnProductRemoved(ctx context.Context, event ddd.Event) error
 }
 
@@ -36,6 +40,18 @@ func (ignoreUnimplementedDomainEvents) OnStoreRebranded(ctx context.Context, eve
 }
 
 func (ignoreUnimplementedDomainEvents) OnProductAdded(ctx context.Context, event ddd.Event) error {
+	return nil
+}
+
+func (ignoreUnimplementedDomainEvents) OnProductRebranded(ctx context.Context, event ddd.Event) error {
+	return nil
+}
+
+func (ignoreUnimplementedDomainEvents) OnProductPriceIncreased(ctx context.Context, event ddd.Event) error {
+	return nil
+}
+
+func (ignoreUnimplementedDomainEvents) OnProductPriceDecreased(ctx context.Context, event ddd.Event) error {
 	return nil
 }
 

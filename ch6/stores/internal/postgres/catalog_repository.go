@@ -27,15 +27,31 @@ func NewCatalogRepository(tableName string, db *sql.DB) CatalogRepository {
 func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, name, description, sku string,
 	price float64,
 ) error {
-	const query = "INSERT INTO %s (id, store_id, name, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)"
+	const query = `INSERT INTO %s (id, store_id, name, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)`
 
 	_, err := r.db.ExecContext(ctx, r.table(query), productID, storeID, name, description, sku, price)
 
 	return err
 }
 
+func (r CatalogRepository) Rebrand(ctx context.Context, productID, name, description string) error {
+	const query = `UPDATE %s SET name = $2, description = $3 WHERE id = $1`
+
+	_, err := r.db.ExecContext(ctx, r.table(query), productID, name, description)
+
+	return err
+}
+
+func (r CatalogRepository) UpdatePrice(ctx context.Context, productID string, price float64) error {
+	const query = `UPDATE %s SET price = $2 WHERE id = $1`
+
+	_, err := r.db.ExecContext(ctx, r.table(query), productID, price)
+
+	return err
+}
+
 func (r CatalogRepository) RemoveProduct(ctx context.Context, productID string) error {
-	const query = "DELETE FROM %s WHERE id = $1"
+	const query = `DELETE FROM %s WHERE id = $1`
 
 	_, err := r.db.ExecContext(ctx, r.table(query), productID)
 
@@ -43,7 +59,7 @@ func (r CatalogRepository) RemoveProduct(ctx context.Context, productID string) 
 }
 
 func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.Product, error) {
-	const query = "SELECT store_id, name, description, sku, price FROM %s WHERE id = $1 LIMIT 1"
+	const query = `SELECT store_id, name, description, sku, price FROM %s WHERE id = $1 LIMIT 1`
 
 	product := domain.NewProduct(productID)
 
@@ -56,7 +72,7 @@ func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.
 }
 
 func (r CatalogRepository) GetCatalog(ctx context.Context, storeID string) ([]*domain.Product, error) {
-	const query = "SELECT id, name, description, sku, price FROM %s WHERE store_id = $1"
+	const query = `SELECT id, name, description, sku, price FROM %s WHERE store_id = $1`
 
 	products := make([]*domain.Product, 0)
 

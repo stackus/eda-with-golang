@@ -38,7 +38,7 @@ func (r AggregateRepository) Save(ctx context.Context, aggregate EventSourcedAgg
 	}
 
 	for _, event := range aggregate.GetEvents() {
-		if err := aggregate.ApplyEvent(ctx, event); err != nil {
+		if err := aggregate.ApplyEvent(event); err != nil {
 			return err
 		}
 	}

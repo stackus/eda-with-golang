@@ -1,27 +1,36 @@
 package es
 
-type SnapshotPayload interface {
+import (
+	"fmt"
+)
+
+type Snapshot interface {
 	SnapshotName() string
 }
 
-type Snapshot interface {
-	Version() int
-	Payload() SnapshotPayload
+type SnapshotApplier interface {
+	ApplySnapshot(snapshot Snapshot) error
 }
 
-type snapshot struct {
-	payload SnapshotPayload
-	version int
+type Snapshotter interface {
+	ToSnapshot() Snapshot
 }
 
-type Snapshotted interface {
-	ToSnapshot() (SnapshotPayload, error)
-	LoadSnapshot(snapshot Snapshot) error
-}
-
-func NewSnapshot(payload SnapshotPayload, version int) *snapshot {
-	return &snapshot{
-		payload: payload,
-		version: version,
+func LoadSnapshot(v interface{}, snapshot Snapshot, version int) error {
+	type loader interface {
+		SnapshotApplier
+		VersionSetter
 	}
+
+	agg, ok := v.(loader)
+	if !ok {
+		return fmt.Errorf("%T does not have the methods implemented to load snapshots", v)
+	}
+
+	if err := agg.ApplySnapshot(snapshot); err != nil {
+		return err
+	}
+	agg.setVersion(version)
+
+	return nil
 }

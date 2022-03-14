@@ -9,8 +9,8 @@ import (
 func RegisterMallHandlers(mallHandlers application.DomainEventHandlers,
 	domainSubscriber ddd.EventSubscriber,
 ) {
-	domainSubscriber.Subscribe(domain.StoreCreated{}, mallHandlers.OnStoreCreated)
-	domainSubscriber.Subscribe(domain.StoreParticipationEnabled{}, mallHandlers.OnStoreParticipationEnabled)
-	domainSubscriber.Subscribe(domain.StoreParticipationDisabled{}, mallHandlers.OnStoreParticipationDisabled)
-	domainSubscriber.Subscribe(domain.StoreRebranded{}, mallHandlers.OnStoreRebranded)
+	domainSubscriber.Subscribe(domain.StoreCreatedEvent, mallHandlers.OnStoreCreated)
+	domainSubscriber.Subscribe(domain.StoreParticipationEnabledEvent, mallHandlers.OnStoreParticipationEnabled)
+	domainSubscriber.Subscribe(domain.StoreParticipationDisabledEvent, mallHandlers.OnStoreParticipationDisabled)
+	domainSubscriber.Subscribe(domain.StoreRebrandedEvent, mallHandlers.OnStoreRebranded)
 }

@@ -19,6 +19,9 @@ type (
 		DisableParticipation(ctx context.Context, cmd commands.DisableParticipation) error
 		RebrandStore(ctx context.Context, cmd commands.RebrandStore) error
 		AddProduct(ctx context.Context, cmd commands.AddProduct) error
+		RebrandProduct(ctx context.Context, cmd commands.RebrandProduct) error
+		IncreaseProductPrice(ctx context.Context, cmd commands.IncreaseProductPrice) error
+		DecreaseProductPrice(ctx context.Context, cmd commands.DecreaseProductPrice) error
 		RemoveProduct(ctx context.Context, cmd commands.RemoveProduct) error
 	}
 	Queries interface {
@@ -39,6 +42,9 @@ type (
 		commands.DisableParticipationHandler
 		commands.RebrandStoreHandler
 		commands.AddProductHandler
+		commands.RebrandProductHandler
+		commands.IncreaseProductPriceHandler
+		commands.DecreaseProductPriceHandler
 		commands.RemoveProductHandler
 	}
 	appQueries struct {
@@ -62,6 +68,9 @@ func New(stores domain.StoreRepository, products domain.ProductRepository,
 			DisableParticipationHandler: commands.NewDisableParticipationHandler(stores),
 			RebrandStoreHandler:         commands.NewRebrandStoreHandler(stores),
 			AddProductHandler:           commands.NewAddProductHandler(stores, products),
+			RebrandProductHandler:       commands.NewRebrandProductHandler(products),
+			IncreaseProductPriceHandler: commands.NewIncreaseProductPriceHandler(products),
+			DecreaseProductPriceHandler: commands.NewDecreaseProductPriceHandler(products),
 			RemoveProductHandler:        commands.NewRemoveProductHandler(products),
 		},
 		appQueries: appQueries{

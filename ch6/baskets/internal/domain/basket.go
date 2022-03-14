@@ -47,12 +47,14 @@ func StartBasket(id, customerID string) (*Basket, error) {
 	basket.CustomerID = customerID
 	basket.Status = BasketIsOpen
 
-	basket.AddEvent(&BasketStarted{
+	basket.AddEvent(BasketStartedEvent, &BasketStarted{
 		Basket: basket,
 	})
 
 	return basket, nil
 }
+
+func (Basket) Key() string { return BasketAggregate }
 
 func (b Basket) IsCancellable() bool {
 	return b.Status == BasketIsOpen
@@ -70,7 +72,7 @@ func (b *Basket) Cancel() error {
 	b.Status = BasketIsCanceled
 	b.Items = []Item{}
 
-	b.AddEvent(&BasketCanceled{
+	b.AddEvent(BasketCanceledEvent, &BasketCanceled{
 		Basket: b,
 	})
 
@@ -93,7 +95,7 @@ func (b *Basket) Checkout(paymentID string) error {
 	b.PaymentID = paymentID
 	b.Status = BasketIsCheckedOut
 
-	b.AddEvent(&BasketCheckedOut{
+	b.AddEvent(BasketCheckedOutEvent, &BasketCheckedOut{
 		Basket: b,
 	})
 
@@ -138,7 +140,7 @@ func (b *Basket) AddItem(store *Store, product *Product, quantity int) error {
 		})
 	}
 
-	b.AddEvent(&BasketItemAdded{
+	b.AddEvent(BasketItemAddedEvent, &BasketItemAdded{
 		Basket: b,
 		Item:   item,
 	})
@@ -165,7 +167,7 @@ func (b *Basket) RemoveItem(product *Product, quantity int) error {
 			b.Items = append(b.Items[:i], b.Items[i+1:]...)
 		}
 
-		b.AddEvent(&BasketItemRemoved{
+		b.AddEvent(BasketItemRemovedEvent, &BasketItemRemoved{
 			Basket: b,
 			Item:   item,
 		})

@@ -7,12 +7,12 @@ import (
 )
 
 type EventSourcedAggregate interface {
-	ddd.IDed
+	ddd.IDer
 	AggregateName() string
-	ddd.Evented
-	Versioned
-	EventApplied
-	EventCommitted
+	ddd.Eventer
+	Versioner
+	EventApplier
+	EventCommitter
 }
 
 type AggregateStore interface {

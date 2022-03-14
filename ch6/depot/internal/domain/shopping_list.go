@@ -34,12 +34,14 @@ func CreateShopping(id, orderID string) *ShoppingList {
 	shoppingList.Status = ShoppingListIsAvailable
 	shoppingList.Stops = make(Stops)
 
-	shoppingList.AddEvent(&ShoppingListCreated{
+	shoppingList.AddEvent(ShoppingListCreatedEvent, &ShoppingListCreated{
 		ShoppingList: shoppingList,
 	})
 
 	return shoppingList
 }
+
+func (ShoppingList) Key() string { return ShoppingListAggregate }
 
 func (sl *ShoppingList) AddItem(store *Store, product *Product, quantity int) error {
 	if _, exists := sl.Stops[store.ID]; !exists {
@@ -69,7 +71,7 @@ func (sl *ShoppingList) Cancel() error {
 
 	sl.Status = ShoppingListIsCanceled
 
-	sl.AddEvent(&ShoppingListCanceled{
+	sl.AddEvent(ShoppingListCanceledEvent, &ShoppingListCanceled{
 		ShoppingList: sl,
 	})
 
@@ -88,7 +90,7 @@ func (sl *ShoppingList) Assign(id string) error {
 	sl.AssignedBotID = id
 	sl.Status = ShoppingListIsAssigned
 
-	sl.AddEvent(&ShoppingListAssigned{
+	sl.AddEvent(ShoppingListAssignedEvent, &ShoppingListAssigned{
 		ShoppingList: sl,
 		BotID:        id,
 	})
@@ -107,7 +109,7 @@ func (sl *ShoppingList) Complete() error {
 
 	sl.Status = ShoppingListIsCompleted
 
-	sl.AddEvent(&ShoppingListCompleted{
+	sl.AddEvent(ShoppingListCompletedEvent, &ShoppingListCompleted{
 		ShoppingList: sl,
 	})
 

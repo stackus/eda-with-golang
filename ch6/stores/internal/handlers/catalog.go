@@ -9,6 +9,9 @@ import (
 func RegisterCatalogHandlers(catalogHandlers application.DomainEventHandlers,
 	domainSubscriber ddd.EventSubscriber,
 ) {
-	domainSubscriber.Subscribe(domain.ProductAdded{}, catalogHandlers.OnProductAdded)
-	domainSubscriber.Subscribe(domain.ProductRemoved{}, catalogHandlers.OnProductRemoved)
+	domainSubscriber.Subscribe(domain.ProductAddedEvent, catalogHandlers.OnProductAdded)
+	domainSubscriber.Subscribe(domain.ProductRebrandedEvent, catalogHandlers.OnProductRebranded)
+	domainSubscriber.Subscribe(domain.ProductPriceIncreasedEvent, catalogHandlers.OnProductPriceIncreased)
+	domainSubscriber.Subscribe(domain.ProductPriceDecreasedEvent, catalogHandlers.OnProductPriceDecreased)
+	domainSubscriber.Subscribe(domain.ProductRemovedEvent, catalogHandlers.OnProductRemoved)
 }

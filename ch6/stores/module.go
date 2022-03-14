@@ -24,13 +24,16 @@ type Module struct {
 func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup Driven adapters
 	reg := registry.New()
-	err := registerEntities(reg)
+	err := registrations(reg)
 	if err != nil {
 		return err
 	}
 	domainDispatcher := ddd.NewEventDispatcher()
 	aggregateStore := es.NewEventPublisher(
-		pg.NewEventStore("stores.events", mono.DB(), reg),
+		pg.NewSnapshotStore(
+			pg.NewEventStore("stores.events", mono.DB(), reg),
+			"stores.snapshots", mono.DB(), reg,
+		),
 		domainDispatcher,
 	)
 	stores := es.NewStoreRepository(reg, aggregateStore)
@@ -68,32 +71,53 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	return nil
 }
 
-func registerEntities(reg registry.Registry) (err error) {
-	js := codecs.NewJSONCodec(reg)
+func registrations(reg registry.Registry) (err error) {
+	codec := codecs.NewJSONCodec(reg)
 
-	if err = js.Register(domain.StoreAggregate, domain.Store{}); err != nil {
+	// Store
+	if err = codec.Register(domain.Store{}); err != nil {
 		return
 	}
-	if err = ddd.RegisterEventPayload(js, domain.StoreCreated{}); err != nil {
+	// store events
+	if err = codec.Register(domain.StoreCreated{}); err != nil {
 		return
 	}
-	if err = ddd.RegisterEventPayload(js, domain.StoreParticipationEnabled{}); err != nil {
+	if err = codec.Register(domain.StoreParticipationEnabled{}); err != nil {
 		return
 	}
-	if err = ddd.RegisterEventPayload(js, domain.StoreParticipationDisabled{}); err != nil {
+	if err = codec.Register(domain.StoreParticipationDisabled{}); err != nil {
 		return
 	}
-	if err = ddd.RegisterEventPayload(js, domain.StoreRebranded{}); err != nil {
+	if err = codec.Register(domain.StoreRebranded{}); err != nil {
+		return
+	}
+	// store snapshots
+	if err = codec.RegisterKey(domain.StoreV1{}.SnapshotName(), domain.StoreV1{}); err != nil {
 		return
 	}
 
-	if err = js.Register(domain.ProductAggregate, domain.Product{}); err != nil {
+	// Product
+	if err = codec.Register(domain.Product{}); err != nil {
 		return
 	}
-	if err = ddd.RegisterEventPayload(js, domain.ProductAdded{}); err != nil {
+	// product events
+	if err = codec.Register(domain.ProductAdded{}); err != nil {
 		return
 	}
-	if err = ddd.RegisterEventPayload(js, domain.ProductRemoved{}); err != nil {
+	if err = codec.Register(domain.ProductRebranded{}); err != nil {
+		return
+	}
+	if err = codec.Register(domain.ProductPriceIncreased{}); err != nil {
+		return
+	}
+	if err = codec.Register(domain.ProductPriceDecreased{}); err != nil {
+		return
+	}
+	if err = codec.Register(domain.ProductRemoved{}); err != nil {
+		return
+	}
+	// product snapshots
+	if err = codec.RegisterKey(domain.ProductV1{}.SnapshotName(), domain.ProductV1{}); err != nil {
 		return
 	}
 
