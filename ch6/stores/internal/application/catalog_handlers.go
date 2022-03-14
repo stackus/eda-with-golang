@@ -31,12 +31,12 @@ func (h CatalogHandlers) OnProductRebranded(ctx context.Context, event ddd.Event
 }
 
 func (h CatalogHandlers) OnProductPriceIncreased(ctx context.Context, event ddd.Event) error {
-	payload := event.Payload().(*domain.ProductPriceIncreased)
+	payload := event.Payload().(*domain.ProductPriceChanged)
 	return h.catalog.UpdatePrice(ctx, event.AggregateID(), payload.Price)
 }
 
 func (h CatalogHandlers) OnProductPriceDecreased(ctx context.Context, event ddd.Event) error {
-	payload := event.Payload().(*domain.ProductPriceDecreased)
+	payload := event.Payload().(*domain.ProductPriceChanged)
 	return h.catalog.UpdatePrice(ctx, event.AggregateID(), payload.Price)
 }
 

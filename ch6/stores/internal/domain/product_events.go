@@ -27,19 +27,9 @@ type ProductRebranded struct {
 // Key implements registry.Registerable
 func (ProductRebranded) Key() string { return ProductRebrandedEvent }
 
-type ProductPriceIncreased struct {
+type ProductPriceChanged struct {
 	Price float64
 }
-
-// Key implements registry.Registerable
-func (ProductPriceIncreased) Key() string { return ProductPriceIncreasedEvent }
-
-type ProductPriceDecreased struct {
-	Price float64
-}
-
-// Key implements registry.Registerable
-func (ProductPriceDecreased) Key() string { return ProductPriceDecreasedEvent }
 
 type ProductRemoved struct{}
 

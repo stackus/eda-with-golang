@@ -20,7 +20,6 @@ type (
 		AggregateName() string
 		AggregateID() string
 		AggregateVersion() int
-		Metadata() map[string]interface{}
 	}
 
 	EventOption func(*event)
@@ -33,7 +32,6 @@ type (
 		aggregateName    string
 		aggregateID      string
 		aggregateVersion int
-		metadata         map[string]interface{}
 	}
 )
 
@@ -80,8 +78,4 @@ func (e event) AggregateID() string {
 
 func (e event) AggregateVersion() int {
 	return e.aggregateVersion
-}
-
-func (e event) Metadata() map[string]interface{} {
-	return e.metadata
 }

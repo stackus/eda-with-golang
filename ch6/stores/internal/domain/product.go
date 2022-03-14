@@ -76,7 +76,7 @@ func (p *Product) IncreasePrice(price float64) error {
 		return ErrNotAPriceIncrease
 	}
 
-	p.AddEvent(ProductPriceIncreasedEvent, &ProductPriceIncreased{
+	p.AddEvent(ProductPriceIncreasedEvent, &ProductPriceChanged{
 		Price: price,
 	})
 
@@ -88,7 +88,7 @@ func (p *Product) DecreasePrice(price float64) error {
 		return ErrNotAPriceDecrease
 	}
 
-	p.AddEvent(ProductPriceDecreasedEvent, &ProductPriceDecreased{
+	p.AddEvent(ProductPriceDecreasedEvent, &ProductPriceChanged{
 		Price: price,
 	})
 
@@ -114,10 +114,7 @@ func (p *Product) ApplyEvent(event ddd.Event) error {
 		p.Name = payload.Name
 		p.Description = payload.Description
 
-	case *ProductPriceIncreased:
-		p.Price = payload.Price
-
-	case *ProductPriceDecreased:
+	case *ProductPriceChanged:
 		p.Price = payload.Price
 
 	case *ProductRemoved:

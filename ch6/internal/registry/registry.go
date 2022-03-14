@@ -14,8 +14,8 @@ type (
 	Unmarshaller func(d []byte, v interface{}) error
 
 	Registry interface {
-		Build(key string, options ...BuildOption) (interface{}, error)
 		Marshal(key string, v interface{}) ([]byte, error)
+		Build(key string, options ...BuildOption) (interface{}, error)
 		Unmarshal(key string, data []byte, options ...BuildOption) (interface{}, error)
 		register(key string, fn func() interface{}, m Marshaller, u Unmarshaller, o []BuildOption) error
 	}

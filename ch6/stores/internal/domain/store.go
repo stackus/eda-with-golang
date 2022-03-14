@@ -64,7 +64,9 @@ func (s *Store) EnableParticipation() (err error) {
 		return ErrStoreIsAlreadyParticipating
 	}
 
-	s.AddEvent(StoreParticipationEnabledEvent, &StoreParticipationEnabled{})
+	s.AddEvent(StoreParticipationEnabledEvent, &StoreParticipationToggled{
+		Participating: true,
+	})
 
 	return
 }
@@ -74,7 +76,9 @@ func (s *Store) DisableParticipation() (err error) {
 		return ErrStoreIsAlreadyNotParticipating
 	}
 
-	s.AddEvent(StoreParticipationDisabledEvent, &StoreParticipationDisabled{})
+	s.AddEvent(StoreParticipationDisabledEvent, &StoreParticipationToggled{
+		Participating: false,
+	})
 
 	return
 }
@@ -93,11 +97,8 @@ func (s *Store) ApplyEvent(event ddd.Event) error {
 		s.Name = payload.Name
 		s.Location = payload.Location
 
-	case *StoreParticipationEnabled:
-		s.Participating = true
-
-	case *StoreParticipationDisabled:
-		s.Participating = false
+	case *StoreParticipationToggled:
+		s.Participating = payload.Participating
 
 	case *StoreRebranded:
 		s.Name = payload.Name

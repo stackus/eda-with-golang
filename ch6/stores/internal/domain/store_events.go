@@ -15,15 +15,9 @@ type StoreCreated struct {
 // Key implements registry.Registerable
 func (StoreCreated) Key() string { return StoreCreatedEvent }
 
-type StoreParticipationEnabled struct{}
-
-// Key implements registry.Registerable
-func (StoreParticipationEnabled) Key() string { return StoreParticipationEnabledEvent }
-
-type StoreParticipationDisabled struct{}
-
-// Key implements registry.Registerable
-func (StoreParticipationDisabled) Key() string { return StoreParticipationDisabledEvent }
+type StoreParticipationToggled struct {
+	Participating bool
+}
 
 type StoreRebranded struct {
 	Name string

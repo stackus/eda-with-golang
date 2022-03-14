@@ -12,6 +12,7 @@ type BasketStarted struct {
 	Basket *Basket
 }
 
+// Key implements registry.Registerable
 func (BasketStarted) Key() string { return BasketStartedEvent }
 
 type BasketItemAdded struct {
@@ -19,6 +20,7 @@ type BasketItemAdded struct {
 	Item   Item
 }
 
+// Key implements registry.Registerable
 func (BasketItemAdded) Key() string { return BasketItemAddedEvent }
 
 type BasketItemRemoved struct {
@@ -26,16 +28,19 @@ type BasketItemRemoved struct {
 	Item   Item
 }
 
+// Key implements registry.Registerable
 func (BasketItemRemoved) Key() string { return BasketItemRemovedEvent }
 
 type BasketCanceled struct {
 	Basket *Basket
 }
 
+// Key implements registry.Registerable
 func (BasketCanceled) Key() string { return BasketCanceledEvent }
 
 type BasketCheckedOut struct {
 	Basket *Basket
 }
 
+// Key implements registry.Registerable
 func (BasketCheckedOut) Key() string { return BasketCheckedOutEvent }

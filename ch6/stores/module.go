@@ -82,10 +82,10 @@ func registrations(reg registry.Registry) (err error) {
 	if err = codec.Register(domain.StoreCreated{}); err != nil {
 		return
 	}
-	if err = codec.Register(domain.StoreParticipationEnabled{}); err != nil {
+	if err = codec.RegisterKey(domain.StoreParticipationEnabledEvent, domain.StoreParticipationToggled{}); err != nil {
 		return
 	}
-	if err = codec.Register(domain.StoreParticipationDisabled{}); err != nil {
+	if err = codec.RegisterKey(domain.StoreParticipationDisabledEvent, domain.StoreParticipationToggled{}); err != nil {
 		return
 	}
 	if err = codec.Register(domain.StoreRebranded{}); err != nil {
@@ -107,10 +107,10 @@ func registrations(reg registry.Registry) (err error) {
 	if err = codec.Register(domain.ProductRebranded{}); err != nil {
 		return
 	}
-	if err = codec.Register(domain.ProductPriceIncreased{}); err != nil {
+	if err = codec.RegisterKey(domain.ProductPriceIncreasedEvent, domain.ProductPriceChanged{}); err != nil {
 		return
 	}
-	if err = codec.Register(domain.ProductPriceDecreased{}); err != nil {
+	if err = codec.RegisterKey(domain.ProductPriceDecreasedEvent, domain.ProductPriceChanged{}); err != nil {
 		return
 	}
 	if err = codec.Register(domain.ProductRemoved{}); err != nil {
