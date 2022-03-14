@@ -70,7 +70,7 @@ func (a *app) waitForWeb(ctx context.Context) error {
 
 	group, gCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
-		fmt.Println("web server started")
+		fmt.Printf("web server started; listening at http://localhost%s\n", a.cfg.Web.Port)
 		defer fmt.Println("web server shutdown")
 		if err := webServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			return err
