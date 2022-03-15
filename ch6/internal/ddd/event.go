@@ -25,13 +25,13 @@ type (
 	EventOption func(*event)
 
 	event struct {
-		id               string
-		name             string
-		payload          EventPayload
-		occurredAt       time.Time
-		aggregateName    string
-		aggregateID      string
-		aggregateVersion int
+		id         string
+		name       string
+		payload    EventPayload
+		occurredAt time.Time
+		aggName    string
+		aggID      string
+		aggVersion int
 	}
 )
 
@@ -52,30 +52,10 @@ func NewEvent(name string, payload EventPayload, options ...EventOption) Event {
 	return evt
 }
 
-func (e event) ID() string {
-	return e.id
-}
-
-func (e event) EventName() string {
-	return e.name
-}
-
-func (e event) Payload() EventPayload {
-	return e.payload
-}
-
-func (e event) OccurredAt() time.Time {
-	return e.occurredAt
-}
-
-func (e event) AggregateName() string {
-	return e.aggregateName
-}
-
-func (e event) AggregateID() string {
-	return e.aggregateID
-}
-
-func (e event) AggregateVersion() int {
-	return e.aggregateVersion
-}
+func (e event) ID() string            { return e.id }
+func (e event) EventName() string     { return e.name }
+func (e event) Payload() EventPayload { return e.payload }
+func (e event) OccurredAt() time.Time { return e.occurredAt }
+func (e event) AggregateName() string { return e.aggName }
+func (e event) AggregateID() string   { return e.aggID }
+func (e event) AggregateVersion() int { return e.aggVersion }

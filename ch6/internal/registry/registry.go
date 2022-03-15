@@ -10,21 +10,21 @@ type (
 		Key() string
 	}
 
-	Marshaller   func(v interface{}) ([]byte, error)
-	Unmarshaller func(d []byte, v interface{}) error
+	Serializer   func(v interface{}) ([]byte, error)
+	Deserializer func(d []byte, v interface{}) error
 
 	Registry interface {
-		Marshal(key string, v interface{}) ([]byte, error)
+		Serialize(key string, v interface{}) ([]byte, error)
 		Build(key string, options ...BuildOption) (interface{}, error)
-		Unmarshal(key string, data []byte, options ...BuildOption) (interface{}, error)
-		register(key string, fn func() interface{}, m Marshaller, u Unmarshaller, o []BuildOption) error
+		Deserialize(key string, data []byte, options ...BuildOption) (interface{}, error)
+		register(key string, fn func() interface{}, s Serializer, d Deserializer, o []BuildOption) error
 	}
 )
 
 type registered struct {
 	factory      func() interface{}
-	marshaller   Marshaller
-	unmarshaller Unmarshaller
+	serializer   Serializer
+	deserializer Deserializer
 	options      []BuildOption
 }
 
@@ -39,21 +39,21 @@ func New() *registry {
 	}
 }
 
-func (r *registry) Marshal(key string, v interface{}) ([]byte, error) {
+func (r *registry) Serialize(key string, v interface{}) ([]byte, error) {
 	reg, exists := r.registered[key]
 	if !exists {
 		return nil, fmt.Errorf("nothing has been registered with the key `%s`", key)
 	}
-	return reg.marshaller(v)
+	return reg.serializer(v)
 }
 
-func (r *registry) Unmarshal(key string, data []byte, options ...BuildOption) (interface{}, error) {
+func (r *registry) Deserialize(key string, data []byte, options ...BuildOption) (interface{}, error) {
 	v, err := r.Build(key, options...)
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.registered[key].unmarshaller(data, v)
+	err = r.registered[key].deserializer(data, v)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (r *registry) Build(key string, options ...BuildOption) (interface{}, error
 	return v, nil
 }
 
-func (r *registry) register(key string, fn func() interface{}, m Marshaller, u Unmarshaller, o []BuildOption,
+func (r *registry) register(key string, fn func() interface{}, s Serializer, d Deserializer, o []BuildOption,
 ) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -91,8 +91,8 @@ func (r *registry) register(key string, fn func() interface{}, m Marshaller, u U
 
 	r.registered[key] = registered{
 		factory:      fn,
-		marshaller:   m,
-		unmarshaller: u,
+		serializer:   s,
+		deserializer: d,
 		options:      o,
 	}
 

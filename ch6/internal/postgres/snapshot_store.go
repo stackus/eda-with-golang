@@ -30,20 +30,20 @@ func NewSnapshotStore(store es.AggregateStore, tableName string, db *sql.DB, reg
 }
 
 func (s SnapshotStore) Load(ctx context.Context, aggregate es.EventSourcedAggregate) error {
-	const query = `SELECT entity_version, snapshot_name, snapshot_data FROM %s WHERE entity_name = $1 AND entity_id = $2 LIMIT 1`
+	const query = `SELECT stream_version, snapshot_name, snapshot_data FROM %s WHERE stream_id = $1 AND stream_name = $2 LIMIT 1`
 
 	var entityVersion int
 	var snapshotName string
 	var snapshotData []byte
 
-	if err := s.db.QueryRowContext(ctx, s.table(query), aggregate.AggregateName(), aggregate.ID()).Scan(&entityVersion, &snapshotName, &snapshotData); err != nil {
+	if err := s.db.QueryRowContext(ctx, s.table(query), aggregate.ID(), aggregate.AggregateName()).Scan(&entityVersion, &snapshotName, &snapshotData); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return s.AggregateStore.Load(ctx, aggregate)
 		}
 		return err
 	}
 
-	v, err := s.registry.Unmarshal(snapshotName, snapshotData, registry.ValidateImplements((*es.Snapshot)(nil)))
+	v, err := s.registry.Deserialize(snapshotName, snapshotData, registry.ValidateImplements((*es.Snapshot)(nil)))
 	if err != nil {
 		return err
 	}
@@ -56,10 +56,10 @@ func (s SnapshotStore) Load(ctx context.Context, aggregate es.EventSourcedAggreg
 }
 
 func (s SnapshotStore) Save(ctx context.Context, aggregate es.EventSourcedAggregate) error {
-	const query = `INSERT INTO %s (entity_name, entity_id, entity_version, snapshot_name, snapshot_data) 
+	const query = `INSERT INTO %s (stream_id, stream_name, stream_version, snapshot_name, snapshot_data) 
 VALUES ($1, $2, $3, $4, $5) 
-ON CONFLICT (entity_name, entity_id) DO
-UPDATE SET entity_version = EXCLUDED.entity_version, snapshot_name = EXCLUDED.snapshot_name, snapshot_data = EXCLUDED.snapshot_data`
+ON CONFLICT (stream_id, stream_name) DO
+UPDATE SET stream_version = EXCLUDED.stream_version, snapshot_name = EXCLUDED.snapshot_name, snapshot_data = EXCLUDED.snapshot_data`
 
 	if err := s.AggregateStore.Save(ctx, aggregate); err != nil {
 		return err
@@ -76,19 +76,19 @@ UPDATE SET entity_version = EXCLUDED.entity_version, snapshot_name = EXCLUDED.sn
 
 	snapshot := sser.ToSnapshot()
 
-	data, err := s.registry.Marshal(snapshot.SnapshotName(), snapshot)
+	data, err := s.registry.Serialize(snapshot.SnapshotName(), snapshot)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.db.ExecContext(ctx, s.table(query), aggregate.AggregateName(), aggregate.ID(), aggregate.PendingVersion(), snapshot.SnapshotName(), data)
+	_, err = s.db.ExecContext(ctx, s.table(query), aggregate.ID(), aggregate.AggregateName(), aggregate.PendingVersion(), snapshot.SnapshotName(), data)
 
 	return err
 }
 
 // TODO use injected & configurable strategies
 func (SnapshotStore) shouldSnapshot(aggregate es.EventSourcedAggregate) bool {
-	var maxChanges = 3 // low for demonstration; production envs should use higher values 10, 50, 100...
+	var maxChanges = 3 // low for demonstration; production envs should use higher values 50, 75, 100...
 	var pendingVersion = aggregate.PendingVersion()
 	var pendingChanges = len(aggregate.GetEvents())
 

@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
+	es2 "github.com/stackus/eda-with-golang/ch6/internal/es"
 	"github.com/stackus/eda-with-golang/ch6/internal/monolith"
 	pg "github.com/stackus/eda-with-golang/ch6/internal/postgres"
 	"github.com/stackus/eda-with-golang/ch6/internal/registry"
-	"github.com/stackus/eda-with-golang/ch6/internal/registry/codecs"
+	"github.com/stackus/eda-with-golang/ch6/internal/registry/serdes"
 	"github.com/stackus/eda-with-golang/ch6/stores/internal/application"
 	"github.com/stackus/eda-with-golang/ch6/stores/internal/domain"
 	"github.com/stackus/eda-with-golang/ch6/stores/internal/es"
@@ -29,7 +30,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 		return err
 	}
 	domainDispatcher := ddd.NewEventDispatcher()
-	aggregateStore := es.NewEventPublisher(
+	aggregateStore := es2.NewEventPublisher(
 		pg.NewSnapshotStore(
 			pg.NewEventStore("stores.events", mono.DB(), reg),
 			"stores.snapshots", mono.DB(), reg,
@@ -72,52 +73,52 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 }
 
 func registrations(reg registry.Registry) (err error) {
-	codec := codecs.NewJSONCodec(reg)
+	serde := serdes.NewJsonSerde(reg)
 
 	// Store
-	if err = codec.Register(domain.Store{}); err != nil {
+	if err = serde.Register(domain.Store{}); err != nil {
 		return
 	}
 	// store events
-	if err = codec.Register(domain.StoreCreated{}); err != nil {
+	if err = serde.Register(domain.StoreCreated{}); err != nil {
 		return
 	}
-	if err = codec.RegisterKey(domain.StoreParticipationEnabledEvent, domain.StoreParticipationToggled{}); err != nil {
+	if err = serde.RegisterKey(domain.StoreParticipationEnabledEvent, domain.StoreParticipationToggled{}); err != nil {
 		return
 	}
-	if err = codec.RegisterKey(domain.StoreParticipationDisabledEvent, domain.StoreParticipationToggled{}); err != nil {
+	if err = serde.RegisterKey(domain.StoreParticipationDisabledEvent, domain.StoreParticipationToggled{}); err != nil {
 		return
 	}
-	if err = codec.Register(domain.StoreRebranded{}); err != nil {
+	if err = serde.Register(domain.StoreRebranded{}); err != nil {
 		return
 	}
 	// store snapshots
-	if err = codec.RegisterKey(domain.StoreV1{}.SnapshotName(), domain.StoreV1{}); err != nil {
+	if err = serde.RegisterKey(domain.StoreV1{}.SnapshotName(), domain.StoreV1{}); err != nil {
 		return
 	}
 
 	// Product
-	if err = codec.Register(domain.Product{}); err != nil {
+	if err = serde.Register(domain.Product{}); err != nil {
 		return
 	}
 	// product events
-	if err = codec.Register(domain.ProductAdded{}); err != nil {
+	if err = serde.Register(domain.ProductAdded{}); err != nil {
 		return
 	}
-	if err = codec.Register(domain.ProductRebranded{}); err != nil {
+	if err = serde.Register(domain.ProductRebranded{}); err != nil {
 		return
 	}
-	if err = codec.RegisterKey(domain.ProductPriceIncreasedEvent, domain.ProductPriceChanged{}); err != nil {
+	if err = serde.RegisterKey(domain.ProductPriceIncreasedEvent, domain.ProductPriceChanged{}); err != nil {
 		return
 	}
-	if err = codec.RegisterKey(domain.ProductPriceDecreasedEvent, domain.ProductPriceChanged{}); err != nil {
+	if err = serde.RegisterKey(domain.ProductPriceDecreasedEvent, domain.ProductPriceChanged{}); err != nil {
 		return
 	}
-	if err = codec.Register(domain.ProductRemoved{}); err != nil {
+	if err = serde.Register(domain.ProductRemoved{}); err != nil {
 		return
 	}
 	// product snapshots
-	if err = codec.RegisterKey(domain.ProductV1{}.SnapshotName(), domain.ProductV1{}); err != nil {
+	if err = serde.RegisterKey(domain.ProductV1{}.SnapshotName(), domain.ProductV1{}); err != nil {
 		return
 	}
 

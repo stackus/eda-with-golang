@@ -22,23 +22,17 @@ func NewAggregate(id, name string) Aggregate {
 	}
 }
 
-func (a Aggregate) ID() string {
-	return a.id
-}
-
-func (a Aggregate) AggregateName() string {
-	return a.name
-}
+func (a Aggregate) AggregateName() string { return a.name }
+func (a Aggregate) GetEvents() []Event    { return a.events }
+func (a Aggregate) ClearEvents()          { a.events = []Event{} }
 
 func (a *Aggregate) AddEvent(name string, payload EventPayload, options ...EventOption) {
-	options = append(options, WithAggregateInfo(a.name, a.id))
-	a.events = append(a.events, NewEvent(name, payload, options...))
-}
-
-func (a Aggregate) GetEvents() []Event {
-	return a.events
-}
-
-func (a Aggregate) ClearEvents() {
-	a.events = []Event{}
+	options = append(
+		options,
+		WithAggregateInfo(a.name, a.id),
+	)
+	a.events = append(
+		a.events,
+		NewEvent(name, payload, options...),
+	)
 }

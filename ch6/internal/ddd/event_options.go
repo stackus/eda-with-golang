@@ -18,13 +18,13 @@ func WithOccurredAt(occurred time.Time) EventOption {
 
 func WithAggregateInfo(name, id string) EventOption {
 	return func(e *event) {
-		e.aggregateID = id
-		e.aggregateName = name
+		e.aggID = id
+		e.aggName = name
 	}
 }
 
 func WithAggregateVersion(version int) EventOption {
 	return func(e *event) {
-		e.aggregateVersion = version
+		e.aggVersion = version
 	}
 }

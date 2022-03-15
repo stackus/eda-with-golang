@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-func Register(reg Registry, v Registerable, m Marshaller, u Unmarshaller, os []BuildOption) error {
+func Register(reg Registry, v Registerable, s Serializer, d Deserializer, os []BuildOption) error {
 	var key string
 
 	t := reflect.TypeOf(v)
@@ -19,10 +19,10 @@ func Register(reg Registry, v Registerable, m Marshaller, u Unmarshaller, os []B
 		key = v.Key()
 	}
 
-	return RegisterKey(reg, key, v, m, u, os)
+	return RegisterKey(reg, key, v, s, d, os)
 }
 
-func RegisterKey(reg Registry, key string, v interface{}, m Marshaller, u Unmarshaller, os []BuildOption) error {
+func RegisterKey(reg Registry, key string, v interface{}, s Serializer, d Deserializer, os []BuildOption) error {
 	t := reflect.TypeOf(v)
 
 	if t.Kind() == reflect.Ptr {
@@ -31,10 +31,10 @@ func RegisterKey(reg Registry, key string, v interface{}, m Marshaller, u Unmars
 
 	return reg.register(key, func() interface{} {
 		return reflect.New(t).Interface()
-	}, m, u, os)
+	}, s, d, os)
 }
 
-func RegisterFactory(reg Registry, key string, fn func() interface{}, m Marshaller, u Unmarshaller,
+func RegisterFactory(reg Registry, key string, fn func() interface{}, s Serializer, d Deserializer,
 	os []BuildOption,
 ) error {
 	if v := fn(); v == nil {
@@ -45,5 +45,5 @@ func RegisterFactory(reg Registry, key string, fn func() interface{}, m Marshall
 		return fmt.Errorf("factory for item `%s` does not return a pointer receiver", key)
 	}
 
-	return reg.register(key, fn, m, u, os)
+	return reg.register(key, fn, s, d, os)
 }

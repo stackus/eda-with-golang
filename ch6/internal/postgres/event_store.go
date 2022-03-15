@@ -30,14 +30,14 @@ func NewEventStore(tableName string, db *sql.DB, registry registry.Registry) Eve
 }
 
 func (s EventStore) Load(ctx context.Context, aggregate es.EventSourcedAggregate) (err error) {
-	const query = `SELECT entity_version, event_id, event_name, event_data, occurred_at FROM %s WHERE entity_name = $1 AND entity_id = $2 AND entity_version > $3 ORDER BY entity_version ASC`
+	const query = `SELECT stream_version, event_id, event_name, event_data, occurred_at FROM %s WHERE stream_id = $1 AND stream_name = $2 AND stream_version > $3 ORDER BY stream_version ASC`
 
-	aggregateName := aggregate.AggregateName()
 	aggregateID := aggregate.ID()
+	aggregateName := aggregate.AggregateName()
 
 	var rows *sql.Rows
 
-	rows, err = s.db.QueryContext(ctx, s.table(query), aggregateName, aggregateID, aggregate.Version())
+	rows, err = s.db.QueryContext(ctx, s.table(query), aggregateID, aggregateName, aggregate.Version())
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (s EventStore) Load(ctx context.Context, aggregate es.EventSourcedAggregate
 		}
 
 		var payload interface{}
-		payload, err = s.registry.Unmarshal(eventName, payloadData)
+		payload, err = s.registry.Deserialize(eventName, payloadData)
 		if err != nil {
 			return err
 		}
@@ -81,7 +81,7 @@ func (s EventStore) Load(ctx context.Context, aggregate es.EventSourcedAggregate
 }
 
 func (s EventStore) Save(ctx context.Context, aggregate es.EventSourcedAggregate) (err error) {
-	const query = `INSERT INTO %s (entity_name, entity_id, entity_version, event_id, event_name, event_data, occurred_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	const query = `INSERT INTO %s (stream_id, stream_name, stream_version, event_id, event_name, event_data, occurred_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	var tx *sql.Tx
 	tx, err = s.db.BeginTx(ctx, &sql.TxOptions{})
@@ -104,19 +104,19 @@ func (s EventStore) Save(ctx context.Context, aggregate es.EventSourcedAggregate
 		}
 	}()
 
-	aggregateName := aggregate.AggregateName()
 	aggregateID := aggregate.ID()
+	aggregateName := aggregate.AggregateName()
 
 	for _, event := range aggregate.GetEvents() {
 		var payloadData []byte
 
-		payloadData, err = s.registry.Marshal(event.EventName(), event.Payload())
+		payloadData, err = s.registry.Serialize(event.EventName(), event.Payload())
 		if err != nil {
 			return err
 		}
 		if _, err = tx.ExecContext(
 			ctx, s.table(query),
-			aggregateName, aggregateID, event.AggregateVersion(), event.ID(), event.EventName(), payloadData, event.OccurredAt(),
+			aggregateID, aggregateName, event.AggregateVersion(), event.ID(), event.EventName(), payloadData, event.OccurredAt(),
 		); err != nil {
 			return err
 		}
