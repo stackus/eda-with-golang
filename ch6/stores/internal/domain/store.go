@@ -45,8 +45,6 @@ func CreateStore(id, name, location string) (*Store, error) {
 	}
 
 	store := NewStore(id)
-	store.Name = name
-	store.Location = location
 
 	store.AddEvent(StoreCreatedEvent, &StoreCreated{
 		Name:     name,
