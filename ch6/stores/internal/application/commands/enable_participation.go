@@ -30,9 +30,5 @@ func (h EnableParticipationHandler) EnableParticipation(ctx context.Context, cmd
 		return err
 	}
 
-	if err = h.stores.Save(ctx, store); err != nil {
-		return err
-	}
-
-	return nil
+	return h.stores.Save(ctx, store)
 }

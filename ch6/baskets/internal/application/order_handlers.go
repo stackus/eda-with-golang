@@ -9,10 +9,9 @@ import (
 
 type OrderHandlers struct {
 	orders domain.OrderRepository
-	ignoreUnimplementedDomainEvents
 }
 
-var _ DomainEventHandlers = (*OrderHandlers)(nil)
+var _ ddd.EventHandler = (*OrderHandlers)(nil)
 
 func NewOrderHandlers(orders domain.OrderRepository) OrderHandlers {
 	return OrderHandlers{
@@ -20,7 +19,15 @@ func NewOrderHandlers(orders domain.OrderRepository) OrderHandlers {
 	}
 }
 
-func (h OrderHandlers) OnBasketCheckedOut(ctx context.Context, event ddd.Event) error {
+func (h OrderHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
+	switch event.EventName() {
+	case domain.BasketCheckedOutEvent:
+		return h.onBasketCheckedOut(ctx, event)
+	}
+	return nil
+}
+
+func (h OrderHandlers) onBasketCheckedOut(ctx context.Context, event ddd.Event) error {
 	checkedOut := event.Payload().(*domain.BasketCheckedOut)
 	_, err := h.orders.Save(ctx, checkedOut.Basket)
 	return err

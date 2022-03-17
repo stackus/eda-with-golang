@@ -20,7 +20,11 @@ func NewAggregateRepository(registry registry.Registry, store AggregateStore) Ag
 }
 
 func (r AggregateRepository) Load(ctx context.Context, aggregateID, aggregateName string) (interface{}, error) {
-	agg, err := r.registry.Build(aggregateName, ddd.SetID(aggregateID), ddd.SetName(aggregateName))
+	agg, err := r.registry.Build(
+		aggregateName,
+		ddd.SetID(aggregateID),
+		ddd.SetName(aggregateName),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +41,7 @@ func (r AggregateRepository) Save(ctx context.Context, aggregate EventSourcedAgg
 		return nil
 	}
 
-	for _, event := range aggregate.GetEvents() {
+	for _, event := range aggregate.Events() {
 		if err := aggregate.ApplyEvent(event); err != nil {
 			return err
 		}

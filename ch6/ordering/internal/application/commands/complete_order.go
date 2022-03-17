@@ -40,7 +40,7 @@ func (h CompleteOrderHandler) CompleteOrder(ctx context.Context, cmd CompleteOrd
 	}
 
 	// publish domain events
-	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+	if err = h.domainPublisher.Publish(ctx, order.Events()...); err != nil {
 		return err
 	}
 

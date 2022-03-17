@@ -20,12 +20,16 @@ type SnapshotStore struct {
 
 var _ es.AggregateStore = (*SnapshotStore)(nil)
 
-func NewSnapshotStore(store es.AggregateStore, tableName string, db *sql.DB, registry registry.Registry) SnapshotStore {
-	return SnapshotStore{
-		AggregateStore: store,
-		tableName:      tableName,
-		db:             db,
-		registry:       registry,
+func NewSnapshotStore(tableName string, db *sql.DB, registry registry.Registry) es.AggregateStoreMiddleware {
+	snapshots := SnapshotStore{
+		tableName: tableName,
+		db:        db,
+		registry:  registry,
+	}
+
+	return func(store es.AggregateStore) es.AggregateStore {
+		snapshots.AggregateStore = store
+		return snapshots
 	}
 }
 
@@ -90,7 +94,7 @@ UPDATE SET stream_version = EXCLUDED.stream_version, snapshot_name = EXCLUDED.sn
 func (SnapshotStore) shouldSnapshot(aggregate es.EventSourcedAggregate) bool {
 	var maxChanges = 3 // low for demonstration; production envs should use higher values 50, 75, 100...
 	var pendingVersion = aggregate.PendingVersion()
-	var pendingChanges = len(aggregate.GetEvents())
+	var pendingChanges = len(aggregate.Events())
 
 	return pendingVersion >= maxChanges && ((pendingChanges >= maxChanges) ||
 		(pendingVersion%maxChanges < pendingChanges) ||

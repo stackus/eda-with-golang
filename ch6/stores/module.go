@@ -30,13 +30,12 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 		return err
 	}
 	domainDispatcher := ddd.NewEventDispatcher()
-	aggregateStore := es2.NewEventPublisher(
-		pg.NewSnapshotStore(
-			pg.NewEventStore("stores.events", mono.DB(), reg),
-			"stores.snapshots", mono.DB(), reg,
-		),
-		domainDispatcher,
+	aggregateStore := es2.AggregateStoreWithMiddleware(
+		pg.NewEventStore("stores.events", mono.DB(), reg),
+		es2.NewEventPublisher(domainDispatcher),
+		pg.NewSnapshotStore("stores.snapshots", mono.DB(), reg),
 	)
+
 	stores := es.NewStoreRepository(reg, aggregateStore)
 	products := es.NewProductRepository(reg, aggregateStore)
 	catalog := postgres.NewCatalogRepository("stores.products", mono.DB())
@@ -47,11 +46,11 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 		application.New(stores, products, catalog, mall),
 		mono.Logger(),
 	)
-	catalogHandlers := logging.LogDomainEventHandlerAccess(
+	catalogHandlers := logging.LogEventHandlerAccess(
 		application.NewCatalogHandlers(catalog),
 		"Catalog", mono.Logger(),
 	)
-	mallHandlers := logging.LogDomainEventHandlerAccess(
+	mallHandlers := logging.LogEventHandlerAccess(
 		application.NewMallHandlers(mall),
 		"Mall", mono.Logger(),
 	)

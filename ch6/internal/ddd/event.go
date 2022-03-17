@@ -1,19 +1,16 @@
 package ddd
 
 import (
-	"context"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type (
-	EventHandler func(ctx context.Context, event Event) error
-
 	EventPayload interface{}
 
 	Event interface {
-		ID() string
+		IDer
 		EventName() string
 		Payload() EventPayload
 		OccurredAt() time.Time
@@ -25,8 +22,7 @@ type (
 	EventOption func(*event)
 
 	event struct {
-		id         string
-		name       string
+		Entity
 		payload    EventPayload
 		occurredAt time.Time
 		aggName    string
@@ -39,8 +35,7 @@ var _ Event = (*event)(nil)
 
 func NewEvent(name string, payload EventPayload, options ...EventOption) Event {
 	evt := event{
-		id:         uuid.New().String(),
-		name:       name,
+		Entity:     NewEntity(uuid.New().String(), name),
 		payload:    payload,
 		occurredAt: time.Now(),
 	}
@@ -52,7 +47,6 @@ func NewEvent(name string, payload EventPayload, options ...EventOption) Event {
 	return evt
 }
 
-func (e event) ID() string            { return e.id }
 func (e event) EventName() string     { return e.name }
 func (e event) Payload() EventPayload { return e.payload }
 func (e event) OccurredAt() time.Time { return e.occurredAt }

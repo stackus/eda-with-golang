@@ -38,7 +38,7 @@ func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error
 	}
 
 	// publish domain events
-	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+	if err = h.domainPublisher.Publish(ctx, order.Events()...); err != nil {
 		return err
 	}
 

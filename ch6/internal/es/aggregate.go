@@ -28,23 +28,19 @@ func NewAggregate(id, name string) Aggregate {
 }
 
 func (a *Aggregate) AddEvent(name string, payload ddd.EventPayload, options ...ddd.EventOption) {
-	options = append(options, ddd.WithAggregateVersion(a.PendingVersion()+1))
+	options = append(
+		options,
+		ddd.WithAggregateVersion(a.PendingVersion()+1),
+	)
 	a.Aggregate.AddEvent(name, payload, options...)
 }
 
 func (a *Aggregate) CommitEvents() {
-	a.version += len(a.GetEvents())
+	a.version += len(a.Events())
 	a.ClearEvents()
 }
 
-func (a Aggregate) Version() int {
-	return a.version
-}
+func (a Aggregate) Version() int        { return a.version }
+func (a Aggregate) PendingVersion() int { return a.version + len(a.Events()) }
 
-func (a Aggregate) PendingVersion() int {
-	return a.version + len(a.GetEvents())
-}
-
-func (a *Aggregate) setVersion(version int) {
-	a.version = version
-}
+func (a *Aggregate) setVersion(version int) { a.version = version }

@@ -31,9 +31,5 @@ func (h RebrandStoreHandler) RebrandStore(ctx context.Context, cmd RebrandStore)
 		return err
 	}
 
-	if err = h.stores.Save(ctx, store); err != nil {
-		return err
-	}
-
-	return nil
+	return h.stores.Save(ctx, store)
 }

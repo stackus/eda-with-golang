@@ -9,10 +9,9 @@ import (
 
 type NotificationHandlers struct {
 	notifications domain.NotificationRepository
-	ignoreUnimplementedDomainEvents
 }
 
-var _ DomainEventHandlers = (*NotificationHandlers)(nil)
+var _ ddd.EventHandler = (*NotificationHandlers)(nil)
 
 func NewNotificationHandlers(notifications domain.NotificationRepository) *NotificationHandlers {
 	return &NotificationHandlers{
@@ -20,17 +19,29 @@ func NewNotificationHandlers(notifications domain.NotificationRepository) *Notif
 	}
 }
 
-func (h NotificationHandlers) OnOrderCreated(ctx context.Context, event ddd.Event) error {
+func (h NotificationHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
+	switch event.EventName() {
+	case domain.OrderCreatedEvent:
+		return h.onOrderCreated(ctx, event)
+	case domain.OrderReadiedEvent:
+		return h.onOrderReadied(ctx, event)
+	case domain.OrderCanceledEvent:
+		return h.onOrderCanceled(ctx, event)
+	}
+	return nil
+}
+
+func (h NotificationHandlers) onOrderCreated(ctx context.Context, event ddd.Event) error {
 	orderCreated := event.Payload().(*domain.OrderCreated)
 	return h.notifications.NotifyOrderCreated(ctx, orderCreated.Order.ID(), orderCreated.Order.CustomerID)
 }
 
-func (h NotificationHandlers) OnOrderReadied(ctx context.Context, event ddd.Event) error {
+func (h NotificationHandlers) onOrderReadied(ctx context.Context, event ddd.Event) error {
 	orderReadied := event.Payload().(*domain.OrderReadied)
 	return h.notifications.NotifyOrderReady(ctx, orderReadied.Order.ID(), orderReadied.Order.CustomerID)
 }
 
-func (h NotificationHandlers) OnOrderCanceled(ctx context.Context, event ddd.Event) error {
+func (h NotificationHandlers) onOrderCanceled(ctx context.Context, event ddd.Event) error {
 	orderCanceled := event.Payload().(*domain.OrderCanceled)
 	return h.notifications.NotifyOrderCanceled(ctx, orderCanceled.Order.ID(), orderCanceled.Order.CustomerID)
 }

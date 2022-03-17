@@ -5,18 +5,26 @@ import (
 	"sync"
 )
 
-type EventSubscriber interface {
-	Subscribe(name string, handler EventHandler)
-}
+type (
+	EventHandler interface {
+		HandleEvent(ctx context.Context, event Event) error
+	}
 
-type EventPublisher interface {
-	Publish(ctx context.Context, events ...Event) error
-}
+	EventHandlerFunc func(ctx context.Context, event Event) error
 
-type EventDispatcher struct {
-	handlers map[string][]EventHandler
-	mu       sync.Mutex
-}
+	EventSubscriber interface {
+		Subscribe(name string, handler EventHandler)
+	}
+
+	EventPublisher interface {
+		Publish(ctx context.Context, events ...Event) error
+	}
+
+	EventDispatcher struct {
+		handlers map[string][]EventHandler
+		mu       sync.Mutex
+	}
+)
 
 var _ interface {
 	EventSubscriber
@@ -39,11 +47,15 @@ func (h *EventDispatcher) Subscribe(name string, handler EventHandler) {
 func (h *EventDispatcher) Publish(ctx context.Context, events ...Event) error {
 	for _, event := range events {
 		for _, handler := range h.handlers[event.EventName()] {
-			err := handler(ctx, event)
+			err := handler.HandleEvent(ctx, event)
 			if err != nil {
 				return err
 			}
 		}
 	}
 	return nil
+}
+
+func (f EventHandlerFunc) HandleEvent(ctx context.Context, event Event) error {
+	return f(ctx, event)
 }

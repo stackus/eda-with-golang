@@ -32,7 +32,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 		application.New(baskets, stores, products, orders, domainDispatcher),
 		mono.Logger(),
 	)
-	orderHandlers := logging.LogDomainEventHandlerAccess(
+	orderHandlers := logging.LogEventHandlerAccess(
 		application.NewOrderHandlers(orders),
 		"Order", mono.Logger(),
 	)

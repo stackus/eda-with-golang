@@ -41,7 +41,7 @@ func (h AssignShoppingListHandler) AssignShoppingList(ctx context.Context, cmd A
 	}
 
 	// publish domain events
-	if err = h.domainPublisher.Publish(ctx, list.GetEvents()...); err != nil {
+	if err = h.domainPublisher.Publish(ctx, list.Events()...); err != nil {
 		return err
 	}
 

@@ -16,7 +16,7 @@ func NewJsonSerde(r registry.Registry) *JsonSerde {
 	return &JsonSerde{r: r}
 }
 
-func (c JsonSerde) Register(v registry.Registerable, options ...registry.BuildOption) error {
+func (c JsonSerde) Register(v registry.Registrable, options ...registry.BuildOption) error {
 	return registry.Register(c.r, v, c.serialize, c.deserialize, options)
 }
 

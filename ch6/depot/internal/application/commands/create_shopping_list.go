@@ -57,7 +57,7 @@ func (h CreateShoppingListHandler) CreateShoppingList(ctx context.Context, cmd C
 	}
 
 	// publish domain events
-	if err := h.domainPublisher.Publish(ctx, list.GetEvents()...); err != nil {
+	if err := h.domainPublisher.Publish(ctx, list.Events()...); err != nil {
 		return err
 	}
 

@@ -31,7 +31,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	app := logging.LogApplicationAccess(application.New(shoppingLists, stores, products, domainDispatcher),
 		mono.Logger(),
 	)
-	orderHandlers := logging.LogDomainEventHandlerAccess(
+	orderHandlers := logging.LogEventHandlerAccess(
 		application.NewOrderHandlers(orders),
 		"Order", mono.Logger(),
 	)

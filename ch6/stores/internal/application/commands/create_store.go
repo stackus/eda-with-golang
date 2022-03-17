@@ -30,9 +30,5 @@ func (h CreateStoreHandler) CreateStore(ctx context.Context, cmd CreateStore) er
 		return err
 	}
 
-	if err = h.stores.Save(ctx, store); err != nil {
-		return err
-	}
-
-	return nil
+	return h.stores.Save(ctx, store)
 }

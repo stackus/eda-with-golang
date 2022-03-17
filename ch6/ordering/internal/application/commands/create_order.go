@@ -63,7 +63,7 @@ func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) er
 	}
 
 	// publish domain events
-	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+	if err = h.domainPublisher.Publish(ctx, order.Events()...); err != nil {
 		return err
 	}
 

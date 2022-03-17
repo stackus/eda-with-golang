@@ -29,9 +29,5 @@ func (h IncreaseProductPriceHandler) IncreaseProductPrice(ctx context.Context, c
 		return err
 	}
 
-	if err = h.products.Save(ctx, product); err != nil {
-		return err
-	}
-
-	return nil
+	return h.products.Save(ctx, product)
 }

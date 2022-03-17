@@ -121,7 +121,7 @@ func (p *Product) ApplyEvent(event ddd.Event) error {
 		// noop
 
 	default:
-		return errors.ErrInternal.Msgf("%T received the unexpected event payload %T", p, event.Payload())
+		return errors.ErrInternal.Msgf("%T received the event %s with unexpected payload %T", p, event.EventName(), payload)
 	}
 
 	return nil

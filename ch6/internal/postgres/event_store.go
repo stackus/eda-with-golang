@@ -107,7 +107,7 @@ func (s EventStore) Save(ctx context.Context, aggregate es.EventSourcedAggregate
 	aggregateID := aggregate.ID()
 	aggregateName := aggregate.AggregateName()
 
-	for _, event := range aggregate.GetEvents() {
+	for _, event := range aggregate.Events() {
 		var payloadData []byte
 
 		payloadData, err = s.registry.Serialize(event.EventName(), event.Payload())

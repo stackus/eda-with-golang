@@ -34,11 +34,11 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	app = application.New(orders, customers, payments, shopping, domainDispatcher)
 	app = logging.LogApplicationAccess(app, mono.Logger())
 	// setup application handlers
-	notificationHandlers := logging.LogDomainEventHandlerAccess(
+	notificationHandlers := logging.LogEventHandlerAccess(
 		application.NewNotificationHandlers(notifications),
 		"Notification", mono.Logger(),
 	)
-	invoiceHandlers := logging.LogDomainEventHandlerAccess(
+	invoiceHandlers := logging.LogEventHandlerAccess(
 		application.NewInvoiceHandlers(invoices),
 		"Invoice", mono.Logger(),
 	)

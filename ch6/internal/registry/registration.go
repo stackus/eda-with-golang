@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-func Register(reg Registry, v Registerable, s Serializer, d Deserializer, os []BuildOption) error {
+func Register(reg Registry, v Registrable, s Serializer, d Deserializer, os []BuildOption) error {
 	var key string
 
 	t := reflect.TypeOf(v)
@@ -13,7 +13,7 @@ func Register(reg Registry, v Registerable, s Serializer, d Deserializer, os []B
 	switch {
 	// accept: (*T)(nil)
 	case t.Kind() == reflect.Ptr && reflect.ValueOf(v).IsNil():
-		key = reflect.New(t).Interface().(Registerable).Key()
+		key = reflect.New(t).Interface().(Registrable).Key()
 	// accept: *T{}, T{}
 	default:
 		key = v.Key()

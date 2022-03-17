@@ -30,9 +30,5 @@ func (h RemoveProductHandler) RemoveProduct(ctx context.Context, cmd RemoveProdu
 		return err
 	}
 
-	if err = h.products.Save(ctx, product); err != nil {
-		return err
-	}
-
-	return nil
+	return h.products.Save(ctx, product)
 }

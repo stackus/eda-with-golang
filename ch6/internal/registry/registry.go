@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	Registerable interface {
+	Registrable interface {
 		Key() string
 	}
 

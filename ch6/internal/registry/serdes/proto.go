@@ -20,7 +20,7 @@ func NewProtoSerde(r registry.Registry) *ProtoSerde {
 	return &ProtoSerde{r: r}
 }
 
-func (c ProtoSerde) Register(v registry.Registerable, options ...registry.BuildOption) error {
+func (c ProtoSerde) Register(v registry.Registrable, options ...registry.BuildOption) error {
 	if !reflect.TypeOf(v).Implements(protoT) {
 		return fmt.Errorf("%T does not implement proto.Message", v)
 	}

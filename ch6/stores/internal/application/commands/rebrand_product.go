@@ -32,9 +32,5 @@ func (h RebrandProductHandler) RebrandProduct(ctx context.Context, cmd RebrandPr
 		return err
 	}
 
-	if err = h.products.Save(ctx, product); err != nil {
-		return err
-	}
-
-	return nil
+	return h.products.Save(ctx, product)
 }

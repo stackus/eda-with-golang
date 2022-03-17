@@ -46,7 +46,7 @@ func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) er
 	}
 
 	// publish domain events
-	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+	if err = h.domainPublisher.Publish(ctx, order.Events()...); err != nil {
 		return err
 	}
 

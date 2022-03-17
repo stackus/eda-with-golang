@@ -9,8 +9,9 @@ import (
 
 type InvoiceHandlers struct {
 	invoices domain.InvoiceRepository
-	ignoreUnimplementedDomainEvents
 }
+
+var _ ddd.EventHandler = (*InvoiceHandlers)(nil)
 
 func NewInvoiceHandlers(invoices domain.InvoiceRepository) *InvoiceHandlers {
 	return &InvoiceHandlers{
@@ -18,7 +19,15 @@ func NewInvoiceHandlers(invoices domain.InvoiceRepository) *InvoiceHandlers {
 	}
 }
 
-func (h InvoiceHandlers) OnOrderReadied(ctx context.Context, event ddd.Event) error {
+func (h InvoiceHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
+	switch event.EventName() {
+	case domain.OrderReadiedEvent:
+		return h.onOrderReadied(ctx, event)
+	}
+	return nil
+}
+
+func (h InvoiceHandlers) onOrderReadied(ctx context.Context, event ddd.Event) error {
 	orderReadied := event.Payload().(*domain.OrderReadied)
 	return h.invoices.Save(ctx, orderReadied.Order.ID(), orderReadied.Order.PaymentID, orderReadied.Order.GetTotal())
 }

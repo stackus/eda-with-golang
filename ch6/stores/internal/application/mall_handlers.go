@@ -9,10 +9,9 @@ import (
 
 type MallHandlers struct {
 	mall domain.MallRepository
-	ignoreUnimplementedDomainEvents
 }
 
-var _ DomainEventHandlers = (*MallHandlers)(nil)
+var _ ddd.EventHandler = (*MallHandlers)(nil)
 
 func NewMallHandlers(mall domain.MallRepository) *MallHandlers {
 	return &MallHandlers{
@@ -20,20 +19,34 @@ func NewMallHandlers(mall domain.MallRepository) *MallHandlers {
 	}
 }
 
-func (h MallHandlers) OnStoreCreated(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
+	switch event.EventName() {
+	case domain.StoreCreatedEvent:
+		return h.onStoreCreated(ctx, event)
+	case domain.StoreParticipationEnabledEvent:
+		return h.onStoreParticipationEnabled(ctx, event)
+	case domain.StoreParticipationDisabledEvent:
+		return h.onStoreParticipationDisabled(ctx, event)
+	case domain.StoreRebrandedEvent:
+		return h.onStoreRebranded(ctx, event)
+	}
+	return nil
+}
+
+func (h MallHandlers) onStoreCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.StoreCreated)
 	return h.mall.AddStore(ctx, event.AggregateID(), payload.Name, payload.Location)
 }
 
-func (h MallHandlers) OnStoreParticipationEnabled(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers) onStoreParticipationEnabled(ctx context.Context, event ddd.Event) error {
 	return h.mall.SetStoreParticipation(ctx, event.AggregateID(), true)
 }
 
-func (h MallHandlers) OnStoreParticipationDisabled(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers) onStoreParticipationDisabled(ctx context.Context, event ddd.Event) error {
 	return h.mall.SetStoreParticipation(ctx, event.AggregateID(), false)
 }
 
-func (h MallHandlers) OnStoreRebranded(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers) onStoreRebranded(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.StoreRebranded)
 	return h.mall.RenameStore(ctx, event.AggregateID(), payload.Name)
 }

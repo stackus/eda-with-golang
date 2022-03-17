@@ -83,7 +83,7 @@ func (a Application) StartBasket(ctx context.Context, start StartBasket) error {
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
 		return err
 	}
 
@@ -106,7 +106,7 @@ func (a Application) CancelBasket(ctx context.Context, cancel CancelBasket) erro
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
 		return err
 	}
 
@@ -135,7 +135,7 @@ func (a Application) CheckoutBasket(ctx context.Context, checkout CheckoutBasket
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
 		return err
 	}
 
@@ -168,7 +168,7 @@ func (a Application) AddItem(ctx context.Context, add AddItem) error {
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
 		return err
 	}
 
@@ -196,7 +196,7 @@ func (a Application) RemoveItem(ctx context.Context, remove RemoveItem) error {
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
 		return err
 	}
 

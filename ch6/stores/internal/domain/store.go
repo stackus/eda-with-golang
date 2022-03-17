@@ -89,6 +89,7 @@ func (s *Store) Rebrand(name string) error {
 	return nil
 }
 
+// ApplyEvent implements es.EventApplier
 func (s *Store) ApplyEvent(event ddd.Event) error {
 	switch payload := event.Payload().(type) {
 	case *StoreCreated:
@@ -102,12 +103,13 @@ func (s *Store) ApplyEvent(event ddd.Event) error {
 		s.Name = payload.Name
 
 	default:
-		return errors.ErrInternal.Msgf("%T received the unexpected event payload %T", s, event.Payload())
+		return errors.ErrInternal.Msgf("%T received the event %s with unexpected payload %T", s, event.EventName(), payload)
 	}
 
 	return nil
 }
 
+// ApplySnapshot implements es.SnapshotApplier
 func (s *Store) ApplySnapshot(snapshot es.Snapshot) error {
 	switch ss := snapshot.(type) {
 	case *StoreV1:
@@ -122,6 +124,7 @@ func (s *Store) ApplySnapshot(snapshot es.Snapshot) error {
 	return nil
 }
 
+// ToSnapshot implements es.Snapshotter
 func (s Store) ToSnapshot() es.Snapshot {
 	return StoreV1{
 		Name:          s.Name,

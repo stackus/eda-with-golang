@@ -12,7 +12,7 @@ RUN go mod download
 COPY .. ./
 
 # Build the binary.
-RUN go build -v -o monolith ./cmd/mallbots
+RUN go build -ldflags="-s -w" -v -o monolith ./cmd/mallbots
 
 FROM alpine:latest AS runtime
 

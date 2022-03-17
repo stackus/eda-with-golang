@@ -64,7 +64,7 @@ func (a Application) RegisterCustomer(ctx context.Context, register RegisterCust
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, customer.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, customer.Events()...); err != nil {
 		return err
 	}
 
@@ -82,7 +82,7 @@ func (a Application) AuthorizeCustomer(ctx context.Context, authorize AuthorizeC
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, customer.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, customer.Events()...); err != nil {
 		return err
 	}
 
@@ -104,7 +104,7 @@ func (a Application) EnableCustomer(ctx context.Context, enable EnableCustomer) 
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, customer.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, customer.Events()...); err != nil {
 		return err
 	}
 
@@ -126,7 +126,7 @@ func (a Application) DisableCustomer(ctx context.Context, disable DisableCustome
 	}
 
 	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, customer.GetEvents()...); err != nil {
+	if err = a.domainPublisher.Publish(ctx, customer.Events()...); err != nil {
 		return err
 	}
 

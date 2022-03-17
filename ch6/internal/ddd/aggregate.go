@@ -1,8 +1,12 @@
 package ddd
 
+type AggregateNamer interface {
+	AggregateName() string
+}
+
 type Eventer interface {
 	AddEvent(string, EventPayload, ...EventOption)
-	GetEvents() []Event
+	Events() []Event
 	ClearEvents()
 }
 
@@ -12,6 +16,7 @@ type Aggregate struct {
 }
 
 var _ interface {
+	AggregateNamer
 	Eventer
 } = (*Aggregate)(nil)
 
@@ -23,7 +28,7 @@ func NewAggregate(id, name string) Aggregate {
 }
 
 func (a Aggregate) AggregateName() string { return a.name }
-func (a Aggregate) GetEvents() []Event    { return a.events }
+func (a Aggregate) Events() []Event       { return a.events }
 func (a Aggregate) ClearEvents()          { a.events = []Event{} }
 
 func (a *Aggregate) AddEvent(name string, payload EventPayload, options ...EventOption) {
@@ -36,3 +41,5 @@ func (a *Aggregate) AddEvent(name string, payload EventPayload, options ...Event
 		NewEvent(name, payload, options...),
 	)
 }
+
+func (a *Aggregate) setEvents(events []Event) { a.events = events }
