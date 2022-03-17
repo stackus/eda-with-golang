@@ -35,8 +35,7 @@ func NewAddProductHandler(stores domain.StoreRepository, products domain.Product
 }
 
 func (h AddProductHandler) AddProduct(ctx context.Context, cmd AddProduct) error {
-	_, err := h.stores.Find(ctx, cmd.StoreID)
-	if err != nil {
+	if _, err := h.stores.Find(ctx, cmd.StoreID); err != nil {
 		return errors.Wrap(err, "error adding product")
 	}
 

@@ -6,8 +6,7 @@ import (
 	"github.com/stackus/eda-with-golang/ch6/stores/internal/domain"
 )
 
-type GetStores struct {
-}
+type GetStores struct{}
 
 type GetStoresHandler struct {
 	mall domain.MallRepository
