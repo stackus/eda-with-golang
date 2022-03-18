@@ -26,7 +26,6 @@ type Store struct {
 var _ interface {
 	es.EventApplier
 	es.Snapshotter
-	es.SnapshotApplier
 } = (*Store)(nil)
 
 func NewStore(id string) *Store {
@@ -109,7 +108,7 @@ func (s *Store) ApplyEvent(event ddd.Event) error {
 	return nil
 }
 
-// ApplySnapshot implements es.SnapshotApplier
+// ApplySnapshot implements es.Snapshotter
 func (s *Store) ApplySnapshot(snapshot es.Snapshot) error {
 	switch ss := snapshot.(type) {
 	case *StoreV1:

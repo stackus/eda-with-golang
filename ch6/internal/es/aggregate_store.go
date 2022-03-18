@@ -23,10 +23,12 @@ type AggregateStore interface {
 }
 
 func AggregateStoreWithMiddleware(store AggregateStore, mws ...AggregateStoreMiddleware) AggregateStore {
-	var s AggregateStore
-	s = store
+	//	var s AggregateStore
+	s := store
 	// middleware are applied in reverse; this makes the first middleware
 	// in the slice the outermost i.e. first to enter, last to exit
+	// given: store, A, B, C
+	// result: A(B(C(store)))
 	for i := len(mws) - 1; i >= 0; i-- {
 		s = mws[i](s)
 	}

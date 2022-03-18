@@ -13,6 +13,7 @@ type SnapshotApplier interface {
 }
 
 type Snapshotter interface {
+	SnapshotApplier
 	ToSnapshot() Snapshot
 }
 

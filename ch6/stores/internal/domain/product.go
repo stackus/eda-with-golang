@@ -28,7 +28,6 @@ type Product struct {
 var _ interface {
 	es.EventApplier
 	es.Snapshotter
-	es.SnapshotApplier
 } = (*Product)(nil)
 
 func NewProduct(id string) *Product {
