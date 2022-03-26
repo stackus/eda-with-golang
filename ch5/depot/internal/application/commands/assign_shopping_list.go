@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/domain"
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/depot/internal/domain"
+	"eda-in-golang/ch5/internal/ddd"
 )
 
 type AssignShoppingList struct {
@@ -17,8 +17,7 @@ type AssignShoppingListHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewAssignShoppingListHandler(shoppingList domain.ShoppingListRepository, domainPublisher ddd.EventPublisher,
-) AssignShoppingListHandler {
+func NewAssignShoppingListHandler(shoppingList domain.ShoppingListRepository, domainPublisher ddd.EventPublisher) AssignShoppingListHandler {
 	return AssignShoppingListHandler{
 		shoppingLists:   shoppingList,
 		domainPublisher: domainPublisher,

@@ -5,8 +5,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/domain"
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/depot/internal/domain"
+	"eda-in-golang/ch5/internal/ddd"
 )
 
 type CreateShoppingList struct {
@@ -22,9 +22,7 @@ type CreateShoppingListHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewCreateShoppingListHandler(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository,
-	products domain.ProductRepository, domainPublisher ddd.EventPublisher,
-) CreateShoppingListHandler {
+func NewCreateShoppingListHandler(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository, domainPublisher ddd.EventPublisher) CreateShoppingListHandler {
 	return CreateShoppingListHandler{
 		shoppingLists:   shoppingLists,
 		stores:          stores,

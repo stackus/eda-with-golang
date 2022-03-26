@@ -5,8 +5,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch5/stores/internal/domain"
+	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/stores/internal/domain"
 )
 
 type AddProduct struct {
@@ -24,9 +24,7 @@ type AddProductHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewAddProductHandler(stores domain.StoreRepository, products domain.ProductRepository,
-	domainPublisher ddd.EventPublisher,
-) AddProductHandler {
+func NewAddProductHandler(stores domain.StoreRepository, products domain.ProductRepository, domainPublisher ddd.EventPublisher) AddProductHandler {
 	return AddProductHandler{
 		stores:          stores,
 		products:        products,

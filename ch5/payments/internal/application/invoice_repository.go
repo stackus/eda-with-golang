@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch5/payments/internal/models"
+	"eda-in-golang/ch5/payments/internal/models"
 )
 
 type InvoiceRepository interface {

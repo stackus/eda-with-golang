@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch5/stores/internal/domain"
+	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/stores/internal/domain"
 )
 
 type EnableParticipation struct {
@@ -16,8 +16,7 @@ type EnableParticipationHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewEnableParticipationHandler(stores domain.StoreRepository, domainPublisher ddd.EventPublisher,
-) EnableParticipationHandler {
+func NewEnableParticipationHandler(stores domain.StoreRepository, domainPublisher ddd.EventPublisher) EnableParticipationHandler {
 	return EnableParticipationHandler{
 		stores:          stores,
 		domainPublisher: domainPublisher,

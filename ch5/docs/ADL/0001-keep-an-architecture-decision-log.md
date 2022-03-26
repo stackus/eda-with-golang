@@ -3,12 +3,15 @@
 Date: 2022/05/10
 
 ## Status
+
 Accepted
 
 ## Context
+
 To allow others to know why an architectural decision was made before their time or without their input.
 
 ## Decision
+
 Keep an architectural decision log that will record all decisions regarding architecture and infrastructure choices.
 
 The records will use the following markdown.
@@ -30,4 +33,5 @@ The records will use the following markdown.
     {What becomes easier or more difficult to do because of this change}
 
 ## Consequences
+
 All decisions will be kept in the /docs/ADL directory.

@@ -3,14 +3,14 @@ package depot
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/application"
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/grpc"
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/handlers"
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/logging"
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/postgres"
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/rest"
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch5/internal/monolith"
+	"eda-in-golang/ch5/depot/internal/application"
+	"eda-in-golang/ch5/depot/internal/grpc"
+	"eda-in-golang/ch5/depot/internal/handlers"
+	"eda-in-golang/ch5/depot/internal/logging"
+	"eda-in-golang/ch5/depot/internal/postgres"
+	"eda-in-golang/ch5/depot/internal/rest"
+	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/internal/monolith"
 )
 
 type Module struct{}

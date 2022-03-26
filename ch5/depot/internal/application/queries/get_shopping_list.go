@@ -3,7 +3,7 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/domain"
+	"eda-in-golang/ch5/depot/internal/domain"
 )
 
 type GetShoppingList struct {

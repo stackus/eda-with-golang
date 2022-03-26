@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/stackus/eda-with-golang/ch5/customers/internal/domain"
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/customers/internal/domain"
+	"eda-in-golang/ch5/internal/ddd"
 )
 
 type CustomerRepository struct {

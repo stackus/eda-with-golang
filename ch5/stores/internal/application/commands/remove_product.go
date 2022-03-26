@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch5/stores/internal/domain"
+	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/stores/internal/domain"
 )
 
 type RemoveProduct struct {
@@ -16,8 +16,7 @@ type RemoveProductHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewRemoveProductHandler(products domain.ProductRepository, domainPublisher ddd.EventPublisher,
-) RemoveProductHandler {
+func NewRemoveProductHandler(products domain.ProductRepository, domainPublisher ddd.EventPublisher) RemoveProductHandler {
 	return RemoveProductHandler{
 		products:        products,
 		domainPublisher: domainPublisher,

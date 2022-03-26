@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch5/depot/internal/domain"
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/depot/internal/domain"
+	"eda-in-golang/ch5/internal/ddd"
 )
 
 type CompleteShoppingList struct {
@@ -16,8 +16,7 @@ type CompleteShoppingListHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewCompleteShoppingListHandler(shoppingLists domain.ShoppingListRepository, domainPublisher ddd.EventPublisher,
-) CompleteShoppingListHandler {
+func NewCompleteShoppingListHandler(shoppingLists domain.ShoppingListRepository, domainPublisher ddd.EventPublisher) CompleteShoppingListHandler {
 	return CompleteShoppingListHandler{
 		shoppingLists:   shoppingLists,
 		domainPublisher: domainPublisher,

@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/stackus/eda-with-golang/ch5/customers/customerspb"
-	"github.com/stackus/eda-with-golang/ch5/ordering/internal/domain"
+	"eda-in-golang/ch5/customers/customerspb"
+	"eda-in-golang/ch5/ordering/internal/domain"
 )
 
 type CustomerRepository struct {

@@ -6,8 +6,8 @@ import (
 	"github.com/stackus/errors"
 	"google.golang.org/grpc"
 
-	"github.com/stackus/eda-with-golang/ch5/baskets/internal/domain"
-	"github.com/stackus/eda-with-golang/ch5/ordering/orderingpb"
+	"eda-in-golang/ch5/baskets/internal/domain"
+	"eda-in-golang/ch5/ordering/orderingpb"
 )
 
 type OrderRepository struct {

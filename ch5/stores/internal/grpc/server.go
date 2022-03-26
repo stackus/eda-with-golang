@@ -6,12 +6,12 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	"github.com/stackus/eda-with-golang/ch5/stores/storespb"
+	"eda-in-golang/ch5/stores/storespb"
 
-	"github.com/stackus/eda-with-golang/ch5/stores/internal/application"
-	"github.com/stackus/eda-with-golang/ch5/stores/internal/application/commands"
-	"github.com/stackus/eda-with-golang/ch5/stores/internal/application/queries"
-	"github.com/stackus/eda-with-golang/ch5/stores/internal/domain"
+	"eda-in-golang/ch5/stores/internal/application"
+	"eda-in-golang/ch5/stores/internal/application/commands"
+	"eda-in-golang/ch5/stores/internal/application/queries"
+	"eda-in-golang/ch5/stores/internal/domain"
 )
 
 type server struct {
@@ -26,9 +26,7 @@ func RegisterServer(_ context.Context, app application.App, registrar grpc.Servi
 	return nil
 }
 
-func (s server) CreateStore(ctx context.Context, request *storespb.CreateStoreRequest) (*storespb.CreateStoreResponse,
-	error,
-) {
+func (s server) CreateStore(ctx context.Context, request *storespb.CreateStoreRequest) (*storespb.CreateStoreResponse, error) {
 	storeID := uuid.New().String()
 
 	err := s.app.CreateStore(ctx, commands.CreateStore{
@@ -54,8 +52,7 @@ func (s server) GetStore(ctx context.Context, request *storespb.GetStoreRequest)
 	return &storespb.GetStoreResponse{Store: s.storeFromDomain(store)}, nil
 }
 
-func (s server) GetStores(ctx context.Context, request *storespb.GetStoresRequest) (*storespb.GetStoresResponse, error,
-) {
+func (s server) GetStores(ctx context.Context, request *storespb.GetStoresRequest) (*storespb.GetStoresResponse, error) {
 	stores, err := s.app.GetStores(ctx, queries.GetStores{})
 	if err != nil {
 		return nil, err
@@ -71,8 +68,7 @@ func (s server) GetStores(ctx context.Context, request *storespb.GetStoresReques
 	}, nil
 }
 
-func (s server) EnableParticipation(ctx context.Context, request *storespb.EnableParticipationRequest,
-) (*storespb.EnableParticipationResponse, error) {
+func (s server) EnableParticipation(ctx context.Context, request *storespb.EnableParticipationRequest) (*storespb.EnableParticipationResponse, error) {
 	err := s.app.EnableParticipation(ctx, commands.EnableParticipation{
 		ID: request.GetId(),
 	})
@@ -83,8 +79,7 @@ func (s server) EnableParticipation(ctx context.Context, request *storespb.Enabl
 	return &storespb.EnableParticipationResponse{}, nil
 }
 
-func (s server) DisableParticipation(ctx context.Context, request *storespb.DisableParticipationRequest,
-) (*storespb.DisableParticipationResponse, error) {
+func (s server) DisableParticipation(ctx context.Context, request *storespb.DisableParticipationRequest) (*storespb.DisableParticipationResponse, error) {
 	err := s.app.DisableParticipation(ctx, commands.DisableParticipation{
 		ID: request.GetId(),
 	})
@@ -95,8 +90,7 @@ func (s server) DisableParticipation(ctx context.Context, request *storespb.Disa
 	return &storespb.DisableParticipationResponse{}, nil
 }
 
-func (s server) GetParticipatingStores(ctx context.Context, request *storespb.GetParticipatingStoresRequest,
-) (*storespb.GetParticipatingStoresResponse, error) {
+func (s server) GetParticipatingStores(ctx context.Context, request *storespb.GetParticipatingStoresRequest) (*storespb.GetParticipatingStoresResponse, error) {
 	stores, err := s.app.GetParticipatingStores(ctx, queries.GetParticipatingStores{})
 	if err != nil {
 		return nil, err
@@ -112,9 +106,7 @@ func (s server) GetParticipatingStores(ctx context.Context, request *storespb.Ge
 	}, nil
 }
 
-func (s server) AddProduct(ctx context.Context, request *storespb.AddProductRequest) (*storespb.AddProductResponse,
-	error,
-) {
+func (s server) AddProduct(ctx context.Context, request *storespb.AddProductRequest) (*storespb.AddProductResponse, error) {
 	id := uuid.New().String()
 	err := s.app.AddProduct(ctx, commands.AddProduct{
 		ID:          id,
@@ -131,8 +123,7 @@ func (s server) AddProduct(ctx context.Context, request *storespb.AddProductRequ
 	return &storespb.AddProductResponse{Id: id}, nil
 }
 
-func (s server) RemoveProduct(ctx context.Context, request *storespb.RemoveProductRequest,
-) (*storespb.RemoveProductResponse, error) {
+func (s server) RemoveProduct(ctx context.Context, request *storespb.RemoveProductRequest) (*storespb.RemoveProductResponse, error) {
 	err := s.app.RemoveProduct(ctx, commands.RemoveProduct{
 		ID: request.GetId(),
 	})
@@ -140,9 +131,7 @@ func (s server) RemoveProduct(ctx context.Context, request *storespb.RemoveProdu
 	return &storespb.RemoveProductResponse{}, err
 }
 
-func (s server) GetCatalog(ctx context.Context, request *storespb.GetCatalogRequest) (*storespb.GetCatalogResponse,
-	error,
-) {
+func (s server) GetCatalog(ctx context.Context, request *storespb.GetCatalogRequest) (*storespb.GetCatalogResponse, error) {
 	products, err := s.app.GetCatalog(ctx, queries.GetCatalog{StoreID: request.GetStoreId()})
 	if err != nil {
 		return nil, err
@@ -158,9 +147,7 @@ func (s server) GetCatalog(ctx context.Context, request *storespb.GetCatalogRequ
 	}, nil
 }
 
-func (s server) GetProduct(ctx context.Context, request *storespb.GetProductRequest) (*storespb.GetProductResponse,
-	error,
-) {
+func (s server) GetProduct(ctx context.Context, request *storespb.GetProductRequest) (*storespb.GetProductResponse, error) {
 	product, err := s.app.GetProduct(ctx, queries.GetProduct{
 		ID: request.GetId(),
 	})

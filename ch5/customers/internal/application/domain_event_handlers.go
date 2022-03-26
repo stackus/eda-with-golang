@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/internal/ddd"
 )
 
 type DomainEventHandlers interface {

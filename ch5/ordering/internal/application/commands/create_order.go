@@ -5,8 +5,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch5/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch5/ordering/internal/domain"
+	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/ch5/ordering/internal/domain"
 )
 
 type CreateOrder struct {
@@ -24,9 +24,7 @@ type CreateOrderHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewCreateOrderHandler(orders domain.OrderRepository, customers domain.CustomerRepository,
-	payments domain.PaymentRepository, shopping domain.ShoppingRepository, domainPublisher ddd.EventPublisher,
-) CreateOrderHandler {
+func NewCreateOrderHandler(orders domain.OrderRepository, customers domain.CustomerRepository, payments domain.PaymentRepository, shopping domain.ShoppingRepository, domainPublisher ddd.EventPublisher) CreateOrderHandler {
 	return CreateOrderHandler{
 		orders:          orders,
 		customers:       customers,

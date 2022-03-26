@@ -1,4 +1,4 @@
-module github.com/stackus/eda-with-golang/ch5
+module eda-in-golang/ch5
 
 go 1.17
 

@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/stackus/eda-with-golang/ch5/depot/depotpb"
-	"github.com/stackus/eda-with-golang/ch5/ordering/internal/domain"
+	"eda-in-golang/ch5/depot/depotpb"
+	"eda-in-golang/ch5/ordering/internal/domain"
 )
 
 type ShoppingRepository struct {
