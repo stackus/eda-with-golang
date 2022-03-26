@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/domain"
+	"eda-in-golang/ch4/internal/ddd"
+	"eda-in-golang/ch4/ordering/internal/domain"
 )
 
 type NotificationHandlers struct {

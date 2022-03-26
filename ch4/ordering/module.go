@@ -3,14 +3,14 @@ package ordering
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch4/internal/monolith"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/application"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/grpc"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/handlers"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/logging"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/postgres"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/rest"
+	"eda-in-golang/ch4/internal/ddd"
+	"eda-in-golang/ch4/internal/monolith"
+	"eda-in-golang/ch4/ordering/internal/application"
+	"eda-in-golang/ch4/ordering/internal/grpc"
+	"eda-in-golang/ch4/ordering/internal/handlers"
+	"eda-in-golang/ch4/ordering/internal/logging"
+	"eda-in-golang/ch4/ordering/internal/postgres"
+	"eda-in-golang/ch4/ordering/internal/rest"
 )
 
 type Module struct{}

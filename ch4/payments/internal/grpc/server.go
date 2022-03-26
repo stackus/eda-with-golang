@@ -6,8 +6,8 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	"github.com/stackus/eda-with-golang/ch4/payments/internal/application"
-	"github.com/stackus/eda-with-golang/ch4/payments/paymentspb"
+	"eda-in-golang/ch4/payments/internal/application"
+	"eda-in-golang/ch4/payments/paymentspb"
 )
 
 type server struct {

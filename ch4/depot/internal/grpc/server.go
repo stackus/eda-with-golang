@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	"github.com/stackus/eda-with-golang/ch4/depot/depotpb"
-	"github.com/stackus/eda-with-golang/ch4/depot/internal/application"
-	"github.com/stackus/eda-with-golang/ch4/depot/internal/application/commands"
+	"eda-in-golang/ch4/depot/depotpb"
+	"eda-in-golang/ch4/depot/internal/application"
+	"eda-in-golang/ch4/depot/internal/application/commands"
 )
 
 type server struct {

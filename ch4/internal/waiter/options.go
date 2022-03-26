@@ -4,16 +4,16 @@ import (
 	"context"
 )
 
-type EgressOption func(c *egressCfg)
+type WaiterOption func(c *waiterCfg)
 
-func ParentContext(ctx context.Context) EgressOption {
-	return func(c *egressCfg) {
+func ParentContext(ctx context.Context) WaiterOption {
+	return func(c *waiterCfg) {
 		c.parentCtx = ctx
 	}
 }
 
-func CatchSignals() EgressOption {
-	return func(c *egressCfg) {
+func CatchSignals() WaiterOption {
+	return func(c *waiterCfg) {
 		c.catchSignals = true
 	}
 }

@@ -24,13 +24,13 @@ type waiter struct {
 	cancel context.CancelFunc
 }
 
-type egressCfg struct {
+type waiterCfg struct {
 	parentCtx    context.Context
 	catchSignals bool
 }
 
-func New(options ...EgressOption) Waiter {
-	cfg := &egressCfg{
+func New(options ...WaiterOption) Waiter {
+	cfg := &waiterCfg{
 		parentCtx:    context.Background(),
 		catchSignals: false,
 	}

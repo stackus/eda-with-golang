@@ -3,9 +3,9 @@ package application
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/commands"
-	"github.com/stackus/eda-with-golang/ch4/stores/internal/application/queries"
-	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
+	"eda-in-golang/ch4/stores/internal/application/commands"
+	"eda-in-golang/ch4/stores/internal/application/queries"
+	"eda-in-golang/ch4/stores/internal/domain"
 )
 
 type (

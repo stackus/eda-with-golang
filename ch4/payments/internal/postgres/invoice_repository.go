@@ -7,8 +7,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch4/payments/internal/application"
-	"github.com/stackus/eda-with-golang/ch4/payments/internal/models"
+	"eda-in-golang/ch4/payments/internal/application"
+	"eda-in-golang/ch4/payments/internal/models"
 )
 
 type InvoiceRepository struct {

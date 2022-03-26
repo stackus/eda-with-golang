@@ -5,7 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch4/payments/internal/models"
+	"eda-in-golang/ch4/payments/internal/models"
 )
 
 type (
@@ -57,8 +57,7 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(invoices InvoiceRepository, payments PaymentRepository, orders OrderRepository,
-) *Application {
+func New(invoices InvoiceRepository, payments PaymentRepository, orders OrderRepository) *Application {
 	return &Application{
 		invoices: invoices,
 		payments: payments,

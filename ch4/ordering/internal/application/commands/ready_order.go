@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/domain"
+	"eda-in-golang/ch4/internal/ddd"
+	"eda-in-golang/ch4/ordering/internal/domain"
 )
 
 type ReadyOrder struct {
@@ -17,9 +17,7 @@ type ReadyOrderHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewReadyOrderHandler(orders domain.OrderRepository, invoices domain.InvoiceRepository,
-	domainPublisher ddd.EventPublisher,
-) ReadyOrderHandler {
+func NewReadyOrderHandler(orders domain.OrderRepository, invoices domain.InvoiceRepository, domainPublisher ddd.EventPublisher) ReadyOrderHandler {
 	return ReadyOrderHandler{
 		orders:          orders,
 		invoices:        invoices,

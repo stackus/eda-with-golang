@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch4/stores/internal/domain"
+	"eda-in-golang/ch4/stores/internal/domain"
 )
 
 type ParticipatingStoreRepository struct {

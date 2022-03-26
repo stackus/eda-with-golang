@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch4/ordering/internal/domain"
+	"eda-in-golang/ch4/internal/ddd"
+	"eda-in-golang/ch4/ordering/internal/domain"
 )
 
 type CancelOrder struct {
@@ -17,9 +17,7 @@ type CancelOrderHandler struct {
 	domainPublisher ddd.EventPublisher
 }
 
-func NewCancelOrderHandler(orders domain.OrderRepository, shopping domain.ShoppingRepository,
-	domainPublisher ddd.EventPublisher,
-) CancelOrderHandler {
+func NewCancelOrderHandler(orders domain.OrderRepository, shopping domain.ShoppingRepository, domainPublisher ddd.EventPublisher) CancelOrderHandler {
 	return CancelOrderHandler{
 		orders:          orders,
 		shopping:        shopping,

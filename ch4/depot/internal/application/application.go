@@ -3,9 +3,9 @@ package application
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch4/depot/internal/application/commands"
-	"github.com/stackus/eda-with-golang/ch4/depot/internal/application/queries"
-	"github.com/stackus/eda-with-golang/ch4/depot/internal/domain"
+	"eda-in-golang/ch4/depot/internal/application/commands"
+	"eda-in-golang/ch4/depot/internal/application/queries"
+	"eda-in-golang/ch4/depot/internal/domain"
 )
 
 type (
@@ -40,9 +40,7 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository,
-	orders domain.OrderRepository,
-) *Application {
+func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository, orders domain.OrderRepository) *Application {
 	return &Application{
 		appCommands: appCommands{
 			CreateShoppingListHandler:   commands.NewCreateShoppingListHandler(shoppingLists, stores, products),
