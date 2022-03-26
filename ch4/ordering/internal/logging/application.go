@@ -18,7 +18,7 @@ type Application struct {
 
 var _ application.App = (*Application)(nil)
 
-func LogApplicationAccess(application application.App, logger zerolog.Logger) Application {
+func NewApplication(application application.App, logger zerolog.Logger) Application {
 	return Application{
 		App:    application,
 		logger: logger,

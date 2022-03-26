@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch4/internal/ddd"
 	"eda-in-golang/ch4/ordering/internal/application/commands"
 	"eda-in-golang/ch4/ordering/internal/application/queries"
 	"eda-in-golang/ch4/ordering/internal/domain"
@@ -42,14 +41,15 @@ type (
 var _ App = (*Application)(nil)
 
 func New(orders domain.OrderRepository, customers domain.CustomerRepository, payments domain.PaymentRepository,
-	invoices domain.InvoiceRepository, shopping domain.ShoppingRepository, domainPublisher ddd.EventPublisher,
+	invoices domain.InvoiceRepository, shopping domain.ShoppingRepository,
+	notifications domain.NotificationRepository,
 ) *Application {
 	return &Application{
 		appCommands: appCommands{
-			CreateOrderHandler:   commands.NewCreateOrderHandler(orders, customers, payments, shopping, domainPublisher),
-			CancelOrderHandler:   commands.NewCancelOrderHandler(orders, shopping, domainPublisher),
-			ReadyOrderHandler:    commands.NewReadyOrderHandler(orders, invoices, domainPublisher),
-			CompleteOrderHandler: commands.NewCompleteOrderHandler(orders, domainPublisher),
+			CreateOrderHandler:   commands.NewCreateOrderHandler(orders, customers, payments, shopping, notifications),
+			CancelOrderHandler:   commands.NewCancelOrderHandler(orders, shopping, notifications),
+			ReadyOrderHandler:    commands.NewReadyOrderHandler(orders, invoices, notifications),
+			CompleteOrderHandler: commands.NewCompleteOrderHandler(orders),
 		},
 		appQueries: appQueries{
 			GetOrderHandler: queries.NewGetOrderHandler(orders),

@@ -8,7 +8,6 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch4/internal/ddd"
 	"eda-in-golang/ch4/ordering/internal/domain"
 )
 
@@ -30,9 +29,7 @@ func (r OrderRepository) Find(ctx context.Context, orderID string) (*domain.Orde
 	const query = "SELECT customer_id, payment_id, shopping_id, invoice_id, items, status FROM %s WHERE id = $1 LIMIT 1"
 
 	order := &domain.Order{
-		AggregateBase: ddd.AggregateBase{
-			ID: orderID,
-		},
+		ID: orderID,
 	}
 
 	var items []byte

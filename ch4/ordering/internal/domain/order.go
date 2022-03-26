@@ -2,8 +2,6 @@ package domain
 
 import (
 	"github.com/stackus/errors"
-
-	"eda-in-golang/ch4/internal/ddd"
 )
 
 var (
@@ -14,7 +12,7 @@ var (
 )
 
 type Order struct {
-	ddd.AggregateBase
+	ID         string
 	CustomerID string
 	PaymentID  string
 	InvoiceID  string
@@ -37,43 +35,30 @@ func CreateOrder(id, customerID, paymentID string, items []*Item) (*Order, error
 	}
 
 	order := &Order{
-		AggregateBase: ddd.AggregateBase{
-			ID: id,
-		},
+		ID:         id,
 		CustomerID: customerID,
 		PaymentID:  paymentID,
 		Items:      items,
-		Status:     OrderIsPending,
+		Status:     OrderPending,
 	}
-
-	order.AddEvent(&OrderCreated{
-		Order: order,
-	})
 
 	return order, nil
 }
 
 func (o *Order) Cancel() error {
-	if o.Status != OrderIsPending {
+	if o.Status != OrderPending {
 		return ErrOrderCannotBeCancelled
 	}
 
-	o.Status = OrderIsCancelled
+	o.Status = OrderCancelled
 
-	o.AddEvent(&OrderCanceled{
-		Order: o,
-	})
 	return nil
 }
 
 func (o *Order) Ready() error {
 	// validate status
 
-	o.Status = OrderIsReady
-
-	o.AddEvent(&OrderReadied{
-		Order: o,
-	})
+	o.Status = OrderReady
 
 	return nil
 }
@@ -84,11 +69,7 @@ func (o *Order) Complete(invoiceID string) error {
 	// validate status
 
 	o.InvoiceID = invoiceID
-	o.Status = OrderIsCompleted
-
-	o.AddEvent(&OrderCompleted{
-		Order: o,
-	})
+	o.Status = OrderCompleted
 
 	return nil
 }
