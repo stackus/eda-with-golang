@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/domain"
+	"eda-in-golang/ch6/stores/internal/domain"
 )
 
 type DecreaseProductPrice struct {

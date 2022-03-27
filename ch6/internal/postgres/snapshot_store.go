@@ -7,8 +7,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/es"
-	"github.com/stackus/eda-with-golang/ch6/internal/registry"
+	"eda-in-golang/ch6/internal/es"
+	"eda-in-golang/ch6/internal/registry"
 )
 
 type SnapshotStore struct {

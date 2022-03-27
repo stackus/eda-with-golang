@@ -3,7 +3,7 @@ package ddd
 import (
 	"fmt"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/registry"
+	"eda-in-golang/ch6/internal/registry"
 )
 
 type IDSetter interface {

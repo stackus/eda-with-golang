@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch6/ordering/internal/domain"
+	"eda-in-golang/ch6/internal/ddd"
+	"eda-in-golang/ch6/ordering/internal/domain"
 )
 
 type InvoiceHandlers struct {
@@ -29,5 +29,5 @@ func (h InvoiceHandlers) HandleEvent(ctx context.Context, event ddd.Event) error
 
 func (h InvoiceHandlers) onOrderReadied(ctx context.Context, event ddd.Event) error {
 	orderReadied := event.Payload().(*domain.OrderReadied)
-	return h.invoices.Save(ctx, orderReadied.Order.ID(), orderReadied.Order.PaymentID, orderReadied.Order.GetTotal())
+	return h.invoices.Save(ctx, event.AggregateID(), orderReadied.PaymentID, orderReadied.Total)
 }

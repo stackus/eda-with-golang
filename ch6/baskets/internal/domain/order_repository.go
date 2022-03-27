@@ -5,5 +5,5 @@ import (
 )
 
 type OrderRepository interface {
-	Save(ctx context.Context, basket *Basket) (string, error)
+	Save(ctx context.Context, paymentID, customerID string, basketItems map[string]Item) (string, error)
 }

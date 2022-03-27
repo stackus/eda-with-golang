@@ -3,12 +3,12 @@ package payments
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/monolith"
-	"github.com/stackus/eda-with-golang/ch6/payments/internal/application"
-	"github.com/stackus/eda-with-golang/ch6/payments/internal/grpc"
-	"github.com/stackus/eda-with-golang/ch6/payments/internal/logging"
-	"github.com/stackus/eda-with-golang/ch6/payments/internal/postgres"
-	"github.com/stackus/eda-with-golang/ch6/payments/internal/rest"
+	"eda-in-golang/ch6/internal/monolith"
+	"eda-in-golang/ch6/payments/internal/application"
+	"eda-in-golang/ch6/payments/internal/grpc"
+	"eda-in-golang/ch6/payments/internal/logging"
+	"eda-in-golang/ch6/payments/internal/postgres"
+	"eda-in-golang/ch6/payments/internal/rest"
 )
 
 type Module struct{}

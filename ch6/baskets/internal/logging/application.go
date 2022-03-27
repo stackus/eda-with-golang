@@ -5,8 +5,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/stackus/eda-with-golang/ch6/baskets/internal/application"
-	"github.com/stackus/eda-with-golang/ch6/baskets/internal/domain"
+	"eda-in-golang/ch6/baskets/internal/application"
+	"eda-in-golang/ch6/baskets/internal/domain"
 )
 
 type Application struct {

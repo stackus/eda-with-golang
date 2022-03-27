@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch6/notifications/internal/models"
+	"eda-in-golang/ch6/notifications/internal/models"
 )
 
 type CustomerRepository interface {

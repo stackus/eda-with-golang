@@ -5,15 +5,15 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch6/ordering/internal/domain"
+	"eda-in-golang/ch6/internal/ddd"
+	"eda-in-golang/ch6/ordering/internal/domain"
 )
 
 type CreateOrder struct {
 	ID         string
 	CustomerID string
 	PaymentID  string
-	Items      []*domain.Item
+	Items      []domain.Item
 }
 
 type CreateOrderHandler struct {
@@ -37,24 +37,30 @@ func NewCreateOrderHandler(orders domain.OrderRepository, customers domain.Custo
 }
 
 func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) error {
-	order, err := domain.CreateOrder(cmd.ID, cmd.CustomerID, cmd.PaymentID, cmd.Items)
+	order, err := h.orders.Find(ctx, cmd.ID)
 	if err != nil {
-		return errors.Wrap(err, "create order command")
+		return err
 	}
 
 	// authorizeCustomer
-	if err = h.customers.Authorize(ctx, order.CustomerID); err != nil {
+	if err = h.customers.Authorize(ctx, cmd.CustomerID); err != nil {
 		return errors.Wrap(err, "order customer authorization")
 	}
 
 	// validatePayment
-	if err = h.payments.Confirm(ctx, order.PaymentID); err != nil {
+	if err = h.payments.Confirm(ctx, cmd.PaymentID); err != nil {
 		return errors.Wrap(err, "order payment confirmation")
 	}
 
 	// scheduleShopping
-	if order.ShoppingID, err = h.shopping.Create(ctx, order); err != nil {
+	var shoppingID string
+	if shoppingID, err = h.shopping.Create(ctx, cmd.ID, cmd.Items); err != nil {
 		return errors.Wrap(err, "order shopping scheduling")
+	}
+
+	err = order.CreateOrder(cmd.ID, cmd.CustomerID, cmd.PaymentID, shoppingID, cmd.Items)
+	if err != nil {
+		return errors.Wrap(err, "create order command")
 	}
 
 	// orderCreation

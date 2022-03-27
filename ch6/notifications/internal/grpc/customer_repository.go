@@ -5,9 +5,9 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/stackus/eda-with-golang/ch6/customers/customerspb"
-	"github.com/stackus/eda-with-golang/ch6/notifications/internal/application"
-	"github.com/stackus/eda-with-golang/ch6/notifications/internal/models"
+	"eda-in-golang/ch6/customers/customerspb"
+	"eda-in-golang/ch6/notifications/internal/application"
+	"eda-in-golang/ch6/notifications/internal/models"
 )
 
 type CustomerRepository struct {

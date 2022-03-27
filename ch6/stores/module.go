@@ -3,20 +3,20 @@ package stores
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
-	es2 "github.com/stackus/eda-with-golang/ch6/internal/es"
-	"github.com/stackus/eda-with-golang/ch6/internal/monolith"
-	pg "github.com/stackus/eda-with-golang/ch6/internal/postgres"
-	"github.com/stackus/eda-with-golang/ch6/internal/registry"
-	"github.com/stackus/eda-with-golang/ch6/internal/registry/serdes"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/application"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/domain"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/es"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/grpc"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/handlers"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/logging"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/postgres"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/rest"
+	"eda-in-golang/ch6/internal/ddd"
+	es2 "eda-in-golang/ch6/internal/es"
+	"eda-in-golang/ch6/internal/monolith"
+	pg "eda-in-golang/ch6/internal/postgres"
+	"eda-in-golang/ch6/internal/registry"
+	"eda-in-golang/ch6/internal/registry/serdes"
+	"eda-in-golang/ch6/stores/internal/application"
+	"eda-in-golang/ch6/stores/internal/domain"
+	"eda-in-golang/ch6/stores/internal/es"
+	"eda-in-golang/ch6/stores/internal/grpc"
+	"eda-in-golang/ch6/stores/internal/handlers"
+	"eda-in-golang/ch6/stores/internal/logging"
+	"eda-in-golang/ch6/stores/internal/postgres"
+	"eda-in-golang/ch6/stores/internal/rest"
 )
 
 type Module struct {
@@ -35,7 +35,6 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 		es2.NewEventPublisher(domainDispatcher),
 		pg.NewSnapshotStore("stores.snapshots", mono.DB(), reg),
 	)
-
 	stores := es.NewStoreRepository(reg, aggregateStore)
 	products := es.NewProductRepository(reg, aggregateStore)
 	catalog := postgres.NewCatalogRepository("stores.products", mono.DB())

@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch6/ordering/internal/domain"
+	"eda-in-golang/ch6/internal/ddd"
+	"eda-in-golang/ch6/ordering/internal/domain"
 )
 
 type CompleteOrder struct {
@@ -35,7 +35,7 @@ func (h CompleteOrderHandler) CompleteOrder(ctx context.Context, cmd CompleteOrd
 		return nil
 	}
 
-	if err = h.orders.Update(ctx, order); err != nil {
+	if err = h.orders.Save(ctx, order); err != nil {
 		return err
 	}
 

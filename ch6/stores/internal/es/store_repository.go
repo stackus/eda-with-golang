@@ -3,9 +3,9 @@ package es
 import (
 	"context"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/es"
-	"github.com/stackus/eda-with-golang/ch6/internal/registry"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/domain"
+	"eda-in-golang/ch6/internal/es"
+	"eda-in-golang/ch6/internal/registry"
+	"eda-in-golang/ch6/stores/internal/domain"
 )
 
 type StoreRepository struct {

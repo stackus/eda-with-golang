@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
-	"github.com/stackus/eda-with-golang/ch6/stores/internal/domain"
+	"eda-in-golang/ch6/internal/ddd"
+	"eda-in-golang/ch6/stores/internal/domain"
 )
 
 func RegisterMallHandlers(mallHandlers ddd.EventHandler, domainSubscriber ddd.EventSubscriber) {

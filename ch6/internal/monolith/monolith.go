@@ -8,8 +8,8 @@ import (
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 
-	"github.com/stackus/eda-with-golang/ch6/internal/config"
-	"github.com/stackus/eda-with-golang/ch6/internal/waiter"
+	"eda-in-golang/ch6/internal/config"
+	"eda-in-golang/ch6/internal/waiter"
 )
 
 type Monolith interface {

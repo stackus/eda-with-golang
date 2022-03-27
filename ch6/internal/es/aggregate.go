@@ -1,7 +1,7 @@
 package es
 
 import (
-	"github.com/stackus/eda-with-golang/ch6/internal/ddd"
+	"eda-in-golang/ch6/internal/ddd"
 )
 
 type Versioner interface {
