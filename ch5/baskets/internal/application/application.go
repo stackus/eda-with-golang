@@ -124,12 +124,6 @@ func (a Application) CheckoutBasket(ctx context.Context, checkout CheckoutBasket
 		return errors.Wrap(err, "baskets checkout")
 	}
 
-	// submit the basket to the order module
-	_, err = a.orders.Save(ctx, basket)
-	if err != nil {
-		return errors.Wrap(err, "baskets checkout")
-	}
-
 	if err = a.baskets.Update(ctx, basket); err != nil {
 		return errors.Wrap(err, "basket checkout")
 	}
