@@ -46,7 +46,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 
 	// setup application
 	var app application.App
-	app = application.New(orders, customers, payments, shopping, domainDispatcher)
+	app = application.New(orders, customers, payments, shopping)
 	app = logging.LogApplicationAccess(app, mono.Logger())
 	// setup application handlers
 	notificationHandlers := logging.LogEventHandlerAccess(

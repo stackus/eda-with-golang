@@ -5,7 +5,6 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch6/internal/ddd"
 	"eda-in-golang/ch6/ordering/internal/domain"
 )
 
@@ -17,22 +16,20 @@ type CreateOrder struct {
 }
 
 type CreateOrderHandler struct {
-	orders          domain.OrderRepository
-	customers       domain.CustomerRepository
-	payments        domain.PaymentRepository
-	shopping        domain.ShoppingRepository
-	domainPublisher ddd.EventPublisher
+	orders    domain.OrderRepository
+	customers domain.CustomerRepository
+	payments  domain.PaymentRepository
+	shopping  domain.ShoppingRepository
 }
 
 func NewCreateOrderHandler(orders domain.OrderRepository, customers domain.CustomerRepository,
-	payments domain.PaymentRepository, shopping domain.ShoppingRepository, domainPublisher ddd.EventPublisher,
+	payments domain.PaymentRepository, shopping domain.ShoppingRepository,
 ) CreateOrderHandler {
 	return CreateOrderHandler{
-		orders:          orders,
-		customers:       customers,
-		payments:        payments,
-		shopping:        shopping,
-		domainPublisher: domainPublisher,
+		orders:    orders,
+		customers: customers,
+		payments:  payments,
+		shopping:  shopping,
 	}
 }
 
@@ -66,11 +63,6 @@ func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) er
 	// orderCreation
 	if err = h.orders.Save(ctx, order); err != nil {
 		return errors.Wrap(err, "order creation")
-	}
-
-	// publish domain events
-	if err = h.domainPublisher.Publish(ctx, order.Events()...); err != nil {
-		return err
 	}
 
 	return nil
