@@ -61,14 +61,13 @@ type (
 var _ App = (*Application)(nil)
 
 func New(baskets domain.BasketRepository, stores domain.StoreRepository, products domain.ProductRepository,
-	orders domain.OrderRepository, domainPublisher ddd.EventPublisher,
+	orders domain.OrderRepository,
 ) *Application {
 	return &Application{
-		baskets:         baskets,
-		stores:          stores,
-		products:        products,
-		orders:          orders,
-		domainPublisher: domainPublisher,
+		baskets:  baskets,
+		stores:   stores,
+		products: products,
+		orders:   orders,
 	}
 }
 
@@ -79,11 +78,6 @@ func (a Application) StartBasket(ctx context.Context, start StartBasket) error {
 	}
 
 	if err = a.baskets.Save(ctx, basket); err != nil {
-		return err
-	}
-
-	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
 		return err
 	}
 
@@ -101,12 +95,7 @@ func (a Application) CancelBasket(ctx context.Context, cancel CancelBasket) erro
 		return err
 	}
 
-	if err = a.baskets.Update(ctx, basket); err != nil {
-		return err
-	}
-
-	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
+	if err = a.baskets.Save(ctx, basket); err != nil {
 		return err
 	}
 
@@ -124,19 +113,8 @@ func (a Application) CheckoutBasket(ctx context.Context, checkout CheckoutBasket
 		return errors.Wrap(err, "baskets checkout")
 	}
 
-	// submit the basket to the order module
-	_, err = a.orders.Save(ctx, basket)
-	if err != nil {
-		return errors.Wrap(err, "baskets checkout")
-	}
-
-	if err = a.baskets.Update(ctx, basket); err != nil {
+	if err = a.baskets.Save(ctx, basket); err != nil {
 		return errors.Wrap(err, "basket checkout")
-	}
-
-	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
-		return err
 	}
 
 	return nil
@@ -163,12 +141,7 @@ func (a Application) AddItem(ctx context.Context, add AddItem) error {
 		return err
 	}
 
-	if err = a.baskets.Update(ctx, basket); err != nil {
-		return err
-	}
-
-	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
+	if err = a.baskets.Save(ctx, basket); err != nil {
 		return err
 	}
 
@@ -191,12 +164,7 @@ func (a Application) RemoveItem(ctx context.Context, remove RemoveItem) error {
 		return err
 	}
 
-	if err = a.baskets.Update(ctx, basket); err != nil {
-		return err
-	}
-
-	// publish domain events
-	if err = a.domainPublisher.Publish(ctx, basket.Events()...); err != nil {
+	if err = a.baskets.Save(ctx, basket); err != nil {
 		return err
 	}
 

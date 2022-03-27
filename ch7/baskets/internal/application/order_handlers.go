@@ -29,6 +29,6 @@ func (h OrderHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
 
 func (h OrderHandlers) onBasketCheckedOut(ctx context.Context, event ddd.Event) error {
 	checkedOut := event.Payload().(*domain.BasketCheckedOut)
-	_, err := h.orders.Save(ctx, checkedOut.Basket)
+	_, err := h.orders.Save(ctx, checkedOut.PaymentID, checkedOut.CustomerID, checkedOut.Items)
 	return err
 }

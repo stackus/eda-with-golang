@@ -5,6 +5,6 @@ import (
 )
 
 type ShoppingRepository interface {
-	Create(ctx context.Context, order *Order) (string, error)
+	Create(ctx context.Context, orderID string, items []Item) (string, error)
 	Cancel(ctx context.Context, shoppingID string) error
 }

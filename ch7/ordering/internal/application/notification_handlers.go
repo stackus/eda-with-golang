@@ -33,15 +33,15 @@ func (h NotificationHandlers) HandleEvent(ctx context.Context, event ddd.Event) 
 
 func (h NotificationHandlers) onOrderCreated(ctx context.Context, event ddd.Event) error {
 	orderCreated := event.Payload().(*domain.OrderCreated)
-	return h.notifications.NotifyOrderCreated(ctx, orderCreated.Order.ID(), orderCreated.Order.CustomerID)
+	return h.notifications.NotifyOrderCreated(ctx, event.AggregateID(), orderCreated.CustomerID)
 }
 
 func (h NotificationHandlers) onOrderReadied(ctx context.Context, event ddd.Event) error {
 	orderReadied := event.Payload().(*domain.OrderReadied)
-	return h.notifications.NotifyOrderReady(ctx, orderReadied.Order.ID(), orderReadied.Order.CustomerID)
+	return h.notifications.NotifyOrderReady(ctx, event.AggregateID(), orderReadied.CustomerID)
 }
 
 func (h NotificationHandlers) onOrderCanceled(ctx context.Context, event ddd.Event) error {
 	orderCanceled := event.Payload().(*domain.OrderCanceled)
-	return h.notifications.NotifyOrderCanceled(ctx, orderCanceled.Order.ID(), orderCanceled.Order.CustomerID)
+	return h.notifications.NotifyOrderCanceled(ctx, event.AggregateID(), orderCanceled.CustomerID)
 }
