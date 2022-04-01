@@ -2,41 +2,50 @@ package es
 
 import (
 	"context"
+	"fmt"
 
 	"eda-in-golang/ch7/internal/ddd"
 	"eda-in-golang/ch7/internal/registry"
 )
 
-type AggregateRepository struct {
-	registry registry.Registry
-	store    AggregateStore
+type AggregateRepository[T EventSourcedAggregate] struct {
+	aggregateName string
+	registry      registry.Registry
+	store         AggregateStore
 }
 
-func NewAggregateRepository(registry registry.Registry, store AggregateStore) AggregateRepository {
-	return AggregateRepository{
-		registry: registry,
-		store:    store,
+func NewAggregateRepository[T EventSourcedAggregate](aggregateName string, registry registry.Registry, store AggregateStore) AggregateRepository[T] {
+	return AggregateRepository[T]{
+		aggregateName: aggregateName,
+		registry:      registry,
+		store:         store,
 	}
 }
 
-func (r AggregateRepository) Load(ctx context.Context, aggregateID, aggregateName string) (interface{}, error) {
-	agg, err := r.registry.Build(
-		aggregateName,
+func (r AggregateRepository[T]) Load(ctx context.Context, aggregateID string) (agg T, err error) {
+	var v any
+	v, err = r.registry.Build(
+		r.aggregateName,
 		ddd.SetID(aggregateID),
-		ddd.SetName(aggregateName),
+		ddd.SetName(r.aggregateName),
 	)
 	if err != nil {
-		return nil, err
+		return agg, err
 	}
 
-	if err = r.store.Load(ctx, agg.(EventSourcedAggregate)); err != nil {
-		return nil, err
+	var ok bool
+	if agg, ok = v.(T); !ok {
+		return agg, fmt.Errorf("%T is not the expected type %T", v, agg)
+	}
+
+	if err = r.store.Load(ctx, agg); err != nil {
+		return agg, err
 	}
 
 	return agg, nil
 }
 
-func (r AggregateRepository) Save(ctx context.Context, aggregate EventSourcedAggregate) error {
+func (r AggregateRepository[T]) Save(ctx context.Context, aggregate T) error {
 	if aggregate.Version() == aggregate.PendingVersion() {
 		return nil
 	}

@@ -48,10 +48,12 @@ func (r MallRepository) RenameStore(ctx context.Context, storeID, name string) e
 	return err
 }
 
-func (r MallRepository) Find(ctx context.Context, storeID string) (*domain.Store, error) {
+func (r MallRepository) Find(ctx context.Context, storeID string) (*domain.MallStore, error) {
 	const query = "SELECT name, location, participating FROM %s WHERE id = $1 LIMIT 1"
 
-	store := domain.NewStore(storeID)
+	store := &domain.MallStore{
+		ID: storeID,
+	}
 
 	err := r.db.QueryRowContext(ctx, r.table(query), storeID).Scan(&store.Name, &store.Location, &store.Participating)
 	if err != nil {
@@ -61,10 +63,11 @@ func (r MallRepository) Find(ctx context.Context, storeID string) (*domain.Store
 	return store, nil
 }
 
-func (r MallRepository) All(ctx context.Context) (stores []*domain.Store, err error) {
+func (r MallRepository) All(ctx context.Context) (stores []*domain.MallStore, err error) {
 	const query = "SELECT id, name, location, participating FROM %s"
 
-	rows, err := r.db.QueryContext(ctx, r.table(query))
+	var rows *sql.Rows
+	rows, err = r.db.QueryContext(ctx, r.table(query))
 	if err != nil {
 		return nil, errors.Wrap(err, "querying stores")
 	}
@@ -76,17 +79,11 @@ func (r MallRepository) All(ctx context.Context) (stores []*domain.Store, err er
 	}(rows)
 
 	for rows.Next() {
-		var storeID, name, location string
-		var participating bool
-		err := rows.Scan(&storeID, &name, &location, &participating)
+		store := new(domain.MallStore)
+		err := rows.Scan(&store.ID, &store.Name, &store.Location, &store.Participating)
 		if err != nil {
 			return nil, errors.Wrap(err, "scanning store")
 		}
-
-		store := domain.NewStore(storeID)
-		store.Name = name
-		store.Location = location
-		store.Participating = participating
 
 		stores = append(stores, store)
 	}
@@ -98,10 +95,11 @@ func (r MallRepository) All(ctx context.Context) (stores []*domain.Store, err er
 	return stores, nil
 }
 
-func (r MallRepository) AllParticipating(ctx context.Context) (stores []*domain.Store, err error) {
+func (r MallRepository) AllParticipating(ctx context.Context) (stores []*domain.MallStore, err error) {
 	const query = "SELECT id, name, location, participating FROM %s WHERE participating is true"
 
-	rows, err := r.db.QueryContext(ctx, r.table(query))
+	var rows *sql.Rows
+	rows, err = r.db.QueryContext(ctx, r.table(query))
 	if err != nil {
 		return nil, errors.Wrap(err, "querying participating stores")
 	}
@@ -113,17 +111,11 @@ func (r MallRepository) AllParticipating(ctx context.Context) (stores []*domain.
 	}(rows)
 
 	for rows.Next() {
-		var storeID, name, location string
-		var participating bool
-		err := rows.Scan(&storeID, &name, &location, &participating)
+		store := new(domain.MallStore)
+		err := rows.Scan(&store.ID, &store.Name, &store.Location, &store.Participating)
 		if err != nil {
-			return nil, errors.Wrap(err, "scanning participating store")
+			return nil, errors.Wrap(err, "scanning store")
 		}
-
-		store := domain.NewStore(storeID)
-		store.Name = name
-		store.Location = location
-		store.Participating = participating
 
 		stores = append(stores, store)
 	}

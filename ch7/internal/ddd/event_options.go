@@ -12,21 +12,21 @@ func WithEventID(id string) EventOption {
 	}
 }
 
-func WithOccurredAt(occurred time.Time) EventOption {
+func WithOccurredAt(occurredAt time.Time) EventOption {
 	return func(e *event) {
-		e.occurredAt = occurred
+		e.occurredAt = occurredAt
 	}
 }
 
 func WithAggregateInfo(name, id string) EventOption {
 	return func(e *event) {
-		e.aggID = id
-		e.aggName = name
+		e.metadata.Set(AggregateIDKey, id)
+		e.metadata.Set(AggregateNameKey, name)
 	}
 }
 
 func WithAggregateVersion(version int) EventOption {
 	return func(e *event) {
-		e.aggVersion = version
+		e.metadata.Set(AggregateVersionKey, version)
 	}
 }

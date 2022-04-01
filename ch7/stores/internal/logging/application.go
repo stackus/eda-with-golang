@@ -79,34 +79,31 @@ func (a Application) RemoveProduct(ctx context.Context, cmd commands.RemoveProdu
 	return a.App.RemoveProduct(ctx, cmd)
 }
 
-func (a Application) GetStore(ctx context.Context, query queries.GetStore) (store *domain.Store, err error) {
+func (a Application) GetStore(ctx context.Context, query queries.GetStore) (store *domain.MallStore, err error) {
 	a.logger.Info().Msg("--> Stores.GetStore")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Stores.GetStore") }()
 	return a.App.GetStore(ctx, query)
 }
 
-func (a Application) GetStores(ctx context.Context, query queries.GetStores) (stores []*domain.Store, err error) {
+func (a Application) GetStores(ctx context.Context, query queries.GetStores) (stores []*domain.MallStore, err error) {
 	a.logger.Info().Msg("--> Stores.GetStores")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Stores.GetStores") }()
 	return a.App.GetStores(ctx, query)
 }
 
-func (a Application) GetParticipatingStores(ctx context.Context, query queries.GetParticipatingStores,
-) (store []*domain.Store,
-	err error,
-) {
+func (a Application) GetParticipatingStores(ctx context.Context, query queries.GetParticipatingStores) (store []*domain.MallStore, err error) {
 	a.logger.Info().Msg("--> Stores.GetParticipatingStores")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Stores.GetParticipatingStores") }()
 	return a.App.GetParticipatingStores(ctx, query)
 }
 
-func (a Application) GetCatalog(ctx context.Context, query queries.GetCatalog) (products []*domain.Product, err error) {
+func (a Application) GetCatalog(ctx context.Context, query queries.GetCatalog) (products []*domain.CatalogProduct, err error) {
 	a.logger.Info().Msg("--> Stores.GetCatalog")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Stores.GetCatalog") }()
 	return a.App.GetCatalog(ctx, query)
 }
 
-func (a Application) GetProduct(ctx context.Context, query queries.GetProduct) (product *domain.Product, err error) {
+func (a Application) GetProduct(ctx context.Context, query queries.GetProduct) (product *domain.CatalogProduct, err error) {
 	a.logger.Info().Msg("--> Stores.GetProduct")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Stores.GetProduct") }()
 	return a.App.GetProduct(ctx, query)

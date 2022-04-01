@@ -8,12 +8,12 @@ import (
 
 type EventPublisher struct {
 	AggregateStore
-	publisher ddd.EventPublisher
+	publisher ddd.EventPublisher[ddd.AggregateEvent]
 }
 
 var _ AggregateStore = (*EventPublisher)(nil)
 
-func NewEventPublisher(publisher ddd.EventPublisher) AggregateStoreMiddleware {
+func NewEventPublisher(publisher ddd.EventPublisher[ddd.AggregateEvent]) AggregateStoreMiddleware {
 	eventPublisher := EventPublisher{
 		publisher: publisher,
 	}

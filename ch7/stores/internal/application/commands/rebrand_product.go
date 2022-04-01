@@ -23,7 +23,7 @@ func NewRebrandProductHandler(products domain.ProductRepository) RebrandProductH
 }
 
 func (h RebrandProductHandler) RebrandProduct(ctx context.Context, cmd RebrandProduct) error {
-	product, err := h.products.Find(ctx, cmd.ID)
+	product, err := h.products.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ func NewEnableParticipationHandler(stores domain.StoreRepository) EnableParticip
 }
 
 func (h EnableParticipationHandler) EnableParticipation(ctx context.Context, cmd EnableParticipation) error {
-	store, err := h.stores.Find(ctx, cmd.ID)
+	store, err := h.stores.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,6 @@ import (
 )
 
 type StoreRepository interface {
-	Find(ctx context.Context, storeID string) (*Store, error)
+	Load(ctx context.Context, storeID string) (*Store, error)
 	Save(ctx context.Context, store *Store) error
 }

@@ -23,7 +23,7 @@ func NewCancelOrderHandler(orders domain.OrderRepository, shopping domain.Shoppi
 }
 
 func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) error {
-	order, err := h.orders.Find(ctx, cmd.ID)
+	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}

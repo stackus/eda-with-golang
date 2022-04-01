@@ -4,14 +4,13 @@ import (
 	"context"
 
 	"eda-in-golang/ch7/internal/ddd"
-	es2 "eda-in-golang/ch7/internal/es"
+	es "eda-in-golang/ch7/internal/es"
 	"eda-in-golang/ch7/internal/monolith"
 	pg "eda-in-golang/ch7/internal/postgres"
 	"eda-in-golang/ch7/internal/registry"
 	"eda-in-golang/ch7/internal/registry/serdes"
 	"eda-in-golang/ch7/ordering/internal/application"
 	"eda-in-golang/ch7/ordering/internal/domain"
-	"eda-in-golang/ch7/ordering/internal/es"
 	"eda-in-golang/ch7/ordering/internal/grpc"
 	"eda-in-golang/ch7/ordering/internal/handlers"
 	"eda-in-golang/ch7/ordering/internal/logging"
@@ -27,13 +26,13 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err != nil {
 		return err
 	}
-	domainDispatcher := ddd.NewEventDispatcher()
-	aggregateStore := es2.AggregateStoreWithMiddleware(
-		pg.NewEventStore("baskets.events", mono.DB(), reg),
-		es2.NewEventPublisher(domainDispatcher),
-		pg.NewSnapshotStore("baskets.snapshots", mono.DB(), reg),
+	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
+	aggregateStore := es.AggregateStoreWithMiddleware(
+		pg.NewEventStore("ordering.events", mono.DB(), reg),
+		es.NewEventPublisher(domainDispatcher),
+		pg.NewSnapshotStore("ordering.snapshots", mono.DB(), reg),
 	)
-	orders := es.NewOrderRepository(reg, aggregateStore)
+	orders := es.NewAggregateRepository[*domain.Order](domain.OrderAggregate, reg, aggregateStore)
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
 		return err
@@ -49,11 +48,11 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	app = application.New(orders, customers, payments, shopping)
 	app = logging.LogApplicationAccess(app, mono.Logger())
 	// setup application handlers
-	notificationHandlers := logging.LogEventHandlerAccess(
+	notificationHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
 		application.NewNotificationHandlers(notifications),
 		"Notification", mono.Logger(),
 	)
-	invoiceHandlers := logging.LogEventHandlerAccess(
+	invoiceHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
 		application.NewInvoiceHandlers(invoices),
 		"Invoice", mono.Logger(),
 	)
@@ -68,8 +67,8 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterNotificationHandlers(notificationHandlers, domainDispatcher)
-	handlers.RegisterInvoiceHandlers(invoiceHandlers, domainDispatcher)
+	handlers.RegisterNotificationHandlers[ddd.AggregateEvent](notificationHandlers, domainDispatcher)
+	handlers.RegisterInvoiceHandlers[ddd.AggregateEvent](invoiceHandlers, domainDispatcher)
 
 	return nil
 }

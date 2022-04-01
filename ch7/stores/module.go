@@ -4,14 +4,13 @@ import (
 	"context"
 
 	"eda-in-golang/ch7/internal/ddd"
-	es2 "eda-in-golang/ch7/internal/es"
+	"eda-in-golang/ch7/internal/es"
 	"eda-in-golang/ch7/internal/monolith"
 	pg "eda-in-golang/ch7/internal/postgres"
 	"eda-in-golang/ch7/internal/registry"
 	"eda-in-golang/ch7/internal/registry/serdes"
 	"eda-in-golang/ch7/stores/internal/application"
 	"eda-in-golang/ch7/stores/internal/domain"
-	"eda-in-golang/ch7/stores/internal/es"
 	"eda-in-golang/ch7/stores/internal/grpc"
 	"eda-in-golang/ch7/stores/internal/handlers"
 	"eda-in-golang/ch7/stores/internal/logging"
@@ -29,15 +28,14 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	if err != nil {
 		return err
 	}
-	domainDispatcher := ddd.NewEventDispatcher()
-	aggregateStore := es2.AggregateStoreWithMiddleware(
+	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
+	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("stores.events", mono.DB(), reg),
-		es2.NewEventPublisher(domainDispatcher),
+		es.NewEventPublisher(domainDispatcher),
 		pg.NewSnapshotStore("stores.snapshots", mono.DB(), reg),
 	)
-
-	stores := es.NewStoreRepository(reg, aggregateStore)
-	products := es.NewProductRepository(reg, aggregateStore)
+	stores := es.NewAggregateRepository[*domain.Store](domain.StoreAggregate, reg, aggregateStore)
+	products := es.NewAggregateRepository[*domain.Product](domain.ProductAggregate, reg, aggregateStore)
 	catalog := postgres.NewCatalogRepository("stores.products", mono.DB())
 	mall := postgres.NewMallRepository("stores.stores", mono.DB())
 
@@ -46,11 +44,11 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 		application.New(stores, products, catalog, mall),
 		mono.Logger(),
 	)
-	catalogHandlers := logging.LogEventHandlerAccess(
+	catalogHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
 		application.NewCatalogHandlers(catalog),
 		"Catalog", mono.Logger(),
 	)
-	mallHandlers := logging.LogEventHandlerAccess(
+	mallHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
 		application.NewMallHandlers(mall),
 		"Mall", mono.Logger(),
 	)
@@ -65,8 +63,8 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterCatalogHandlers(catalogHandlers, domainDispatcher)
-	handlers.RegisterMallHandlers(mallHandlers, domainDispatcher)
+	handlers.RegisterCatalogHandlers[ddd.AggregateEvent](catalogHandlers, domainDispatcher)
+	handlers.RegisterMallHandlers[ddd.AggregateEvent](mallHandlers, domainDispatcher)
 
 	return nil
 }

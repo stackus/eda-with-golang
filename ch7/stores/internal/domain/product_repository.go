@@ -5,6 +5,6 @@ import (
 )
 
 type ProductRepository interface {
-	Find(ctx context.Context, id string) (*Product, error)
+	Load(ctx context.Context, id string) (*Product, error)
 	Save(ctx context.Context, product *Product) error
 }

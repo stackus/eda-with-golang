@@ -21,7 +21,7 @@ func NewReadyOrderHandler(orders domain.OrderRepository) ReadyOrderHandler {
 }
 
 func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error {
-	order, err := h.orders.Find(ctx, cmd.ID)
+	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}

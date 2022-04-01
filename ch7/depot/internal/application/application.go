@@ -42,7 +42,7 @@ type (
 var _ App = (*Application)(nil)
 
 func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository,
-	domainPublisher ddd.EventPublisher,
+	domainPublisher ddd.EventPublisher[ddd.AggregateEvent],
 ) *Application {
 	return &Application{
 		appCommands: appCommands{

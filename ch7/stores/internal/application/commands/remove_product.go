@@ -21,7 +21,7 @@ func NewRemoveProductHandler(products domain.ProductRepository) RemoveProductHan
 }
 
 func (h RemoveProductHandler) RemoveProduct(ctx context.Context, cmd RemoveProduct) error {
-	product, err := h.products.Find(ctx, cmd.ID)
+	product, err := h.products.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}

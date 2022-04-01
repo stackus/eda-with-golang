@@ -6,7 +6,6 @@ import (
 	"github.com/stackus/errors"
 
 	"eda-in-golang/ch7/baskets/internal/domain"
-	"eda-in-golang/ch7/internal/ddd"
 )
 
 type (
@@ -50,11 +49,10 @@ type (
 	}
 
 	Application struct {
-		baskets         domain.BasketRepository
-		stores          domain.StoreRepository
-		products        domain.ProductRepository
-		orders          domain.OrderRepository
-		domainPublisher ddd.EventPublisher
+		baskets  domain.BasketRepository
+		stores   domain.StoreRepository
+		products domain.ProductRepository
+		orders   domain.OrderRepository
 	}
 )
 
@@ -85,7 +83,7 @@ func (a Application) StartBasket(ctx context.Context, start StartBasket) error {
 }
 
 func (a Application) CancelBasket(ctx context.Context, cancel CancelBasket) error {
-	basket, err := a.baskets.Find(ctx, cancel.ID)
+	basket, err := a.baskets.Load(ctx, cancel.ID)
 	if err != nil {
 		return err
 	}
@@ -103,7 +101,7 @@ func (a Application) CancelBasket(ctx context.Context, cancel CancelBasket) erro
 }
 
 func (a Application) CheckoutBasket(ctx context.Context, checkout CheckoutBasket) error {
-	basket, err := a.baskets.Find(ctx, checkout.ID)
+	basket, err := a.baskets.Load(ctx, checkout.ID)
 	if err != nil {
 		return err
 	}
@@ -121,7 +119,7 @@ func (a Application) CheckoutBasket(ctx context.Context, checkout CheckoutBasket
 }
 
 func (a Application) AddItem(ctx context.Context, add AddItem) error {
-	basket, err := a.baskets.Find(ctx, add.ID)
+	basket, err := a.baskets.Load(ctx, add.ID)
 	if err != nil {
 		return err
 	}
@@ -154,7 +152,7 @@ func (a Application) RemoveItem(ctx context.Context, remove RemoveItem) error {
 		return err
 	}
 
-	basket, err := a.baskets.Find(ctx, remove.ID)
+	basket, err := a.baskets.Load(ctx, remove.ID)
 	if err != nil {
 		return err
 	}
@@ -172,5 +170,5 @@ func (a Application) RemoveItem(ctx context.Context, remove RemoveItem) error {
 }
 
 func (a Application) GetBasket(ctx context.Context, get GetBasket) (*domain.Basket, error) {
-	return a.baskets.Find(ctx, get.ID)
+	return a.baskets.Load(ctx, get.ID)
 }
