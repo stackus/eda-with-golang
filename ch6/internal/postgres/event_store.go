@@ -13,13 +13,24 @@ import (
 	"eda-in-golang/ch6/internal/registry"
 )
 
-type EventStore struct {
-	tableName string
-	db        *sql.DB
-	registry  registry.Registry
-}
+type (
+	EventStore struct {
+		tableName string
+		db        *sql.DB
+		registry  registry.Registry
+	}
+	aggregateEvent struct {
+		id         string
+		name       string
+		payload    ddd.EventPayload
+		occurredAt time.Time
+		aggregate  es.EventSourcedAggregate
+		version    int
+	}
+)
 
 var _ es.AggregateStore = (*EventStore)(nil)
+var _ ddd.AggregateEvent = (*aggregateEvent)(nil)
 
 func NewEventStore(tableName string, db *sql.DB, registry registry.Registry) EventStore {
 	return EventStore{
@@ -64,14 +75,15 @@ func (s EventStore) Load(ctx context.Context, aggregate es.EventSourcedAggregate
 			return err
 		}
 
-		event := ddd.NewEvent(
-			eventName,
-			payload,
-			ddd.WithEventID(eventID),
-			ddd.WithAggregateInfo(aggregateName, aggregateID),
-			ddd.WithAggregateVersion(aggregateVersion),
-			ddd.WithOccurredAt(occurredAt),
-		)
+		event := aggregateEvent{
+			id:         eventID,
+			name:       eventName,
+			payload:    payload,
+			aggregate:  aggregate,
+			version:    aggregateVersion,
+			occurredAt: occurredAt,
+		}
+
 		if err = es.LoadEvent(aggregate, event); err != nil {
 			return err
 		}
@@ -128,3 +140,12 @@ func (s EventStore) Save(ctx context.Context, aggregate es.EventSourcedAggregate
 func (s EventStore) table(query string) string {
 	return fmt.Sprintf(query, s.tableName)
 }
+
+func (e aggregateEvent) ID() string                { return e.id }
+func (e aggregateEvent) EventName() string         { return e.name }
+func (e aggregateEvent) Payload() ddd.EventPayload { return e.payload }
+func (e aggregateEvent) Metadata() ddd.Metadata    { return ddd.Metadata{} }
+func (e aggregateEvent) OccurredAt() time.Time     { return e.occurredAt }
+func (e aggregateEvent) AggregateName() string     { return e.aggregate.AggregateName() }
+func (e aggregateEvent) AggregateID() string       { return e.aggregate.ID() }
+func (e aggregateEvent) AggregateVersion() int     { return e.version }

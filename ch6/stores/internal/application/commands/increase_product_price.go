@@ -20,7 +20,7 @@ func NewIncreaseProductPriceHandler(products domain.ProductRepository) IncreaseP
 }
 
 func (h IncreaseProductPriceHandler) IncreaseProductPrice(ctx context.Context, cmd IncreaseProductPrice) error {
-	product, err := h.products.Find(ctx, cmd.ID)
+	product, err := h.products.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}

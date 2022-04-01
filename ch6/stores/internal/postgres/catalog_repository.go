@@ -24,9 +24,7 @@ func NewCatalogRepository(tableName string, db *sql.DB) CatalogRepository {
 	}
 }
 
-func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, name, description, sku string,
-	price float64,
-) error {
+func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, name, description, sku string, price float64) error {
 	const query = `INSERT INTO %s (id, store_id, name, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)`
 
 	_, err := r.db.ExecContext(ctx, r.table(query), productID, storeID, name, description, sku, price)
@@ -58,10 +56,12 @@ func (r CatalogRepository) RemoveProduct(ctx context.Context, productID string) 
 	return err
 }
 
-func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.Product, error) {
+func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.CatalogProduct, error) {
 	const query = `SELECT store_id, name, description, sku, price FROM %s WHERE id = $1 LIMIT 1`
 
-	product := domain.NewProduct(productID)
+	product := &domain.CatalogProduct{
+		ID: productID,
+	}
 
 	err := r.db.QueryRowContext(ctx, r.table(query), productID).Scan(&product.StoreID, &product.Name, &product.Description, &product.SKU, &product.Price)
 	if err != nil {
@@ -71,12 +71,11 @@ func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.
 	return product, nil
 }
 
-func (r CatalogRepository) GetCatalog(ctx context.Context, storeID string) ([]*domain.Product, error) {
+func (r CatalogRepository) GetCatalog(ctx context.Context, storeID string) (products []*domain.CatalogProduct, err error) {
 	const query = `SELECT id, name, description, sku, price FROM %s WHERE store_id = $1`
 
-	products := make([]*domain.Product, 0)
-
-	rows, err := r.db.QueryContext(ctx, r.table(query), storeID)
+	var rows *sql.Rows
+	rows, err = r.db.QueryContext(ctx, r.table(query), storeID)
 	if err != nil {
 		return nil, errors.Wrap(err, "querying products")
 	}
@@ -88,19 +87,13 @@ func (r CatalogRepository) GetCatalog(ctx context.Context, storeID string) ([]*d
 	}(rows)
 
 	for rows.Next() {
-		var productID, name, description, sku string
-		var price float64
-		err := rows.Scan(&productID, &name, &description, &sku, &price)
+		product := &domain.CatalogProduct{
+			StoreID: storeID,
+		}
+		err := rows.Scan(&product.ID, &product.Name, &product.Description, &product.SKU, &product.Price)
 		if err != nil {
 			return nil, errors.Wrap(err, "scanning product")
 		}
-
-		product := domain.NewProduct(productID)
-		product.StoreID = storeID
-		product.Name = name
-		product.Description = description
-		product.SKU = sku
-		product.Price = price
 
 		products = append(products, product)
 	}

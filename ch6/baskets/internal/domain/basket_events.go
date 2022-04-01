@@ -10,7 +10,6 @@ const (
 
 type BasketStarted struct {
 	CustomerID string
-	// Basket *Basket
 }
 
 // Key implements registry.Registerable

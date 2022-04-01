@@ -4,15 +4,17 @@ import (
 	"eda-in-golang/ch6/internal/ddd"
 )
 
-type Versioner interface {
-	Version() int
-	PendingVersion() int
-}
+type (
+	Versioner interface {
+		Version() int
+		PendingVersion() int
+	}
 
-type Aggregate struct {
-	ddd.Aggregate
-	version int
-}
+	Aggregate struct {
+		ddd.Aggregate
+		version int
+	}
+)
 
 var _ interface {
 	EventCommitter

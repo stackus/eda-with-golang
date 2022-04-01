@@ -19,11 +19,11 @@ type CreateShoppingListHandler struct {
 	shoppingLists   domain.ShoppingListRepository
 	stores          domain.StoreRepository
 	products        domain.ProductRepository
-	domainPublisher ddd.EventPublisher
+	domainPublisher ddd.EventPublisher[ddd.AggregateEvent]
 }
 
 func NewCreateShoppingListHandler(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository,
-	products domain.ProductRepository, domainPublisher ddd.EventPublisher,
+	products domain.ProductRepository, domainPublisher ddd.EventPublisher[ddd.AggregateEvent],
 ) CreateShoppingListHandler {
 	return CreateShoppingListHandler{
 		shoppingLists:   shoppingLists,

@@ -14,7 +14,7 @@ type EventCommitter interface {
 	CommitEvents()
 }
 
-func LoadEvent(v interface{}, event ddd.Event) error {
+func LoadEvent(v interface{}, event ddd.AggregateEvent) error {
 	type loader interface {
 		EventApplier
 		VersionSetter

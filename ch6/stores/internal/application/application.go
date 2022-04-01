@@ -25,11 +25,11 @@ type (
 		RemoveProduct(ctx context.Context, cmd commands.RemoveProduct) error
 	}
 	Queries interface {
-		GetStore(ctx context.Context, query queries.GetStore) (*domain.Store, error)
-		GetStores(ctx context.Context, query queries.GetStores) ([]*domain.Store, error)
-		GetParticipatingStores(ctx context.Context, query queries.GetParticipatingStores) ([]*domain.Store, error)
-		GetCatalog(ctx context.Context, query queries.GetCatalog) ([]*domain.Product, error)
-		GetProduct(ctx context.Context, query queries.GetProduct) (*domain.Product, error)
+		GetStore(ctx context.Context, query queries.GetStore) (*domain.MallStore, error)
+		GetStores(ctx context.Context, query queries.GetStores) ([]*domain.MallStore, error)
+		GetParticipatingStores(ctx context.Context, query queries.GetParticipatingStores) ([]*domain.MallStore, error)
+		GetCatalog(ctx context.Context, query queries.GetCatalog) ([]*domain.CatalogProduct, error)
+		GetProduct(ctx context.Context, query queries.GetProduct) (*domain.CatalogProduct, error)
 	}
 
 	Application struct {

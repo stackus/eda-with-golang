@@ -16,7 +16,6 @@ func NewGetParticipatingStoresHandler(mall domain.MallRepository) GetParticipati
 	return GetParticipatingStoresHandler{mall: mall}
 }
 
-func (h GetParticipatingStoresHandler) GetParticipatingStores(ctx context.Context, _ GetParticipatingStores,
-) ([]*domain.Store, error) {
+func (h GetParticipatingStoresHandler) GetParticipatingStores(ctx context.Context, _ GetParticipatingStores) ([]*domain.MallStore, error) {
 	return h.mall.AllParticipating(ctx)
 }

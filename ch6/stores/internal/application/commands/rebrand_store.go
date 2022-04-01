@@ -22,7 +22,7 @@ func NewRebrandStoreHandler(stores domain.StoreRepository) RebrandStoreHandler {
 }
 
 func (h RebrandStoreHandler) RebrandStore(ctx context.Context, cmd RebrandStore) error {
-	store, err := h.stores.Find(ctx, cmd.ID)
+	store, err := h.stores.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}

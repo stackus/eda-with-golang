@@ -7,19 +7,19 @@ import (
 	"eda-in-golang/ch6/ordering/internal/domain"
 )
 
-type NotificationHandlers struct {
+type NotificationHandlers[T ddd.AggregateEvent] struct {
 	notifications domain.NotificationRepository
 }
 
-var _ ddd.EventHandler = (*NotificationHandlers)(nil)
+var _ ddd.EventHandler[ddd.AggregateEvent] = (*NotificationHandlers[ddd.AggregateEvent])(nil)
 
-func NewNotificationHandlers(notifications domain.NotificationRepository) *NotificationHandlers {
-	return &NotificationHandlers{
+func NewNotificationHandlers(notifications domain.NotificationRepository) *NotificationHandlers[ddd.AggregateEvent] {
+	return &NotificationHandlers[ddd.AggregateEvent]{
 		notifications: notifications,
 	}
 }
 
-func (h NotificationHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
+func (h NotificationHandlers[T]) HandleEvent(ctx context.Context, event T) error {
 	switch event.EventName() {
 	case domain.OrderCreatedEvent:
 		return h.onOrderCreated(ctx, event)
@@ -31,17 +31,17 @@ func (h NotificationHandlers) HandleEvent(ctx context.Context, event ddd.Event) 
 	return nil
 }
 
-func (h NotificationHandlers) onOrderCreated(ctx context.Context, event ddd.Event) error {
+func (h NotificationHandlers[T]) onOrderCreated(ctx context.Context, event ddd.AggregateEvent) error {
 	orderCreated := event.Payload().(*domain.OrderCreated)
 	return h.notifications.NotifyOrderCreated(ctx, event.AggregateID(), orderCreated.CustomerID)
 }
 
-func (h NotificationHandlers) onOrderReadied(ctx context.Context, event ddd.Event) error {
+func (h NotificationHandlers[T]) onOrderReadied(ctx context.Context, event ddd.AggregateEvent) error {
 	orderReadied := event.Payload().(*domain.OrderReadied)
 	return h.notifications.NotifyOrderReady(ctx, event.AggregateID(), orderReadied.CustomerID)
 }
 
-func (h NotificationHandlers) onOrderCanceled(ctx context.Context, event ddd.Event) error {
+func (h NotificationHandlers[T]) onOrderCanceled(ctx context.Context, event ddd.AggregateEvent) error {
 	orderCanceled := event.Payload().(*domain.OrderCanceled)
 	return h.notifications.NotifyOrderCanceled(ctx, event.AggregateID(), orderCanceled.CustomerID)
 }

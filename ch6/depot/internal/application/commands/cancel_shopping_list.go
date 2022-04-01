@@ -13,10 +13,10 @@ type CancelShoppingList struct {
 
 type CancelShoppingListHandler struct {
 	shoppingLists   domain.ShoppingListRepository
-	domainPublisher ddd.EventPublisher
+	domainPublisher ddd.EventPublisher[ddd.AggregateEvent]
 }
 
-func NewCancelShoppingListHandler(shoppingLists domain.ShoppingListRepository, domainPublisher ddd.EventPublisher,
+func NewCancelShoppingListHandler(shoppingLists domain.ShoppingListRepository, domainPublisher ddd.EventPublisher[ddd.AggregateEvent],
 ) CancelShoppingListHandler {
 	return CancelShoppingListHandler{
 		shoppingLists:   shoppingLists,

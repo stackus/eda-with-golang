@@ -13,10 +13,10 @@ type CompleteShoppingList struct {
 
 type CompleteShoppingListHandler struct {
 	shoppingLists   domain.ShoppingListRepository
-	domainPublisher ddd.EventPublisher
+	domainPublisher ddd.EventPublisher[ddd.AggregateEvent]
 }
 
-func NewCompleteShoppingListHandler(shoppingLists domain.ShoppingListRepository, domainPublisher ddd.EventPublisher,
+func NewCompleteShoppingListHandler(shoppingLists domain.ShoppingListRepository, domainPublisher ddd.EventPublisher[ddd.AggregateEvent],
 ) CompleteShoppingListHandler {
 	return CompleteShoppingListHandler{
 		shoppingLists:   shoppingLists,

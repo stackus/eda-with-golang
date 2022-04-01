@@ -18,6 +18,6 @@ func NewGetProductHandler(catalog domain.CatalogRepository) GetProductHandler {
 	return GetProductHandler{catalog: catalog}
 }
 
-func (h GetProductHandler) GetProduct(ctx context.Context, query GetProduct) (*domain.Product, error) {
+func (h GetProductHandler) GetProduct(ctx context.Context, query GetProduct) (*domain.CatalogProduct, error) {
 	return h.catalog.Find(ctx, query.ID)
 }

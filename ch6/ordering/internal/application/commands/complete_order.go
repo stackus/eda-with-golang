@@ -22,7 +22,7 @@ func NewCompleteOrderHandler(orders domain.OrderRepository) CompleteOrderHandler
 }
 
 func (h CompleteOrderHandler) CompleteOrder(ctx context.Context, cmd CompleteOrder) error {
-	order, err := h.orders.Find(ctx, cmd.ID)
+	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}

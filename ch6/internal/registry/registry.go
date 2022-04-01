@@ -80,8 +80,7 @@ func (r *registry) Build(key string, options ...BuildOption) (interface{}, error
 	return v, nil
 }
 
-func (r *registry) register(key string, fn func() interface{}, s Serializer, d Deserializer, o []BuildOption,
-) error {
+func (r *registry) register(key string, fn func() interface{}, s Serializer, d Deserializer, o []BuildOption) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

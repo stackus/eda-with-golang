@@ -7,19 +7,19 @@ import (
 	"eda-in-golang/ch6/ordering/internal/domain"
 )
 
-type InvoiceHandlers struct {
+type InvoiceHandlers[T ddd.AggregateEvent] struct {
 	invoices domain.InvoiceRepository
 }
 
-var _ ddd.EventHandler = (*InvoiceHandlers)(nil)
+var _ ddd.EventHandler[ddd.AggregateEvent] = (*InvoiceHandlers[ddd.AggregateEvent])(nil)
 
-func NewInvoiceHandlers(invoices domain.InvoiceRepository) *InvoiceHandlers {
-	return &InvoiceHandlers{
+func NewInvoiceHandlers(invoices domain.InvoiceRepository) *InvoiceHandlers[ddd.AggregateEvent] {
+	return &InvoiceHandlers[ddd.AggregateEvent]{
 		invoices: invoices,
 	}
 }
 
-func (h InvoiceHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
+func (h InvoiceHandlers[T]) HandleEvent(ctx context.Context, event T) error {
 	switch event.EventName() {
 	case domain.OrderReadiedEvent:
 		return h.onOrderReadied(ctx, event)
@@ -27,7 +27,7 @@ func (h InvoiceHandlers) HandleEvent(ctx context.Context, event ddd.Event) error
 	return nil
 }
 
-func (h InvoiceHandlers) onOrderReadied(ctx context.Context, event ddd.Event) error {
+func (h InvoiceHandlers[T]) onOrderReadied(ctx context.Context, event ddd.AggregateEvent) error {
 	orderReadied := event.Payload().(*domain.OrderReadied)
 	return h.invoices.Save(ctx, event.AggregateID(), orderReadied.PaymentID, orderReadied.Total)
 }

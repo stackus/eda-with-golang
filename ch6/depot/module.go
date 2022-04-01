@@ -17,7 +17,7 @@ type Module struct{}
 
 func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup Driven adapters
-	domainDispatcher := ddd.NewEventDispatcher()
+	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
 	shoppingLists := postgres.NewShoppingListRepository("depot.shopping_lists", mono.DB())
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
@@ -28,10 +28,11 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	orders := grpc.NewOrderRepository(conn)
 
 	// setup application
-	app := logging.LogApplicationAccess(application.New(shoppingLists, stores, products, domainDispatcher),
+	app := logging.LogApplicationAccess(
+		application.New(shoppingLists, stores, products, domainDispatcher),
 		mono.Logger(),
 	)
-	orderHandlers := logging.LogEventHandlerAccess(
+	orderHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
 		application.NewOrderHandlers(orders),
 		"Order", mono.Logger(),
 	)
@@ -46,7 +47,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterOrderHandlers(orderHandlers, domainDispatcher)
+	handlers.RegisterOrderHandlers[ddd.AggregateEvent](orderHandlers, domainDispatcher)
 
 	return nil
 }

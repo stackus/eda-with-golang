@@ -40,13 +40,13 @@ type (
 
 	Application struct {
 		customers       domain.CustomerRepository
-		domainPublisher ddd.EventPublisher
+		domainPublisher ddd.EventPublisher[ddd.AggregateEvent]
 	}
 )
 
 var _ App = (*Application)(nil)
 
-func New(customers domain.CustomerRepository, domainPublisher ddd.EventPublisher) *Application {
+func New(customers domain.CustomerRepository, domainPublisher ddd.EventPublisher[ddd.AggregateEvent]) *Application {
 	return &Application{
 		customers:       customers,
 		domainPublisher: domainPublisher,

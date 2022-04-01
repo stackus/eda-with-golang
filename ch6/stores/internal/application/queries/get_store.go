@@ -18,6 +18,6 @@ func NewGetStoreHandler(mall domain.MallRepository) GetStoreHandler {
 	return GetStoreHandler{mall: mall}
 }
 
-func (h GetStoreHandler) GetStore(ctx context.Context, query GetStore) (*domain.Store, error) {
+func (h GetStoreHandler) GetStore(ctx context.Context, query GetStore) (*domain.MallStore, error) {
 	return h.mall.Find(ctx, query.ID)
 }

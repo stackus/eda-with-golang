@@ -8,23 +8,23 @@ import (
 	"eda-in-golang/ch6/internal/ddd"
 )
 
-type EventHandlers struct {
-	ddd.EventHandler
+type EventHandlers[T ddd.Event] struct {
+	ddd.EventHandler[T]
 	label  string
 	logger zerolog.Logger
 }
 
-var _ ddd.EventHandler = (*EventHandlers)(nil)
+var _ ddd.EventHandler[ddd.Event] = (*EventHandlers[ddd.Event])(nil)
 
-func LogEventHandlerAccess(handlers ddd.EventHandler, label string, logger zerolog.Logger) EventHandlers {
-	return EventHandlers{
+func LogEventHandlerAccess[T ddd.Event](handlers ddd.EventHandler[T], label string, logger zerolog.Logger) EventHandlers[T] {
+	return EventHandlers[T]{
 		EventHandler: handlers,
 		label:        label,
 		logger:       logger,
 	}
 }
 
-func (h EventHandlers) HandleEvent(ctx context.Context, event ddd.Event) (err error) {
+func (h EventHandlers[T]) HandleEvent(ctx context.Context, event T) (err error) {
 	h.logger.Info().Msgf("--> Ordering.%s.On(%s)", h.label, event.EventName())
 	defer func() { h.logger.Info().Err(err).Msgf("<-- Ordering.%s.On(%s)", h.label, event.EventName()) }()
 	return h.EventHandler.HandleEvent(ctx, event)

@@ -16,7 +16,7 @@ type Module struct{}
 
 func (m Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	// setup Driven adapters
-	domainDispatcher := ddd.NewEventDispatcher()
+	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
 	customers := postgres.NewCustomerRepository("customers.customers", mono.DB())
 
 	// setup application

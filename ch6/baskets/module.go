@@ -5,13 +5,12 @@ import (
 
 	"eda-in-golang/ch6/baskets/internal/application"
 	"eda-in-golang/ch6/baskets/internal/domain"
-	"eda-in-golang/ch6/baskets/internal/es"
 	"eda-in-golang/ch6/baskets/internal/grpc"
 	"eda-in-golang/ch6/baskets/internal/handlers"
 	"eda-in-golang/ch6/baskets/internal/logging"
 	"eda-in-golang/ch6/baskets/internal/rest"
 	"eda-in-golang/ch6/internal/ddd"
-	es2 "eda-in-golang/ch6/internal/es"
+	"eda-in-golang/ch6/internal/es"
 	"eda-in-golang/ch6/internal/monolith"
 	pg "eda-in-golang/ch6/internal/postgres"
 	"eda-in-golang/ch6/internal/registry"
@@ -27,13 +26,13 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	if err != nil {
 		return err
 	}
-	domainDispatcher := ddd.NewEventDispatcher()
-	aggregateStore := es2.AggregateStoreWithMiddleware(
+	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
+	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("baskets.events", mono.DB(), reg),
-		es2.NewEventPublisher(domainDispatcher),
+		es.NewEventPublisher(domainDispatcher),
 		pg.NewSnapshotStore("baskets.snapshots", mono.DB(), reg),
 	)
-	baskets := es.NewBasketRepository(reg, aggregateStore)
+	baskets := es.NewAggregateRepository[*domain.Basket](domain.BasketAggregate, reg, aggregateStore)
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
 		return err
@@ -47,7 +46,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 		application.New(baskets, stores, products, orders),
 		mono.Logger(),
 	)
-	orderHandlers := logging.LogEventHandlerAccess(
+	orderHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
 		application.NewOrderHandlers(orders),
 		"Order", mono.Logger(),
 	)
@@ -62,7 +61,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterOrderHandlers(orderHandlers, domainDispatcher)
+	handlers.RegisterOrderHandlers[ddd.AggregateEvent](orderHandlers, domainDispatcher)
 
 	return
 }

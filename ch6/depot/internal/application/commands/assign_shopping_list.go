@@ -14,10 +14,10 @@ type AssignShoppingList struct {
 
 type AssignShoppingListHandler struct {
 	shoppingLists   domain.ShoppingListRepository
-	domainPublisher ddd.EventPublisher
+	domainPublisher ddd.EventPublisher[ddd.AggregateEvent]
 }
 
-func NewAssignShoppingListHandler(shoppingList domain.ShoppingListRepository, domainPublisher ddd.EventPublisher,
+func NewAssignShoppingListHandler(shoppingList domain.ShoppingListRepository, domainPublisher ddd.EventPublisher[ddd.AggregateEvent],
 ) AssignShoppingListHandler {
 	return AssignShoppingListHandler{
 		shoppingLists:   shoppingList,

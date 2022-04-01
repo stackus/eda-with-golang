@@ -7,19 +7,19 @@ import (
 	"eda-in-golang/ch6/stores/internal/domain"
 )
 
-type MallHandlers struct {
+type MallHandlers[T ddd.AggregateEvent] struct {
 	mall domain.MallRepository
 }
 
-var _ ddd.EventHandler = (*MallHandlers)(nil)
+var _ ddd.EventHandler[ddd.AggregateEvent] = (*MallHandlers[ddd.AggregateEvent])(nil)
 
-func NewMallHandlers(mall domain.MallRepository) *MallHandlers {
-	return &MallHandlers{
+func NewMallHandlers(mall domain.MallRepository) *MallHandlers[ddd.AggregateEvent] {
+	return &MallHandlers[ddd.AggregateEvent]{
 		mall: mall,
 	}
 }
 
-func (h MallHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers[T]) HandleEvent(ctx context.Context, event T) error {
 	switch event.EventName() {
 	case domain.StoreCreatedEvent:
 		return h.onStoreCreated(ctx, event)
@@ -33,20 +33,20 @@ func (h MallHandlers) HandleEvent(ctx context.Context, event ddd.Event) error {
 	return nil
 }
 
-func (h MallHandlers) onStoreCreated(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers[T]) onStoreCreated(ctx context.Context, event ddd.AggregateEvent) error {
 	payload := event.Payload().(*domain.StoreCreated)
 	return h.mall.AddStore(ctx, event.AggregateID(), payload.Name, payload.Location)
 }
 
-func (h MallHandlers) onStoreParticipationEnabled(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers[T]) onStoreParticipationEnabled(ctx context.Context, event ddd.AggregateEvent) error {
 	return h.mall.SetStoreParticipation(ctx, event.AggregateID(), true)
 }
 
-func (h MallHandlers) onStoreParticipationDisabled(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers[T]) onStoreParticipationDisabled(ctx context.Context, event ddd.AggregateEvent) error {
 	return h.mall.SetStoreParticipation(ctx, event.AggregateID(), false)
 }
 
-func (h MallHandlers) onStoreRebranded(ctx context.Context, event ddd.Event) error {
+func (h MallHandlers[T]) onStoreRebranded(ctx context.Context, event ddd.AggregateEvent) error {
 	payload := event.Payload().(*domain.StoreRebranded)
 	return h.mall.RenameStore(ctx, event.AggregateID(), payload.Name)
 }
