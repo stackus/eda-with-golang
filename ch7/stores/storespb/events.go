@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	StoreAggregateChannel = "mallbots.stores.Store"
+	StoreAggregateChannel = "mallbots.stores.events.Store"
 
 	StoreCreatedEvent              = "storesapi.StoreCreated"
 	StoreParticipatingToggledEvent = "storesapi.StoreParticipatingToggled"
 	StoreRebrandedEvent            = "storesapi.StoreRebranded"
 
-	ProductAggregateChannel = "mallbots.stores.Product"
+	ProductAggregateChannel = "mallbots.stores.events.Product"
 
 	ProductAddedEvent          = "storesapi.ProductAdded"
 	ProductRebrandedEvent      = "storesapi.ProductRebranded"

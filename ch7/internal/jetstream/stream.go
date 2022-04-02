@@ -7,7 +7,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
 
-	"eda-in-golang/ch7/internal/em"
+	"eda-in-golang/ch7/internal/am"
 )
 
 type rawMessage struct {
@@ -27,8 +27,8 @@ type Stream struct {
 	mu         sync.Mutex
 }
 
-var _ em.MessageStream[em.RawMessage, em.RawMessage] = (*Stream)(nil)
-var _ em.RawMessage = (*rawMessage)(nil)
+var _ am.MessageStream[am.RawMessage, am.RawMessage] = (*Stream)(nil)
+var _ am.RawMessage = (*rawMessage)(nil)
 
 func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	return &Stream{
@@ -37,7 +37,7 @@ func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	}
 }
 
-func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg em.RawMessage) error {
+func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMessage) error {
 	data, err := proto.Marshal(&StreamMessage{
 		Id:   rawMsg.ID(),
 		Name: rawMsg.MessageName(),
@@ -55,13 +55,13 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg em.RawMes
 	return err
 }
 
-func (s *Stream) Subscribe(topicName string, handler em.MessageHandler[em.RawMessage], options ...em.SubscriberOption) error {
+func (s *Stream) Subscribe(topicName string, handler am.MessageHandler[am.RawMessage], options ...am.SubscriberOption) error {
 	var err error
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	subCfg := em.NewSubscriberConfig(options)
+	subCfg := am.NewSubscriberConfig(options)
 
 	opts := []nats.SubOpt{
 		nats.MaxDeliver(subCfg.MaxRedeliver()),
@@ -77,7 +77,7 @@ func (s *Stream) Subscribe(topicName string, handler em.MessageHandler[em.RawMes
 		opts = append(opts, nats.Bind(s.streamName, groupName), nats.Durable(groupName))
 	}
 
-	if ackType := subCfg.AckType(); ackType != em.AckTypeAuto {
+	if ackType := subCfg.AckType(); ackType != am.AckTypeAuto {
 		ackWait := subCfg.AckWait()
 
 		cfg.AckPolicy = nats.AckExplicitPolicy
@@ -103,7 +103,7 @@ func (s *Stream) Subscribe(topicName string, handler em.MessageHandler[em.RawMes
 	return nil
 }
 
-func (s *Stream) handleMsg(cfg em.SubscriberConfig, handler em.MessageHandler[em.RawMessage]) func(*nats.Msg) {
+func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler[am.RawMessage]) func(*nats.Msg) {
 	return func(natsMsg *nats.Msg) {
 
 		var err error
@@ -134,7 +134,7 @@ func (s *Stream) handleMsg(cfg em.SubscriberConfig, handler em.MessageHandler[em
 			errc <- handler.HandleMessage(wCtx, msg)
 		}()
 
-		if cfg.AckType() == em.AckTypeAuto {
+		if cfg.AckType() == am.AckTypeAuto {
 			err = msg.Ack()
 			if err != nil {
 				// TODO logging?

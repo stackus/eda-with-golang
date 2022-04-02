@@ -4,7 +4,7 @@
 // 	protoc        v3.18.1
 // source: message_types.proto
 
-package em
+package am
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

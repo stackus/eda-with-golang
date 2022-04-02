@@ -1,3 +1,3 @@
-package em
+package am
 
 //go:generate buf generate

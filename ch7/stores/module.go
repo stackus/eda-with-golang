@@ -3,8 +3,8 @@ package stores
 import (
 	"context"
 
+	"eda-in-golang/ch7/internal/am"
 	"eda-in-golang/ch7/internal/ddd"
-	"eda-in-golang/ch7/internal/em"
 	"eda-in-golang/ch7/internal/es"
 	"eda-in-golang/ch7/internal/jetstream"
 	"eda-in-golang/ch7/internal/monolith"
@@ -33,7 +33,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	if err = storespb.Registrations(reg); err != nil {
 		return err
 	}
-	eventStream := em.NewEventStream(reg, jetstream.NewStream(mono.Config().Nats.Stream, mono.JS()))
+	eventStream := am.NewEventStream(reg, jetstream.NewStream(mono.Config().Nats.Stream, mono.JS()))
 	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
 	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("stores.events", mono.DB(), reg),

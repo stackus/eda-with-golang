@@ -3,19 +3,19 @@ package application
 import (
 	"context"
 
+	"eda-in-golang/ch7/internal/am"
 	"eda-in-golang/ch7/internal/ddd"
-	"eda-in-golang/ch7/internal/em"
 	"eda-in-golang/ch7/stores/internal/domain"
 	"eda-in-golang/ch7/stores/storespb"
 )
 
 type IntegrationEventHandlers[T ddd.AggregateEvent] struct {
-	publisher em.MessagePublisher[ddd.Event]
+	publisher am.MessagePublisher[ddd.Event]
 }
 
 var _ ddd.EventHandler[ddd.AggregateEvent] = (*IntegrationEventHandlers[ddd.AggregateEvent])(nil)
 
-func NewIntegrationEventHandlers(publisher em.MessagePublisher[ddd.Event]) *IntegrationEventHandlers[ddd.AggregateEvent] {
+func NewIntegrationEventHandlers(publisher am.MessagePublisher[ddd.Event]) *IntegrationEventHandlers[ddd.AggregateEvent] {
 	return &IntegrationEventHandlers[ddd.AggregateEvent]{
 		publisher: publisher,
 	}
