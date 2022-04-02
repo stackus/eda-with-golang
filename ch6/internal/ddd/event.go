@@ -27,6 +27,10 @@ type (
 
 var _ Event = (*event)(nil)
 
+func NewEvent(name string, payload EventPayload, options ...EventOption) event {
+	return newEvent(name, payload, options...)
+}
+
 func newEvent(name string, payload EventPayload, options ...EventOption) event {
 	evt := event{
 		Entity:     NewEntity(uuid.New().String(), name),
@@ -36,7 +40,7 @@ func newEvent(name string, payload EventPayload, options ...EventOption) event {
 	}
 
 	for _, option := range options {
-		option(&evt)
+		option.configureEvent(&evt)
 	}
 
 	return evt

@@ -13,3 +13,9 @@ func (m Metadata) Get(key string) interface{} {
 func (m Metadata) Del(key string) {
 	delete(m, key)
 }
+
+func (m Metadata) configureEvent(e *event) {
+	for key, value := range m {
+		e.metadata[key] = value
+	}
+}
