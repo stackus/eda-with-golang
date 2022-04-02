@@ -6,54 +6,42 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"eda-in-golang/ch7/internal/ddd"
 	"eda-in-golang/ch7/internal/em"
-	"eda-in-golang/ch7/internal/registry"
 )
+
+type rawMessage struct {
+	id       string
+	name     string
+	data     []byte
+	acked    bool
+	ackFn    func() error
+	nackFn   func() error
+	extendFn func() error
+	killFn   func() error
+}
 
 type Stream struct {
 	streamName string
 	js         nats.JetStreamContext
-	reg        registry.Registry
 	mu         sync.Mutex
 }
 
-var _ em.Stream = (*Stream)(nil)
+var _ em.MessageStream[em.RawMessage, em.RawMessage] = (*Stream)(nil)
+var _ em.RawMessage = (*rawMessage)(nil)
 
-func NewStream(streamName string, js nats.JetStreamContext, reg registry.Registry) *Stream {
+func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	return &Stream{
 		streamName: streamName,
 		js:         js,
-		reg:        reg,
 	}
 }
 
-func (s *Stream) Publish(topicName string, event ddd.Event, options ...em.PublisherOption) error {
-	data, err := s.reg.Serialize(event.EventName(), event.Payload())
-	if err != nil {
-		return err
-	}
-
-	pubCfg := em.NewPublisherConfig(options...)
-
-	headers := make(map[string]*EventMessage_Values)
-	for key, values := range pubCfg.Headers() {
-		headers[key] = &EventMessage_Values{Values: values}
-	}
-
-	var m []byte
-
-	m, err = proto.Marshal(&EventMessage{
-		Id:               event.ID(),
-		EventName:        event.EventName(),
-		AggregateName:    event.AggregateName(),
-		AggregateId:      event.AggregateID(),
-		AggregateVersion: int32(event.AggregateVersion()),
-		OccurredAt:       timestamppb.New(event.OccurredAt()),
-		Headers:          headers,
-		Data:             data,
+func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg em.RawMessage) error {
+	data, err := proto.Marshal(&StreamMessage{
+		Id:   rawMsg.ID(),
+		Name: rawMsg.MessageName(),
+		Data: rawMsg.Data(),
 	})
 	if err != nil {
 		return err
@@ -61,19 +49,19 @@ func (s *Stream) Publish(topicName string, event ddd.Event, options ...em.Publis
 
 	_, err = s.js.PublishMsgAsync(&nats.Msg{
 		Subject: topicName,
-		Data:    m,
+		Data:    data,
 	})
 
 	return err
 }
 
-func (s *Stream) Subscribe(topicName string, handler em.MessageHandler, options ...em.SubscriberOption) error {
+func (s *Stream) Subscribe(topicName string, handler em.MessageHandler[em.RawMessage], options ...em.SubscriberOption) error {
 	var err error
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	subCfg := em.NewSubscriberConfig(options...)
+	subCfg := em.NewSubscriberConfig(options)
 
 	opts := []nats.SubOpt{
 		nats.MaxDeliver(subCfg.MaxRedeliver()),
@@ -115,39 +103,27 @@ func (s *Stream) Subscribe(topicName string, handler em.MessageHandler, options 
 	return nil
 }
 
-func (s *Stream) handleMsg(cfg em.SubscriberConfig, handler em.MessageHandler) func(*nats.Msg) {
+func (s *Stream) handleMsg(cfg em.SubscriberConfig, handler em.MessageHandler[em.RawMessage]) func(*nats.Msg) {
 	return func(natsMsg *nats.Msg) {
 
 		var err error
 
-		m := &EventMessage{}
+		m := &StreamMessage{}
 		err = proto.Unmarshal(natsMsg.Data, m)
 		if err != nil {
 			// TODO Nak? ... logging?
 			return
 		}
 
-		headers := map[string][]string{}
-		for key, values := range m.GetHeaders() {
-			headers[key] = values.GetValues()
-		}
-
-		msg := &message{
-			reg:        s.reg,
-			eventID:    m.GetId(),
-			eventName:  m.GetEventName(),
-			data:       m.GetData(),
-			payload:    nil,
-			aggID:      m.GetAggregateId(),
-			aggName:    m.GetAggregateName(),
-			aggVersion: int(m.GetAggregateVersion()),
-			occurredAt: m.GetOccurredAt().AsTime(),
-			headers:    headers,
-			acked:      false,
-			ackFn:      func() error { return natsMsg.Ack() },
-			nackFn:     func() error { return natsMsg.Nak() },
-			extendFn:   func() error { return natsMsg.InProgress() },
-			killFn:     func() error { return natsMsg.Term() },
+		msg := &rawMessage{
+			id:       m.GetId(),
+			name:     m.GetName(),
+			data:     m.GetData(),
+			acked:    false,
+			ackFn:    func() error { return natsMsg.Ack() },
+			nackFn:   func() error { return natsMsg.Nak() },
+			extendFn: func() error { return natsMsg.InProgress() },
+			killFn:   func() error { return natsMsg.Term() },
 		}
 
 		wCtx, cancel := context.WithTimeout(context.Background(), cfg.AckWait())
@@ -183,55 +159,43 @@ func (s *Stream) handleMsg(cfg em.SubscriberConfig, handler em.MessageHandler) f
 	}
 }
 
-// func (s *Stream) Start(ctx context.Context) error {
-// 	var err error
-// 	s.js, err = s.nc.JetStream(nats.ContextOpt{Context: ctx})
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	if s.cfg.Name == "" {
-// 		return fmt.Errorf("cannot start stream without a name")
-// 	}
-//
-// 	info, err := s.js.StreamInfo(s.cfg.Name, nats.ContextOpt{Context: ctx})
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	// create the stream if it does not exist
-// 	if info == nil {
-// 		if len(s.cfg.Subjects) == 0 {
-// 			s.cfg.Subjects = []string{fmt.Sprintf("%s.>", s.cfg.Name)}
-// 		}
-//
-// 		_, err = s.js.AddStream(s.cfg, nats.ContextOpt{Context: ctx})
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-//
-// 	for _, subscribers := range s.subs {
-// 		for _, sub := range subscribers {
-// 			err = sub.subscribe(ctx, s.js)
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
-// 	}
-//
-// 	for {
-// 		select {
-// 		case <-ctx.Done():
-// 			return nil
-// 		case <-s.shutdown:
-// 			return nil
-// 		default:
-// 		}
-// 	}
-// }
-//
-// func (s *Stream) Shutdown() (err error) {
-// 	close(s.shutdown)
-// 	return s.nc.Drain()
-// }
+func (m rawMessage) ID() string {
+	return m.id
+}
+
+func (m rawMessage) MessageName() string {
+	return m.name
+}
+
+func (m rawMessage) Data() []byte {
+	return m.data
+}
+
+func (m *rawMessage) Ack() error {
+	if m.acked {
+		return nil
+	}
+	m.acked = true
+	return m.ackFn()
+}
+
+func (m *rawMessage) NAck() error {
+	if m.acked {
+		return nil
+	}
+	m.acked = true
+	return m.nackFn()
+}
+
+func (m rawMessage) Extend() error {
+	return m.extendFn()
+}
+
+func (m *rawMessage) Kill() error {
+	if m.acked {
+		return nil
+	}
+
+	m.acked = true
+	return m.killFn()
+}

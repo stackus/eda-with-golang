@@ -10,11 +10,14 @@ import (
 	"eda-in-golang/ch7/baskets/internal/logging"
 	"eda-in-golang/ch7/baskets/internal/rest"
 	"eda-in-golang/ch7/internal/ddd"
+	"eda-in-golang/ch7/internal/em"
 	"eda-in-golang/ch7/internal/es"
+	"eda-in-golang/ch7/internal/jetstream"
 	"eda-in-golang/ch7/internal/monolith"
 	pg "eda-in-golang/ch7/internal/postgres"
 	"eda-in-golang/ch7/internal/registry"
 	"eda-in-golang/ch7/internal/registry/serdes"
+	"eda-in-golang/ch7/stores/storespb"
 )
 
 type Module struct{}
@@ -22,10 +25,13 @@ type Module struct{}
 func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	// setup Driven adapters
 	reg := registry.New()
-	err = registrations(reg)
-	if err != nil {
+	if err = registrations(reg); err != nil {
 		return err
 	}
+	if err = storespb.Registrations(reg); err != nil {
+		return err
+	}
+	eventStream := em.NewEventStream(reg, jetstream.NewStream(mono.Config().Nats.Stream, mono.JS()))
 	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
 	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("baskets.events", mono.DB(), reg),
@@ -50,18 +56,32 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 		application.NewOrderHandlers(orders),
 		"Order", mono.Logger(),
 	)
+	storeHandlers := logging.LogEventHandlerAccess[ddd.Event](
+		application.NewStoreHandlers(mono.Logger()),
+		"Store", mono.Logger(),
+	)
+	productHandlers := logging.LogEventHandlerAccess[ddd.Event](
+		application.NewProductHandlers(mono.Logger()),
+		"Product", mono.Logger(),
+	)
 
 	// setup Driver adapters
-	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {
+	if err = grpc.RegisterServer(app, mono.RPC()); err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	if err = rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
 		return err
 	}
-	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
+	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
 	handlers.RegisterOrderHandlers[ddd.AggregateEvent](orderHandlers, domainDispatcher)
+	if err = handlers.RegisterStoreHandlers(storeHandlers, eventStream); err != nil {
+		return err
+	}
+	if err = handlers.RegisterProductHandlers(productHandlers, eventStream); err != nil {
+		return err
+	}
 
 	return
 }

@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"eda-in-golang/ch7/internal/ddd"
+	"eda-in-golang/ch7/internal/em"
 	"eda-in-golang/ch7/internal/es"
+	"eda-in-golang/ch7/internal/jetstream"
 	"eda-in-golang/ch7/internal/monolith"
 	pg "eda-in-golang/ch7/internal/postgres"
 	"eda-in-golang/ch7/internal/registry"
@@ -16,18 +18,22 @@ import (
 	"eda-in-golang/ch7/stores/internal/logging"
 	"eda-in-golang/ch7/stores/internal/postgres"
 	"eda-in-golang/ch7/stores/internal/rest"
+	"eda-in-golang/ch7/stores/storespb"
 )
 
 type Module struct {
 }
 
-func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
+func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	// setup Driven adapters
 	reg := registry.New()
-	err := registrations(reg)
-	if err != nil {
+	if err = registrations(reg); err != nil {
 		return err
 	}
+	if err = storespb.Registrations(reg); err != nil {
+		return err
+	}
+	eventStream := em.NewEventStream(reg, jetstream.NewStream(mono.Config().Nats.Stream, mono.JS()))
 	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
 	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("stores.events", mono.DB(), reg),
@@ -52,6 +58,10 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 		application.NewMallHandlers(mall),
 		"Mall", mono.Logger(),
 	)
+	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
+		application.NewIntegrationEventHandlers(eventStream),
+		"IntegrationEvents", mono.Logger(),
+	)
 
 	// setup Driver adapters
 	if err := grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
@@ -65,6 +75,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	}
 	handlers.RegisterCatalogHandlers[ddd.AggregateEvent](catalogHandlers, domainDispatcher)
 	handlers.RegisterMallHandlers[ddd.AggregateEvent](mallHandlers, domainDispatcher)
+	handlers.RegisterIntegrationEventHandlers[ddd.AggregateEvent](integrationEventHandlers, domainDispatcher)
 
 	return nil
 }

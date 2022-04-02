@@ -15,14 +15,16 @@ var defaultAckWait = 5 * time.Second
 var defaultMaxRedeliver = 5
 
 type SubscriberConfig struct {
+	msgFilter    []string
 	groupName    string
 	ackType      AckType
 	ackWait      time.Duration
 	maxRedeliver int
 }
 
-func NewSubscriberConfig(options ...SubscriberOption) SubscriberConfig {
+func NewSubscriberConfig(options []SubscriberOption) SubscriberConfig {
 	cfg := SubscriberConfig{
+		msgFilter:    []string{},
 		groupName:    "",
 		ackType:      AckTypeManual,
 		ackWait:      defaultAckWait,
@@ -40,6 +42,10 @@ type SubscriberOption interface {
 	configureSubscriberConfig(*SubscriberConfig)
 }
 
+func (c SubscriberConfig) MessageFilters() []string {
+	return c.msgFilter
+}
+
 func (c SubscriberConfig) GroupName() string {
 	return c.groupName
 }
@@ -54,6 +60,12 @@ func (c SubscriberConfig) AckWait() time.Duration {
 
 func (c SubscriberConfig) MaxRedeliver() int {
 	return c.maxRedeliver
+}
+
+type MessageFilter []string
+
+func (s MessageFilter) configureSubscriberConfig(cfg *SubscriberConfig) {
+	cfg.msgFilter = s
 }
 
 type GroupName string

@@ -53,7 +53,10 @@ func (a Aggregate) ClearEvents()             { a.events = []AggregateEvent{} }
 func (a *Aggregate) AddEvent(name string, payload EventPayload, options ...EventOption) {
 	options = append(
 		options,
-		WithAggregateInfo(a.name, a.id),
+		Metadata{
+			AggregateNameKey: a.name,
+			AggregateIDKey:   a.id,
+		},
 	)
 	a.events = append(
 		a.events,

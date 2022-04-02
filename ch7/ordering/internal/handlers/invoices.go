@@ -6,5 +6,5 @@ import (
 )
 
 func RegisterInvoiceHandlers[T ddd.AggregateEvent](invoiceHandlers ddd.EventHandler[T], domainSubscriber ddd.EventSubscriber[T]) {
-	domainSubscriber.Subscribe(domain.OrderReadiedEvent, invoiceHandlers)
+	domainSubscriber.Subscribe(invoiceHandlers, domain.OrderReadiedEvent)
 }
