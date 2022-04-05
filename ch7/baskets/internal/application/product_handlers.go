@@ -50,7 +50,7 @@ func (h ProductHandlers[T]) onProductRebranded(ctx context.Context, event ddd.Ev
 
 func (h ProductHandlers[T]) onProductPriceChanged(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*storespb.ProductPriceChanged)
-	h.logger.Debug().Msgf(`ID: %s, Price: "%d"`, payload.GetId(), payload.GetPrice())
+	h.logger.Debug().Msgf(`ID: %s, Delta: "%d"`, payload.GetId(), payload.GetDelta())
 	return nil
 }
 

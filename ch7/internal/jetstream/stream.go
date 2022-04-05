@@ -2,7 +2,6 @@ package jetstream
 
 import (
 	"context"
-	"sync"
 
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
@@ -10,25 +9,14 @@ import (
 	"eda-in-golang/ch7/internal/am"
 )
 
-type rawMessage struct {
-	id       string
-	name     string
-	data     []byte
-	acked    bool
-	ackFn    func() error
-	nackFn   func() error
-	extendFn func() error
-	killFn   func() error
-}
+const maxRetries = 5
 
 type Stream struct {
 	streamName string
 	js         nats.JetStreamContext
-	mu         sync.Mutex
 }
 
 var _ am.MessageStream[am.RawMessage, am.RawMessage] = (*Stream)(nil)
-var _ am.RawMessage = (*rawMessage)(nil)
 
 func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	return &Stream{
@@ -37,8 +25,10 @@ func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	}
 }
 
-func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMessage) error {
-	data, err := proto.Marshal(&StreamMessage{
+func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMessage) (err error) {
+	var data []byte
+
+	data, err = proto.Marshal(&StreamMessage{
 		Id:   rawMsg.ID(),
 		Name: rawMsg.MessageName(),
 		Data: rawMsg.Data(),
@@ -47,19 +37,44 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMes
 		return err
 	}
 
-	_, err = s.js.PublishMsgAsync(&nats.Msg{
+	var p nats.PubAckFuture
+	p, err = s.js.PublishMsgAsync(&nats.Msg{
 		Subject: topicName,
 		Data:    data,
-	})
+	}, nats.MsgId(rawMsg.ID()))
+	if err != nil {
+		return err
+	}
 
-	return err
+	// retry a handful of times to publish the messages
+	go func(future nats.PubAckFuture, tries int) {
+		var err error
+
+		for {
+			select {
+			case <-future.Ok(): // publish acknowledged
+				return
+			case <-future.Err(): // error ignored; try again
+				// TODO add some variable delay between tries
+				tries = tries - 1
+				if tries <= 0 {
+					// TODO do more than give up
+					return
+				}
+				future, err = s.js.PublishMsgAsync(future.Msg())
+				if err != nil {
+					// TODO do more than give up
+					return
+				}
+			}
+		}
+	}(p, maxRetries)
+
+	return nil
 }
 
 func (s *Stream) Subscribe(topicName string, handler am.MessageHandler[am.RawMessage], options ...am.SubscriberOption) error {
 	var err error
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
 
 	subCfg := am.NewSubscriberConfig(options)
 
@@ -105,7 +120,6 @@ func (s *Stream) Subscribe(topicName string, handler am.MessageHandler[am.RawMes
 
 func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler[am.RawMessage]) func(*nats.Msg) {
 	return func(natsMsg *nats.Msg) {
-
 		var err error
 
 		m := &StreamMessage{}
@@ -157,45 +171,4 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler[am
 			return
 		}
 	}
-}
-
-func (m rawMessage) ID() string {
-	return m.id
-}
-
-func (m rawMessage) MessageName() string {
-	return m.name
-}
-
-func (m rawMessage) Data() []byte {
-	return m.data
-}
-
-func (m *rawMessage) Ack() error {
-	if m.acked {
-		return nil
-	}
-	m.acked = true
-	return m.ackFn()
-}
-
-func (m *rawMessage) NAck() error {
-	if m.acked {
-		return nil
-	}
-	m.acked = true
-	return m.nackFn()
-}
-
-func (m rawMessage) Extend() error {
-	return m.extendFn()
-}
-
-func (m *rawMessage) Kill() error {
-	if m.acked {
-		return nil
-	}
-
-	m.acked = true
-	return m.killFn()
 }

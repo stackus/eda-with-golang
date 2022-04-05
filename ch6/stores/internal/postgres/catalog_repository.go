@@ -40,10 +40,10 @@ func (r CatalogRepository) Rebrand(ctx context.Context, productID, name, descrip
 	return err
 }
 
-func (r CatalogRepository) UpdatePrice(ctx context.Context, productID string, price float64) error {
-	const query = `UPDATE %s SET price = $2 WHERE id = $1`
+func (r CatalogRepository) UpdatePrice(ctx context.Context, productID string, delta float64) error {
+	const query = `UPDATE %s SET price = price + $2 WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, price)
+	_, err := r.db.ExecContext(ctx, r.table(query), productID, delta)
 
 	return err
 }

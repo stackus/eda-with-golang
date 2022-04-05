@@ -54,14 +54,15 @@ func (s eventStream) Publish(ctx context.Context, topicName string, event ddd.Ev
 		return err
 	}
 
-	data, err := s.reg.Serialize(event.EventName(), event.Payload())
+	payload, err := s.reg.Serialize(
+		event.EventName(), event.Payload(),
+	)
 	if err != nil {
 		return err
 	}
 
-	eventData, err := proto.Marshal(&EventMessageData{
-		Name:       event.EventName(),
-		Data:       data,
+	data, err := proto.Marshal(&EventMessageData{
+		Payload:    payload,
 		OccurredAt: timestamppb.New(event.OccurredAt()),
 		Metadata:   metadata,
 	})
@@ -72,7 +73,7 @@ func (s eventStream) Publish(ctx context.Context, topicName string, event ddd.Ev
 	return s.stream.Publish(ctx, topicName, rawMessage{
 		id:   event.ID(),
 		name: event.EventName(),
-		data: eventData,
+		data: data,
 	})
 }
 
@@ -101,9 +102,9 @@ func (s eventStream) Subscribe(topicName string, handler MessageHandler[EventMes
 			return err
 		}
 
-		eventName := eventData.GetName()
+		eventName := msg.MessageName()
 
-		payload, err := s.reg.Deserialize(eventName, eventData.GetData())
+		payload, err := s.reg.Deserialize(eventName, eventData.GetPayload())
 		if err != nil {
 			return err
 		}
@@ -119,6 +120,7 @@ func (s eventStream) Subscribe(topicName string, handler MessageHandler[EventMes
 
 		return handler.HandleMessage(ctx, eventMsg)
 	})
+
 	return s.stream.Subscribe(topicName, fn, options...)
 }
 

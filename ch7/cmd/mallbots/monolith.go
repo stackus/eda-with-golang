@@ -142,10 +142,10 @@ func (a *app) waitForStream(ctx context.Context) error {
 	})
 	group, gCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
-		fmt.Println("event stream started")
-		defer fmt.Println("event stream stopped")
+		fmt.Println("message stream started")
+		defer fmt.Println("message stream stopped")
 		<-closed
-		return a.nc.Drain()
+		return nil
 	})
 	group.Go(func() error {
 		<-gCtx.Done()

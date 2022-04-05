@@ -76,7 +76,7 @@ func (p *Product) IncreasePrice(price float64) error {
 	}
 
 	p.AddEvent(ProductPriceIncreasedEvent, &ProductPriceChanged{
-		Price: price,
+		Delta: price - p.Price,
 	})
 
 	return nil
@@ -88,7 +88,7 @@ func (p *Product) DecreasePrice(price float64) error {
 	}
 
 	p.AddEvent(ProductPriceDecreasedEvent, &ProductPriceChanged{
-		Price: price,
+		Delta: price - p.Price,
 	})
 
 	return nil
@@ -114,7 +114,7 @@ func (p *Product) ApplyEvent(event ddd.Event) error {
 		p.Description = payload.Description
 
 	case *ProductPriceChanged:
-		p.Price = payload.Price
+		p.Price = p.Price + payload.Delta
 
 	case *ProductRemoved:
 		// noop

@@ -28,7 +28,7 @@ type ProductRebranded struct {
 func (ProductRebranded) Key() string { return ProductRebrandedEvent }
 
 type ProductPriceChanged struct {
-	Price float64
+	Delta float64
 }
 
 type ProductRemoved struct{}

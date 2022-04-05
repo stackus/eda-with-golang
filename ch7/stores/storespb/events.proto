@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package storespb;
+
 message StoreCreated {
   string id = 1;
   string name = 2;
@@ -33,7 +35,7 @@ message ProductRebranded {
 
 message ProductPriceChanged {
   string id = 1;
-  double price = 2;
+  double delta = 2;
 }
 
 message ProductRemoved {

@@ -2,11 +2,13 @@ package am
 
 import (
 	"context"
+
+	"eda-in-golang/ch7/internal/ddd"
 )
 
 type (
 	Message interface {
-		ID() string
+		ddd.IDer
 		MessageName() string
 		Ack() error
 		NAck() error
@@ -25,7 +27,7 @@ type (
 	}
 
 	MessageSubscriber[O Message] interface {
-		Subscribe(eventName string, handler MessageHandler[O], options ...SubscriberOption) error
+		Subscribe(topicName string, handler MessageHandler[O], options ...SubscriberOption) error
 	}
 
 	MessageStream[I any, O Message] interface {
