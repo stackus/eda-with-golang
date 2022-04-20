@@ -1,12 +1,12 @@
 package ddd
 
-type Metadata map[string]interface{}
+type Metadata map[string]any
 
-func (m Metadata) Set(key string, value interface{}) {
+func (m Metadata) Set(key string, value any) {
 	m[key] = value
 }
 
-func (m Metadata) Get(key string) interface{} {
+func (m Metadata) Get(key string) any {
 	return m[key]
 }
 
