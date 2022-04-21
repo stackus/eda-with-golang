@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package basketspb;
 
-import "basketspb/messages.proto";
-
 service BasketService {
   rpc StartBasket(StartBasketRequest) returns (StartBasketResponse) {};
   rpc CancelBasket(CancelBasketRequest) returns (CancelBasketResponse) {};
@@ -11,6 +9,20 @@ service BasketService {
   rpc AddItem(AddItemRequest) returns (AddItemResponse) {};
   rpc RemoveItem(RemoveItemRequest) returns (RemoveItemResponse) {};
   rpc GetBasket(GetBasketRequest) returns (GetBasketResponse) {};
+}
+
+message Basket {
+  string id = 1;
+  repeated Item items = 2;
+}
+
+message Item {
+  string store_id = 1;
+  string product_id = 2;
+  string store_name = 3;
+  string product_name = 4;
+  double product_price = 5;
+  int32 quantity = 6;
 }
 
 message StartBasketRequest {

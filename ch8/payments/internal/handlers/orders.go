@@ -15,5 +15,5 @@ func RegisterOrderHandlers(orderHandlers ddd.EventHandler[ddd.Event], stream am.
 
 	return stream.Subscribe(orderingpb.OrderAggregateChannel, evtMsgHandler, am.MessageFilter{
 		orderingpb.OrderReadiedEvent,
-	})
+	}, am.GroupName("payment-orders"))
 }

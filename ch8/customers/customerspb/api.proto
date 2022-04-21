@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package customerspb;
 
-import "customerspb/messages.proto";
-
 service CustomersService {
   rpc RegisterCustomer(RegisterCustomerRequest) returns (RegisterCustomerResponse) {};
   rpc EnableCustomer(EnableCustomerRequest) returns (EnableCustomerResponse) {};
@@ -11,6 +9,13 @@ service CustomersService {
   rpc ChangeSmsNumber(ChangeSmsNumberRequest) returns (ChangeSmsNumberResponse) {};
   rpc AuthorizeCustomer(AuthorizeCustomerRequest) returns (AuthorizeCustomerResponse) {};
   rpc GetCustomer(GetCustomerRequest) returns (GetCustomerResponse) {};
+}
+
+message Customer {
+  string id = 1;
+  string name = 2;
+  string sms_number = 3;
+  bool enabled = 4;
 }
 
 message RegisterCustomerRequest {

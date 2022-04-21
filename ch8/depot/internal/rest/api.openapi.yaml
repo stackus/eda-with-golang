@@ -1,6 +1,6 @@
 openapiOptions:
   file:
-    - file: "depotpb/messages.proto"
+    - file: "depotpb/api.proto"
       option:
         info:
           title: Depot Operations

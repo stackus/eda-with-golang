@@ -16,5 +16,5 @@ func RegisterCustomerHandlers(customerHandlers ddd.EventHandler[ddd.Event], stre
 	return stream.Subscribe(customerspb.CustomerAggregateChannel, evtMsgHandler, am.MessageFilter{
 		customerspb.CustomerRegisteredEvent,
 		customerspb.CustomerSmsChangedEvent,
-	})
+	}, am.GroupName("notification-customers"))
 }

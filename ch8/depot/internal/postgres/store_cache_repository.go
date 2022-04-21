@@ -53,7 +53,7 @@ func (r StoreCacheRepository) Rename(ctx context.Context, storeID, name string) 
 }
 
 func (r StoreCacheRepository) Find(ctx context.Context, storeID string) (*domain.Store, error) {
-	const query = "SELECT name FROM %s WHERE id = $1 LIMIT 1"
+	const query = "SELECT name, location FROM %s WHERE id = $1 LIMIT 1"
 
 	store := &domain.Store{
 		ID: storeID,

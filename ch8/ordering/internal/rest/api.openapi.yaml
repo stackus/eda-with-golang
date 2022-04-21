@@ -1,6 +1,6 @@
 openapiOptions:
   file:
-    - file: "orderingpb/messages.proto"
+    - file: "orderingpb/api.proto"
       option:
         info:
           title: Order Processing
@@ -18,7 +18,7 @@ openapiOptions:
         operationId: getOrder
         tags:
           - Order
-        summary: Get na order
+        summary: Get an order
     - method: orderingpb.OrderingService.CancelOrder
       option:
         operationId: cancelOrder

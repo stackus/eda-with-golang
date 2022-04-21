@@ -1,6 +1,6 @@
 openapiOptions:
   file:
-    - file: "storespb/messages.proto"
+    - file: "storespb/api.proto"
       option:
         info:
           title: Store Management

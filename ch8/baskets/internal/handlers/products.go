@@ -19,5 +19,5 @@ func RegisterProductHandlers(productHandlers ddd.EventHandler[ddd.Event], stream
 		storespb.ProductPriceIncreasedEvent,
 		storespb.ProductPriceDecreasedEvent,
 		storespb.ProductRemovedEvent,
-	})
+	}, am.GroupName("baskets-products"))
 }

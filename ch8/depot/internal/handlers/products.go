@@ -17,5 +17,5 @@ func RegisterProductHandlers(productHandlers ddd.EventHandler[ddd.Event], stream
 		storespb.ProductAddedEvent,
 		storespb.ProductRebrandedEvent,
 		storespb.ProductRemovedEvent,
-	})
+	}, am.GroupName("depot-products"))
 }

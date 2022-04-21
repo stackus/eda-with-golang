@@ -16,5 +16,5 @@ func RegisterStoreHandlers(storeHandlers ddd.EventHandler[ddd.Event], stream am.
 	return stream.Subscribe(storespb.StoreAggregateChannel, evtMsgHandler, am.MessageFilter{
 		storespb.StoreCreatedEvent,
 		storespb.StoreRebrandedEvent,
-	})
+	}, am.GroupName("baskets-stores"))
 }

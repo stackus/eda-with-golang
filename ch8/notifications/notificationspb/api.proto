@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package notificationspb;
 
-import "notificationspb/messages.proto";
-
 service NotificationsService {
   rpc NotifyOrderCreated(NotifyOrderCreatedRequest) returns (NotifyOrderCreatedResponse) {};
   rpc NotifyOrderCanceled(NotifyOrderCanceledRequest) returns (NotifyOrderCanceledResponse) {};

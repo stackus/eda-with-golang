@@ -1,6 +1,6 @@
 openapiOptions:
   file:
-    - file: "basketspb/messages.proto"
+    - file: "basketspb/api.proto"
       option:
         info:
           title: Shopping Baskets

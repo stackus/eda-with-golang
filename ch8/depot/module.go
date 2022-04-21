@@ -32,8 +32,8 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err != nil {
 		return err
 	}
-	stores := postgres.NewStoreCacheRepository("baskets.stores_cache", mono.DB(), grpc.NewStoreRepository(conn))
-	products := postgres.NewProductCacheRepository("baskets.products_cache", mono.DB(), grpc.NewProductRepository(conn))
+	stores := postgres.NewStoreCacheRepository("depot.stores_cache", mono.DB(), grpc.NewStoreRepository(conn))
+	products := postgres.NewProductCacheRepository("depot.products_cache", mono.DB(), grpc.NewProductRepository(conn))
 	orders := grpc.NewOrderRepository(conn)
 
 	// setup application
@@ -53,6 +53,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 		application.NewProductHandlers(products),
 		"Product", mono.Logger(),
 	)
+
 	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
 		return err
