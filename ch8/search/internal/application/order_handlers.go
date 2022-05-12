@@ -5,6 +5,7 @@ import (
 
 	"eda-in-golang/ch8/internal/ddd"
 	"eda-in-golang/ch8/ordering/orderingpb"
+	"eda-in-golang/ch8/search/internal/models"
 )
 
 type OrderHandlers[T ddd.Event] struct {
@@ -41,24 +42,62 @@ func (h OrderHandlers[T]) HandleEvent(ctx context.Context, event T) error {
 
 func (h OrderHandlers[T]) onOrderCreated(ctx context.Context, event T) error {
 	payload := event.Payload().(*orderingpb.OrderCreated)
-	// TODO implement me
-	panic("implement me")
+
+	customer, err := h.customers.Find(ctx, payload.CustomerId)
+	if err != nil {
+		return err
+	}
+
+	var total float64
+	items := make([]models.Item, len(payload.GetItems()))
+	seenStores := map[string]*models.Store{}
+	for i, item := range payload.GetItems() {
+		product, err := h.products.Find(ctx, item.GetProductId())
+		if err != nil {
+			return err
+		}
+		var store *models.Store
+		var exists bool
+
+		if store, exists = seenStores[product.StoreID]; !exists {
+			store, err = h.stores.Find(ctx, product.StoreID)
+			if err != nil {
+				return err
+			}
+			seenStores[store.ID] = store
+		}
+		items[i] = models.Item{
+			ProductID:   product.ID,
+			StoreID:     store.ID,
+			ProductName: product.Name,
+			StoreName:   store.Name,
+			Price:       item.Price,
+			Quantity:    int(item.Quantity),
+		}
+		total += float64(item.Quantity) * item.Price
+	}
+	order := &models.Order{
+		OrderID:      payload.GetId(),
+		CustomerID:   customer.ID,
+		CustomerName: customer.Name,
+		Items:        items,
+		Total:        total,
+		Status:       "New",
+	}
+	return h.orders.Add(ctx, order)
 }
 
 func (h OrderHandlers[T]) onOrderReadied(ctx context.Context, event T) error {
 	payload := event.Payload().(*orderingpb.OrderReadied)
-	// TODO implement me
-	panic("implement me")
+	return h.orders.UpdateStatus(ctx, payload.GetId(), "Ready For Pickup")
 }
 
 func (h OrderHandlers[T]) onOrderCanceled(ctx context.Context, event T) error {
 	payload := event.Payload().(*orderingpb.OrderCanceled)
-	// TODO implement me
-	panic("implement me")
+	return h.orders.UpdateStatus(ctx, payload.GetId(), "Canceled")
 }
 
 func (h OrderHandlers[T]) onOrderCompleted(ctx context.Context, event T) error {
 	payload := event.Payload().(*orderingpb.OrderCompleted)
-	// TODO implement me
-	panic("implement me")
+	return h.orders.UpdateStatus(ctx, payload.GetId(), "Completed")
 }

@@ -1,5 +1,9 @@
 package models
 
+import (
+	"time"
+)
+
 type Order struct {
 	OrderID      string
 	CustomerID   string
@@ -7,6 +11,7 @@ type Order struct {
 	Items        []Item
 	Total        float64
 	Status       string
+	CreatedAt    time.Time
 }
 
 type Item struct {
@@ -15,5 +20,5 @@ type Item struct {
 	ProductName string
 	StoreName   string
 	Price       float64
-	Quantity    int64
+	Quantity    int
 }

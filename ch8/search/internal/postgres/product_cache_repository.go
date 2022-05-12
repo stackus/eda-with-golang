@@ -29,10 +29,10 @@ func NewProductCacheRepository(tableName string, db *sql.DB, fallback applicatio
 	}
 }
 
-func (r ProductCacheRepository) Add(ctx context.Context, productID, name string) error {
-	const query = `INSERT INTO %s (id, name) VALUES ($1, $3)`
+func (r ProductCacheRepository) Add(ctx context.Context, productID, storeID, name string) error {
+	const query = `INSERT INTO %s (id, store_id, name) VALUES ($1, $2, $3)`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, name)
+	_, err := r.db.ExecContext(ctx, r.table(query), productID, storeID, name)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -78,7 +78,7 @@ func (r ProductCacheRepository) Find(ctx context.Context, productID string) (*mo
 			return nil, errors.Wrap(err, "product fallback failed")
 		}
 		// attempt to add it to the cache
-		return product, r.Add(ctx, product.ID, product.Name)
+		return product, r.Add(ctx, product.ID, product.StoreID, product.Name)
 	}
 
 	return product, nil

@@ -2,12 +2,27 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"eda-in-golang/ch8/search/internal/models"
 )
 
 type (
-	SearchOrders struct{}
+	Filters struct {
+		CustomerID string
+		After      time.Time
+		Before     time.Time
+		StoreIDs   []string
+		ProductIDs []string
+		MinTotal   float64
+		MaxTotal   float64
+		Status     string
+	}
+	SearchOrders struct {
+		Filters Filters
+		Next    string
+		Limit   int
+	}
 
 	GetOrder struct {
 		OrderID string

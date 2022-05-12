@@ -66,13 +66,16 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	)
 
 	// setup Driver adapters
-	if err := grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
+	if err = grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	if err = rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
 		return err
 	}
-	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
+	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
+		return err
+	}
+	if err = handlers.RegisterOrderHandlers(orderHandlers, eventStream); err != nil {
 		return err
 	}
 	if err = handlers.RegisterCustomerHandlers(customerHandlers, eventStream); err != nil {
@@ -82,9 +85,6 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		return err
 	}
 	if err = handlers.RegisterProductHandlers(productHandlers, eventStream); err != nil {
-		return err
-	}
-	if err = handlers.RegisterOrderHandlers(orderHandlers, eventStream); err != nil {
 		return err
 	}
 

@@ -9,3 +9,5 @@
 ## Chapter 6 Asynchronous Connections
 
 ## Chapter 7 Event-carried State Transfer
+
+## Chapter 8 Messaging Workflows
