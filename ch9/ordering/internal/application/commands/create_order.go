@@ -39,6 +39,15 @@ func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) er
 		return err
 	}
 
+	// start saga
+
+	// 0. -RejectOrder
+	// 1. AuthorizeCustomer
+	// 2. CreateShoppingList, -CancelShoppingList
+	// 3. ConfirmPayment
+	// 4. InitiateShopping
+	// 5. ApproveOrder
+
 	// authorizeCustomer
 	if err = h.customers.Authorize(ctx, cmd.CustomerID); err != nil {
 		return errors.Wrap(err, "order customer authorization")

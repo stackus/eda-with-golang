@@ -35,29 +35,29 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		application.New(invoices, payments, domainDispatcher),
 		mono.Logger(),
 	)
-	orderHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		application.NewOrderHandlers(app),
-		"Order", mono.Logger(),
+	domainEventHandlers := logging.LogEventHandlerAccess[ddd.Event](
+		handlers.NewDomainEventHandlers(eventStream),
+		"DomainEvents", mono.Logger(),
 	)
 	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		application.NewIntegrationEventHandlers(eventStream),
+		handlers.NewIntegrationHandlers(app),
 		"IntegrationEvents", mono.Logger(),
 	)
 
 	// setup Driver adapters
-	if err := grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
+	if err = grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	if err = rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
 		return err
 	}
-	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
+	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	if err = handlers.RegisterOrderHandlers(orderHandlers, eventStream); err != nil {
+	if err = handlers.RegisterIntegrationEventHandlers(eventStream, integrationEventHandlers); err != nil {
 		return err
 	}
-	handlers.RegisterIntegrationEventHandlers[ddd.Event](integrationEventHandlers, domainDispatcher)
+	handlers.RegisterDomainEventHandlers(domainDispatcher, domainEventHandlers)
 
-	return nil
+	return
 }

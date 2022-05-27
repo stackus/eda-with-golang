@@ -3,6 +3,7 @@ package ordering
 import (
 	"context"
 
+	"eda-in-golang/ch9/internal/ac"
 	"eda-in-golang/ch9/internal/am"
 	"eda-in-golang/ch9/internal/ddd"
 	"eda-in-golang/ch9/internal/es"
@@ -32,13 +33,17 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 		return err
 	}
 	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
-	eventStream := am.NewEventStream(reg, jetstream.NewStream(mono.Config().Nats.Stream, mono.JS()))
+	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS())
+	eventStream := am.NewEventStream(reg, stream)
+	commandStream := am.NewCommandStream(reg, stream)
 	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("ordering.events", mono.DB(), reg),
 		es.NewEventPublisher(domainDispatcher),
 		pg.NewSnapshotStore("ordering.snapshots", mono.DB(), reg),
 	)
 	orders := es.NewAggregateRepository[*domain.Order](domain.OrderAggregate, reg, aggregateStore)
+	sagaStore := pg.NewSagaStore("ordering.sagas", mono.DB(), reg)
+	createOrderSagaRepo := ac.NewSagaRepository[*domain.CreateOrderData](reg, sagaStore)
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
 	if err != nil {
 		return err
@@ -48,51 +53,65 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	shopping := grpc.NewShoppingListRepository(conn)
 
 	// setup application
-	var app application.App
-	app = application.New(orders, customers, payments, shopping)
-	app = logging.LogApplicationAccess(app, mono.Logger())
-	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
-		application.NewIntegrationEventHandlers(eventStream),
+	app := logging.LogApplicationAccess(
+		application.New(orders, customers, payments, shopping),
+		mono.Logger(),
+	)
+	createOrderSaga := ac.NewOrchestrator[*domain.CreateOrderData](application.NewCreateOrderSaga(), createOrderSagaRepo, commandStream)
+	domainEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
+		handlers.NewDomainEventHandlers(eventStream),
+		"DomainEvents", mono.Logger(),
+	)
+	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.Event](
+		handlers.NewIntegrationEventHandlers(app, createOrderSaga),
 		"IntegrationEvents", mono.Logger(),
 	)
 
 	// setup Driver adapters
-	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {
+	if err = grpc.RegisterServer(app, mono.RPC()); err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	if err = rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
 		return err
 	}
-	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
+	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterIntegrationEventHandlers[ddd.AggregateEvent](integrationEventHandlers, domainDispatcher)
+	handlers.RegisterDomainEventHandlers(domainDispatcher, domainEventHandlers)
+	if err = handlers.RegisterIntegrationEventHandlers(eventStream, integrationEventHandlers); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func registrations(reg registry.Registry) error {
+func registrations(reg registry.Registry) (err error) {
 	serde := serdes.NewJsonSerde(reg)
 
 	// Order
-	if err := serde.Register(domain.Order{}); err != nil {
+	if err = serde.Register(domain.Order{}); err != nil {
 		return err
 	}
 	// order events
-	if err := serde.Register(domain.OrderCreated{}); err != nil {
+	if err = serde.Register(domain.OrderCreated{}); err != nil {
 		return err
 	}
-	if err := serde.Register(domain.OrderCanceled{}); err != nil {
+	if err = serde.Register(domain.OrderCanceled{}); err != nil {
 		return err
 	}
-	if err := serde.Register(domain.OrderReadied{}); err != nil {
+	if err = serde.Register(domain.OrderReadied{}); err != nil {
 		return err
 	}
-	if err := serde.Register(domain.OrderCompleted{}); err != nil {
+	if err = serde.Register(domain.OrderCompleted{}); err != nil {
 		return err
 	}
 	// order snapshots
-	if err := serde.RegisterKey(domain.OrderV1{}.SnapshotName(), domain.OrderV1{}); err != nil {
+	if err = serde.RegisterKey(domain.OrderV1{}.SnapshotName(), domain.OrderV1{}); err != nil {
+		return err
+	}
+
+	// Saga data
+	if err = serde.RegisterKey(application.CreateOrderSagaName, domain.CreateOrderData{}); err != nil {
 		return err
 	}
 

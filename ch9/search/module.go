@@ -48,21 +48,9 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		application.New(orders),
 		mono.Logger(),
 	)
-	orderHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		application.NewOrderHandlers(orders, customers, stores, products),
-		"Order", mono.Logger(),
-	)
-	customerHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		application.NewCustomerHandlers(customers),
-		"Customer", mono.Logger(),
-	)
-	storeHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		application.NewStoreHandlers(stores),
-		"Store", mono.Logger(),
-	)
-	productHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		application.NewProductHandlers(products),
-		"Product", mono.Logger(),
+	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.Event](
+		handlers.NewIntegrationEventHandlers(orders, customers, stores, products),
+		"IntegrationEvents", mono.Logger(),
 	)
 
 	// setup Driver adapters
@@ -75,16 +63,7 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	if err = handlers.RegisterOrderHandlers(orderHandlers, eventStream); err != nil {
-		return err
-	}
-	if err = handlers.RegisterCustomerHandlers(customerHandlers, eventStream); err != nil {
-		return err
-	}
-	if err = handlers.RegisterStoreHandlers(storeHandlers, eventStream); err != nil {
-		return err
-	}
-	if err = handlers.RegisterProductHandlers(productHandlers, eventStream); err != nil {
+	if err = handlers.RegisterIntegrationEventHandlers(eventStream, integrationEventHandlers); err != nil {
 		return err
 	}
 

@@ -36,9 +36,7 @@ type BasketCanceled struct{}
 func (BasketCanceled) Key() string { return BasketCanceledEvent }
 
 type BasketCheckedOut struct {
-	PaymentID  string
-	CustomerID string
-	Items      map[string]Item
+	PaymentID string
 }
 
 // Key implements registry.Registerable

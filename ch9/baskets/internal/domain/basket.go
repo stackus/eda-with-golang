@@ -59,6 +59,22 @@ func StartBasket(id, customerID string) (*Basket, error) {
 
 func (Basket) Key() string { return BasketAggregate }
 
+func (b *Basket) Start(customerID string) (ddd.Event, error) {
+	if b.Status != BasketUnknown {
+		return nil, ErrBasketCannotBeModified
+	}
+
+	if customerID == "" {
+		return nil, ErrCustomerIDCannotBeBlank
+	}
+
+	b.AddEvent(BasketStartedEvent, &BasketStarted{
+		CustomerID: customerID,
+	})
+
+	return ddd.NewEvent(BasketStartedEvent, b), nil
+}
+
 func (b Basket) IsCancellable() bool {
 	return b.Status == BasketIsOpen
 }
@@ -67,36 +83,34 @@ func (b Basket) IsOpen() bool {
 	return b.Status == BasketIsOpen
 }
 
-func (b *Basket) Cancel() error {
+func (b *Basket) Cancel() (ddd.Event, error) {
 	if !b.IsCancellable() {
-		return ErrBasketCannotBeCancelled
+		return nil, ErrBasketCannotBeCancelled
 	}
 
 	b.AddEvent(BasketCanceledEvent, &BasketCanceled{})
 
-	return nil
+	return ddd.NewEvent(BasketCanceledEvent, b), nil
 }
 
-func (b *Basket) Checkout(paymentID string) error {
+func (b *Basket) Checkout(paymentID string) (ddd.Event, error) {
 	if !b.IsOpen() {
-		return ErrBasketCannotBeModified
+		return nil, ErrBasketCannotBeModified
 	}
 
 	if len(b.Items) == 0 {
-		return ErrBasketHasNoItems
+		return nil, ErrBasketHasNoItems
 	}
 
 	if paymentID == "" {
-		return ErrPaymentIDCannotBeBlank
+		return nil, ErrPaymentIDCannotBeBlank
 	}
 
 	b.AddEvent(BasketCheckedOutEvent, &BasketCheckedOut{
-		PaymentID:  paymentID,
-		CustomerID: b.CustomerID,
-		Items:      b.Items,
+		PaymentID: paymentID,
 	})
 
-	return nil
+	return ddd.NewEvent(BasketCheckedOutEvent, b), nil
 }
 
 func (b *Basket) AddItem(store *Store, product *Product, quantity int) error {

@@ -34,9 +34,9 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		application.New(customers, domainDispatcher),
 		mono.Logger(),
 	)
-	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
-		application.NewIntegrationEventHandlers(eventStream),
-		"IntegrationEvents", mono.Logger(),
+	domainEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
+		handlers.NewDomainEventHandlers(eventStream),
+		"DomainEvents", mono.Logger(),
 	)
 	if err := grpc.RegisterServer(app, mono.RPC()); err != nil {
 		return err
@@ -47,7 +47,7 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterIntegrationEventHandlers[ddd.AggregateEvent](integrationEventHandlers, domainDispatcher)
+	handlers.RegisterDomainEventHandlers[ddd.AggregateEvent](domainEventHandlers, domainDispatcher)
 
 	return nil
 }

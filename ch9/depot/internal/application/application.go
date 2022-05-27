@@ -41,9 +41,7 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository,
-	domainPublisher ddd.EventPublisher[ddd.AggregateEvent],
-) *Application {
+func New(shoppingLists domain.ShoppingListRepository, stores domain.StoreRepository, products domain.ProductRepository, domainPublisher ddd.EventPublisher[ddd.AggregateEvent]) *Application {
 	return &Application{
 		appCommands: appCommands{
 			CreateShoppingListHandler:   commands.NewCreateShoppingListHandler(shoppingLists, stores, products, domainPublisher),

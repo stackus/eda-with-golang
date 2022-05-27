@@ -36,23 +36,16 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		application.New(customers),
 		mono.Logger(),
 	)
-	customerHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		application.NewCustomerHandlers(customers),
-		"Customer", mono.Logger(),
-	)
-	orderHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		application.NewOrderHandlers(app),
-		"Order", mono.Logger(),
+	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.Event](
+		handlers.NewIntegrationEventHandlers(app, customers),
+		"IntegrationEvents", mono.Logger(),
 	)
 
 	// setup Driver adapters
 	if err := grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
 		return err
 	}
-	if err = handlers.RegisterCustomerHandlers(customerHandlers, eventStream); err != nil {
-		return err
-	}
-	if err = handlers.RegisterOrderHandlers(orderHandlers, eventStream); err != nil {
+	if err = handlers.RegisterIntegrationEventHandlers(eventStream, integrationEventHandlers); err != nil {
 		return err
 	}
 

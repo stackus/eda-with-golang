@@ -52,7 +52,7 @@
     },
     "/api/ordering/{id}": {
       "get": {
-        "summary": "Get na order",
+        "summary": "Get an order",
         "operationId": "getOrder",
         "responses": {
           "200": {

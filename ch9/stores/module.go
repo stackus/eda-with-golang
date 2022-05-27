@@ -58,9 +58,9 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 		application.NewMallHandlers(mall),
 		"Mall", mono.Logger(),
 	)
-	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
-		application.NewIntegrationEventHandlers(eventStream),
-		"IntegrationEvents", mono.Logger(),
+	domainEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
+		handlers.NewDomainEventHandlers(eventStream),
+		"DomainEvents", mono.Logger(),
 	)
 
 	// setup Driver adapters
@@ -75,7 +75,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	}
 	handlers.RegisterCatalogHandlers[ddd.AggregateEvent](catalogHandlers, domainDispatcher)
 	handlers.RegisterMallHandlers[ddd.AggregateEvent](mallHandlers, domainDispatcher)
-	handlers.RegisterIntegrationEventHandlers[ddd.AggregateEvent](integrationEventHandlers, domainDispatcher)
+	handlers.RegisterDomainEventHandlers(domainDispatcher, domainEventHandlers)
 	if err = storespb.RegisterAsyncAPI(mono.Mux()); err != nil {
 		return err
 	}

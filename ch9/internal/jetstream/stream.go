@@ -16,7 +16,7 @@ type Stream struct {
 	js         nats.JetStreamContext
 }
 
-var _ am.MessageStream[am.RawMessage, am.RawMessage] = (*Stream)(nil)
+var _ am.RawMessageStream = (*Stream)(nil)
 
 func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	return &Stream{
@@ -73,7 +73,7 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMes
 	return nil
 }
 
-func (s *Stream) Subscribe(topicName string, handler am.MessageHandler[am.RawMessage], options ...am.SubscriberOption) error {
+func (s *Stream) Subscribe(topicName string, handler am.RawMessageHandler, options ...am.SubscriberOption) error {
 	var err error
 
 	subCfg := am.NewSubscriberConfig(options)
@@ -118,7 +118,7 @@ func (s *Stream) Subscribe(topicName string, handler am.MessageHandler[am.RawMes
 	return nil
 }
 
-func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler[am.RawMessage]) func(*nats.Msg) {
+func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.RawMessageHandler) func(*nats.Msg) {
 	return func(natsMsg *nats.Msg) {
 		var err error
 
