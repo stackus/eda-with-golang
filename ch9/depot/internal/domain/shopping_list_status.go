@@ -4,6 +4,7 @@ type ShoppingListStatus string
 
 const (
 	ShoppingListUnknown     ShoppingListStatus = ""
+	ShoppingListIsPending   ShoppingListStatus = "pending"
 	ShoppingListIsAvailable ShoppingListStatus = "available"
 	ShoppingListIsAssigned  ShoppingListStatus = "assigned"
 	ShoppingListIsActive    ShoppingListStatus = "active"
@@ -13,7 +14,8 @@ const (
 
 func (s ShoppingListStatus) String() string {
 	switch s {
-	case ShoppingListIsAvailable, ShoppingListIsAssigned, ShoppingListIsActive, ShoppingListIsCompleted, ShoppingListIsCanceled:
+	case ShoppingListIsPending, ShoppingListIsAvailable, ShoppingListIsAssigned,
+		ShoppingListIsActive, ShoppingListIsCompleted, ShoppingListIsCanceled:
 		return string(s)
 	default:
 		return ""
@@ -22,6 +24,8 @@ func (s ShoppingListStatus) String() string {
 
 func ToShoppingListStatus(status string) ShoppingListStatus {
 	switch status {
+	case ShoppingListIsPending.String():
+		return ShoppingListIsPending
 	case ShoppingListIsAvailable.String():
 		return ShoppingListIsAvailable
 	case ShoppingListIsAssigned.String():

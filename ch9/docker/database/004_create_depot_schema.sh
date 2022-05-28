@@ -22,7 +22,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
       id         text NOT NULL,
       store_id   text NOT NULL,
       name       text NOT NULL,
-      price      decimal(9,4) NOT NULL,
       created_at timestamptz NOT NULL DEFAULT NOW(),
       updated_at timestamptz NOT NULL DEFAULT NOW(),
       PRIMARY KEY (id)

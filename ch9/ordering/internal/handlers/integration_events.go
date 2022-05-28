@@ -81,6 +81,7 @@ func (h integrationHandlers[T]) onBasketCheckedOut(ctx context.Context, event dd
 func (h integrationHandlers[T]) onOrderCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*orderingpb.OrderCreated)
 
+	var total float64
 	items := make([]domain.Item, len(payload.GetItems()))
 	for i, item := range payload.GetItems() {
 		items[i] = domain.Item{
@@ -89,6 +90,7 @@ func (h integrationHandlers[T]) onOrderCreated(ctx context.Context, event ddd.Ev
 			Price:     item.GetPrice(),
 			Quantity:  int(item.GetQuantity()),
 		}
+		total += float64(item.GetQuantity()) * item.GetPrice()
 	}
 
 	data := &domain.CreateOrderData{
@@ -96,6 +98,7 @@ func (h integrationHandlers[T]) onOrderCreated(ctx context.Context, event ddd.Ev
 		CustomerID: payload.GetCustomerId(),
 		PaymentID:  payload.GetPaymentId(),
 		Items:      items,
+		Total:      total,
 	}
 
 	// Start the CreateOrderSaga

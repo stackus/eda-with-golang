@@ -25,7 +25,9 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	if err = orderingpb.Registrations(reg); err != nil {
 		return err
 	}
-	eventStream := am.NewEventStream(reg, jetstream.NewStream(mono.Config().Nats.Stream, mono.JS()))
+	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS())
+	eventStream := am.NewEventStream(reg, stream)
+	commandStream := am.NewCommandStream(reg, stream)
 	domainDispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	invoices := postgres.NewInvoiceRepository("payments.invoices", mono.DB())
 	payments := postgres.NewPaymentRepository("payments.payments", mono.DB())
@@ -43,6 +45,10 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		handlers.NewIntegrationHandlers(app),
 		"IntegrationEvents", mono.Logger(),
 	)
+	commandHandlers := logging.LogCommandHandlerAccess[ddd.Command](
+		handlers.NewCommandHandlers(app),
+		"Commands", mono.Logger(),
+	)
 
 	// setup Driver adapters
 	if err = grpc.RegisterServer(ctx, app, mono.RPC()); err != nil {
@@ -58,6 +64,9 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		return err
 	}
 	handlers.RegisterDomainEventHandlers(domainDispatcher, domainEventHandlers)
+	if err = handlers.RegisterCommandHandlers(commandStream, commandHandlers); err != nil {
+		return err
+	}
 
 	return
 }

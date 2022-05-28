@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"eda-in-golang/ch9/internal/ddd"
 	"eda-in-golang/ch9/ordering/internal/domain"
 )
 
@@ -11,12 +12,14 @@ type ReadyOrder struct {
 }
 
 type ReadyOrderHandler struct {
-	orders domain.OrderRepository
+	orders    domain.OrderRepository
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewReadyOrderHandler(orders domain.OrderRepository) ReadyOrderHandler {
+func NewReadyOrderHandler(orders domain.OrderRepository, publisher ddd.EventPublisher[ddd.Event]) ReadyOrderHandler {
 	return ReadyOrderHandler{
-		orders: orders,
+		orders:    orders,
+		publisher: publisher,
 	}
 }
 
@@ -26,7 +29,8 @@ func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error
 		return err
 	}
 
-	if err = order.Ready(); err != nil {
+	event, err := order.Ready()
+	if err != nil {
 		return nil
 	}
 
@@ -34,5 +38,5 @@ func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error
 		return err
 	}
 
-	return nil
+	return h.publisher.Publish(ctx, event)
 }

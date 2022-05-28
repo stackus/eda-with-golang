@@ -34,7 +34,7 @@ func NewCreateShoppingListHandler(shoppingLists domain.ShoppingListRepository, s
 }
 
 func (h CreateShoppingListHandler) CreateShoppingList(ctx context.Context, cmd CreateShoppingList) error {
-	list := domain.CreateShopping(cmd.ID, cmd.OrderID)
+	list := domain.CreateShoppingList(cmd.ID, cmd.OrderID)
 
 	for _, item := range cmd.Items {
 		// horribly inefficient

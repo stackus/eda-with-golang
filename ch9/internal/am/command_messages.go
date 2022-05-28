@@ -2,6 +2,7 @@ package am
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -24,10 +25,12 @@ type (
 	}
 
 	CommandPublisher  = MessagePublisher[ddd.Command]
-	CommandSubscriber = MessageSubscriber[IncomingCommandMessage]
-	CommandStream     interface {
-		MessagePublisher[ddd.Command]
+	CommandSubscriber interface {
 		Subscribe(topicName string, handler CommandMessageHandler, options ...SubscriberOption) error
+	}
+	CommandStream interface {
+		MessagePublisher[ddd.Command]
+		CommandSubscriber
 	}
 
 	commandStream struct {
@@ -36,13 +39,12 @@ type (
 	}
 
 	commandMessage struct {
-		id          string
-		name        string
-		destination string
-		payload     ddd.CommandPayload
-		metadata    ddd.Metadata
-		occurredAt  time.Time
-		msg         IncomingMessage
+		id         string
+		name       string
+		payload    ddd.CommandPayload
+		metadata   ddd.Metadata
+		occurredAt time.Time
+		msg        IncomingMessage
 	}
 )
 
@@ -127,38 +129,35 @@ func (s commandStream) Subscribe(topicName string, handler CommandMessageHandler
 			msg:        msg,
 		}
 
-		var reply Reply
+		destination := commandMsg.Metadata().Get(CommandReplyChannelHdr).(string)
+
+		var reply ddd.Reply
 		reply, err = handler.HandleMessage(ctx, commandMsg)
 		if err != nil {
-			if reply != nil {
-				reply.Metadata().Set(ReplyOutcomeHdr, OutcomeFailure)
-				return s.publishReply(ctx, reply)
-			}
-			return s.publishReply(ctx, s.failure(commandMsg))
+			return s.publishReply(ctx, destination, s.failure(reply, commandMsg))
 		}
 
-		if reply != nil {
-			reply.Metadata().Set(ReplyOutcomeHdr, OutcomeSuccess)
-			return s.publishReply(ctx, reply)
-		}
-
-		return s.publishReply(ctx, s.success(commandMsg))
+		return s.publishReply(ctx, destination, s.success(reply, commandMsg))
 	})
 
 	return s.stream.Subscribe(topicName, fn, options...)
 }
 
-func (s commandStream) publishReply(ctx context.Context, reply Reply) error {
+func (s commandStream) publishReply(ctx context.Context, destination string, reply ddd.Reply) error {
 	metadata, err := structpb.NewStruct(reply.Metadata())
 	if err != nil {
 		return err
 	}
 
-	payload, err := s.reg.Serialize(
-		reply.ReplyName(), reply.Payload(),
-	)
-	if err != nil {
-		return err
+	var payload []byte
+
+	if reply.ReplyName() != SuccessReply && reply.ReplyName() != FailureReply {
+		payload, err = s.reg.Serialize(
+			reply.ReplyName(), reply.Payload(),
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	data, err := proto.Marshal(&ReplyMessageData{
@@ -170,24 +169,50 @@ func (s commandStream) publishReply(ctx context.Context, reply Reply) error {
 		return err
 	}
 
-	return s.stream.Publish(ctx, reply.Destination(), rawMessage{
+	return s.stream.Publish(ctx, destination, rawMessage{
 		id:   reply.ID(),
 		name: reply.ReplyName(),
 		data: data,
 	})
 }
 
-func (s commandStream) failure(cmd Command) Reply {
-	return NewReply(FailureReply, nil, cmd, ddd.Metadata{ReplyOutcomeHdr: OutcomeFailure})
+func (s commandStream) failure(reply ddd.Reply, cmd ddd.Command) ddd.Reply {
+	if reply == nil {
+		reply = ddd.NewReply(FailureReply, nil)
+	}
+
+	reply.Metadata().Set(ReplyOutcomeHdr, OutcomeFailure)
+
+	return s.applyCorrelationHeaders(reply, cmd)
 }
 
-func (s commandStream) success(cmd Command) Reply {
-	return NewReply(SuccessReply, nil, cmd, ddd.Metadata{ReplyOutcomeHdr: OutcomeSuccess})
+func (s commandStream) success(reply ddd.Reply, cmd ddd.Command) ddd.Reply {
+	if reply == nil {
+		reply = ddd.NewReply(SuccessReply, nil)
+	}
+
+	reply.Metadata().Set(ReplyOutcomeHdr, OutcomeSuccess)
+
+	return s.applyCorrelationHeaders(reply, cmd)
+}
+
+func (s commandStream) applyCorrelationHeaders(reply ddd.Reply, cmd ddd.Command) ddd.Reply {
+	for key, value := range cmd.Metadata() {
+		if key == CommandNameHdr {
+			continue
+		}
+
+		if strings.HasPrefix(key, CommandHdrPrefix) {
+			hdr := ReplyHdrPrefix + key[len(CommandHdrPrefix):]
+			reply.Metadata().Set(hdr, value)
+		}
+	}
+
+	return reply
 }
 
 func (c commandMessage) ID() string                  { return c.id }
 func (c commandMessage) CommandName() string         { return c.name }
-func (c commandMessage) Destination() string         { return c.destination }
 func (c commandMessage) Payload() ddd.CommandPayload { return c.payload }
 func (c commandMessage) Metadata() ddd.Metadata      { return c.metadata }
 func (c commandMessage) OccurredAt() time.Time       { return c.occurredAt }

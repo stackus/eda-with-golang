@@ -55,11 +55,11 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
     store_ids      text ARRAY NOT NULL,
     created_at     timestamptz NOT NULL DEFAULT NOW(),
     updated_at     timestamptz NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (id)
+    PRIMARY KEY (order_id)
   );
 
-  -- CREATE TRIGGER created_at_orders_trgr BEFORE UPDATE ON ordering.orders FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-  CREATE TRIGGER updated_at_orders_trgr BEFORE UPDATE ON ordering.orders FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
+  -- CREATE TRIGGER created_at_sorders_trgr BEFORE UPDATE ON search.orders FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
+  CREATE TRIGGER updated_at_sorders_trgr BEFORE UPDATE ON search.orders FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 
   GRANT USAGE ON SCHEMA search TO mallbots_user;

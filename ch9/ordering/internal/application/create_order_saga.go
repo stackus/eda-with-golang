@@ -2,13 +2,16 @@ package application
 
 import (
 	"context"
+	"fmt"
 
+	"eda-in-golang/ch9/customers/customerspb"
 	"eda-in-golang/ch9/depot/depotpb"
 	"eda-in-golang/ch9/internal/ac"
 	"eda-in-golang/ch9/internal/am"
 	"eda-in-golang/ch9/internal/ddd"
 	"eda-in-golang/ch9/ordering/internal/domain"
 	"eda-in-golang/ch9/ordering/orderingpb"
+	"eda-in-golang/ch9/payments/paymentspb"
 )
 
 const CreateOrderSagaName = "ordering.CreateOrder"
@@ -56,7 +59,8 @@ func (s createOrderSaga) rejectOrder(ctx context.Context, data *domain.CreateOrd
 }
 
 func (s createOrderSaga) authorizeCustomer(ctx context.Context, data *domain.CreateOrderData) am.Command {
-	return nil
+	fmt.Println("building authorizeCustomer command")
+	return am.NewCommand(customerspb.AuthorizeCustomerCommand, customerspb.CommandChannel, &customerspb.AuthorizeCustomer{Id: data.CustomerID})
 }
 
 func (s createOrderSaga) createShoppingList(ctx context.Context, data *domain.CreateOrderData) am.Command {
@@ -88,11 +92,14 @@ func (s createOrderSaga) cancelShoppingList(ctx context.Context, data *domain.Cr
 }
 
 func (s createOrderSaga) confirmPayment(ctx context.Context, data *domain.CreateOrderData) am.Command {
-	return nil
+	return am.NewCommand(paymentspb.ConfirmPaymentCommand, paymentspb.CommandChannel, &paymentspb.ConfirmPayment{
+		Id:     data.PaymentID,
+		Amount: data.Total,
+	})
 }
 
 func (s createOrderSaga) initiateShopping(ctx context.Context, data *domain.CreateOrderData) am.Command {
-	return nil
+	return am.NewCommand(depotpb.InitiateShoppingCommand, depotpb.CommandChannel, &depotpb.InitiateShopping{Id: data.ShoppingID})
 }
 
 func (s createOrderSaga) approveOrder(ctx context.Context, data *domain.CreateOrderData) am.Command {

@@ -17,6 +17,18 @@ message OrderCreated {
   repeated Item items = 5;
 }
 
+message OrderRejected {
+  string id = 1;
+  string customer_id = 2;
+  string payment_id = 3;
+}
+
+message OrderApproved {
+  string id = 1;
+  string customer_id = 2;
+  string payment_id = 3;
+}
+
 message OrderReadied {
   string id = 1;
   string customer_id = 2;
@@ -44,4 +56,5 @@ message RejectOrder {
 
 message ApproveOrder {
   string id = 1;
+  string shopping_id = 2;
 }

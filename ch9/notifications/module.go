@@ -14,6 +14,7 @@ import (
 	"eda-in-golang/ch9/notifications/internal/handlers"
 	"eda-in-golang/ch9/notifications/internal/logging"
 	"eda-in-golang/ch9/notifications/internal/postgres"
+	"eda-in-golang/ch9/ordering/orderingpb"
 )
 
 type Module struct{}
@@ -22,6 +23,9 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	// setup Driven adapters
 	reg := registry.New()
 	if err = customerspb.Registrations(reg); err != nil {
+		return err
+	}
+	if err = orderingpb.Registrations(reg); err != nil {
 		return err
 	}
 	eventStream := am.NewEventStream(reg, jetstream.NewStream(mono.Config().Nats.Stream, mono.JS()))

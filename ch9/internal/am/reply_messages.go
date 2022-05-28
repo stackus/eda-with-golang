@@ -59,11 +59,15 @@ func (s replyStream) Publish(ctx context.Context, topicName string, reply ddd.Re
 		return err
 	}
 
-	payload, err := s.reg.Serialize(
-		reply.ReplyName(), reply.Payload(),
-	)
-	if err != nil {
-		return err
+	var payload []byte
+
+	if reply.ReplyName() != SuccessReply && reply.ReplyName() != FailureReply {
+		payload, err = s.reg.Serialize(
+			reply.ReplyName(), reply.Payload(),
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	data, err := proto.Marshal(&ReplyMessageData{
@@ -109,12 +113,16 @@ func (s replyStream) Subscribe(topicName string, handler MessageHandler[Incoming
 
 		replyName := msg.MessageName()
 
-		payload, err := s.reg.Deserialize(replyName, replyData.GetPayload())
-		if err != nil {
-			return err
+		var payload any
+
+		if replyName != SuccessReply && replyName != FailureReply {
+			payload, err = s.reg.Deserialize(replyName, replyData.GetPayload())
+			if err != nil {
+				return err
+			}
 		}
 
-		ReplyMsg := replyMessage{
+		replyMsg := replyMessage{
 			id:         msg.ID(),
 			name:       replyName,
 			payload:    payload,
@@ -123,7 +131,7 @@ func (s replyStream) Subscribe(topicName string, handler MessageHandler[Incoming
 			msg:        msg,
 		}
 
-		return handler.HandleMessage(ctx, ReplyMsg)
+		return handler.HandleMessage(ctx, replyMsg)
 	})
 
 	return s.stream.Subscribe(topicName, fn, options...)

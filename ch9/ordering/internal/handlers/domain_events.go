@@ -9,17 +9,19 @@ import (
 	"eda-in-golang/ch9/ordering/orderingpb"
 )
 
-type domainHandlers[T ddd.AggregateEvent] struct {
+type domainHandlers[T ddd.Event] struct {
 	publisher am.MessagePublisher[ddd.Event]
 }
 
-func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) ddd.EventHandler[ddd.AggregateEvent] {
-	return domainHandlers[ddd.AggregateEvent]{publisher: publisher}
+func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) ddd.EventHandler[ddd.Event] {
+	return domainHandlers[ddd.Event]{publisher: publisher}
 }
 
-func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.AggregateEvent], handlers ddd.EventHandler[ddd.AggregateEvent]) {
+func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], handlers ddd.EventHandler[ddd.Event]) {
 	subscriber.Subscribe(handlers,
 		domain.OrderCreatedEvent,
+		domain.OrderRejectedEvent,
+		domain.OrderApprovedEvent,
 		domain.OrderReadiedEvent,
 		domain.OrderCanceledEvent,
 		domain.OrderCompletedEvent,
@@ -40,8 +42,8 @@ func (h domainHandlers[T]) HandleEvent(ctx context.Context, event T) error {
 	return nil
 }
 
-func (h domainHandlers[T]) onOrderCreated(ctx context.Context, event ddd.AggregateEvent) error {
-	payload := event.Payload().(*domain.OrderCreated)
+func (h domainHandlers[T]) onOrderCreated(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.Order)
 	items := make([]*orderingpb.OrderCreated_Item, len(payload.Items))
 	for i, item := range payload.Items {
 		items[i] = &orderingpb.OrderCreated_Item{
@@ -52,7 +54,7 @@ func (h domainHandlers[T]) onOrderCreated(ctx context.Context, event ddd.Aggrega
 	}
 	return h.publisher.Publish(ctx, orderingpb.OrderAggregateChannel,
 		ddd.NewEvent(orderingpb.OrderCreatedEvent, &orderingpb.OrderCreated{
-			Id:         event.AggregateID(),
+			Id:         payload.ID(),
 			CustomerId: payload.CustomerID,
 			PaymentId:  payload.PaymentID,
 			ShoppingId: payload.ShoppingID,
@@ -61,34 +63,56 @@ func (h domainHandlers[T]) onOrderCreated(ctx context.Context, event ddd.Aggrega
 	)
 }
 
-func (h domainHandlers[T]) onOrderReadied(ctx context.Context, event ddd.AggregateEvent) error {
-	payload := event.Payload().(*domain.OrderReadied)
+func (h domainHandlers[T]) onOrderRejected(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.Order)
+	return h.publisher.Publish(ctx, orderingpb.OrderAggregateChannel,
+		ddd.NewEvent(orderingpb.OrderRejectedEvent, &orderingpb.OrderRejected{
+			Id:         payload.ID(),
+			CustomerId: payload.CustomerID,
+			PaymentId:  payload.PaymentID,
+		}),
+	)
+}
+
+func (h domainHandlers[T]) onOrderApproved(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.Order)
+	return h.publisher.Publish(ctx, orderingpb.OrderAggregateChannel,
+		ddd.NewEvent(orderingpb.OrderApprovedEvent, &orderingpb.OrderApproved{
+			Id:         payload.ID(),
+			CustomerId: payload.CustomerID,
+			PaymentId:  payload.PaymentID,
+		}),
+	)
+}
+
+func (h domainHandlers[T]) onOrderReadied(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.Order)
 	return h.publisher.Publish(ctx, orderingpb.OrderAggregateChannel,
 		ddd.NewEvent(orderingpb.OrderReadiedEvent, &orderingpb.OrderReadied{
-			Id:         event.AggregateID(),
+			Id:         payload.ID(),
 			CustomerId: payload.CustomerID,
 			PaymentId:  payload.PaymentID,
-			Total:      payload.Total,
+			Total:      payload.GetTotal(),
 		}),
 	)
 }
 
-func (h domainHandlers[T]) onOrderCanceled(ctx context.Context, event ddd.AggregateEvent) error {
-	payload := event.Payload().(*domain.OrderCanceled)
+func (h domainHandlers[T]) onOrderCanceled(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.Order)
 	return h.publisher.Publish(ctx, orderingpb.OrderAggregateChannel,
 		ddd.NewEvent(orderingpb.OrderCanceledEvent, &orderingpb.OrderCanceled{
-			Id:         event.AggregateID(),
+			Id:         payload.ID(),
 			CustomerId: payload.CustomerID,
 			PaymentId:  payload.PaymentID,
 		}),
 	)
 }
 
-func (h domainHandlers[T]) onOrderCompleted(ctx context.Context, event ddd.AggregateEvent) error {
-	payload := event.Payload().(*domain.OrderCompleted)
+func (h domainHandlers[T]) onOrderCompleted(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.Order)
 	return h.publisher.Publish(ctx, orderingpb.OrderAggregateChannel,
 		ddd.NewEvent(orderingpb.OrderCompletedEvent, &orderingpb.OrderCompleted{
-			Id:         event.AggregateID(),
+			Id:         payload.ID(),
 			CustomerId: payload.CustomerID,
 			InvoiceId:  payload.InvoiceID,
 		}),

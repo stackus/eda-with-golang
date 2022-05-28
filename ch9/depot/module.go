@@ -25,7 +25,9 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err = storespb.Registrations(reg); err != nil {
 		return err
 	}
-	eventStream := am.NewEventStream(reg, jetstream.NewStream(mono.Config().Nats.Stream, mono.JS()))
+	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS())
+	eventStream := am.NewEventStream(reg, stream)
+	commandStream := am.NewCommandStream(reg, stream)
 	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
 	shoppingLists := postgres.NewShoppingListRepository("depot.shopping_lists", mono.DB())
 	conn, err := grpc.Dial(ctx, mono.Config().Rpc.Address())
@@ -49,6 +51,10 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 		handlers.NewIntegrationEventHandlers(stores, products),
 		"IntegrationEvents", mono.Logger(),
 	)
+	commandHandlers := logging.LogCommandHandlerAccess[ddd.Command](
+		handlers.NewCommandHandlers(app),
+		"Commands", mono.Logger(),
+	)
 
 	// setup Driver adapters
 	if err := grpc.Register(ctx, app, mono.RPC()); err != nil {
@@ -62,6 +68,9 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	}
 	handlers.RegisterDomainEventHandlers(domainDispatcher, domainEventHandlers)
 	if err = handlers.RegisterIntegrationEventHandlers(eventStream, integrationEventHandlers); err != nil {
+		return err
+	}
+	if err = handlers.RegisterCommandHandlers(commandStream, commandHandlers); err != nil {
 		return err
 	}
 

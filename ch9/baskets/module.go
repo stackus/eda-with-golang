@@ -40,7 +40,6 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	domainDispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("baskets.events", mono.DB(), reg),
-		// es.NewEventPublisher(domainDispatcher),
 		pg.NewSnapshotStore("baskets.snapshots", mono.DB(), reg),
 	)
 	baskets := es.NewAggregateRepository[*domain.Basket](domain.BasketAggregate, reg, aggregateStore)

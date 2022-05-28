@@ -27,6 +27,11 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.AggregateEve
 		domain.StoreParticipationEnabledEvent,
 		domain.StoreParticipationDisabledEvent,
 		domain.StoreRebrandedEvent,
+		domain.ProductAddedEvent,
+		domain.ProductRebrandedEvent,
+		domain.ProductPriceIncreasedEvent,
+		domain.ProductPriceDecreasedEvent,
+		domain.ProductRemovedEvent,
 	)
 }
 func (h domainHandlers[T]) HandleEvent(ctx context.Context, event T) error {

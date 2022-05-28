@@ -2,6 +2,8 @@ package jetstream
 
 import (
 	"context"
+	"fmt"
+	"sync"
 
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
@@ -14,6 +16,7 @@ const maxRetries = 5
 type Stream struct {
 	streamName string
 	js         nats.JetStreamContext
+	mu         sync.Mutex
 }
 
 var _ am.RawMessageStream = (*Stream)(nil)
@@ -34,7 +37,7 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMes
 		Data: rawMsg.Data(),
 	})
 	if err != nil {
-		return err
+		return
 	}
 
 	var p nats.PubAckFuture
@@ -43,7 +46,7 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMes
 		Data:    data,
 	}, nats.MsgId(rawMsg.ID()))
 	if err != nil {
-		return err
+		return
 	}
 
 	// retry a handful of times to publish the messages
@@ -70,11 +73,14 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMes
 		}
 	}(p, maxRetries)
 
-	return nil
+	return
 }
 
 func (s *Stream) Subscribe(topicName string, handler am.RawMessageHandler, options ...am.SubscriberOption) error {
 	var err error
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	subCfg := am.NewSubscriberConfig(options)
 
@@ -82,7 +88,9 @@ func (s *Stream) Subscribe(topicName string, handler am.RawMessageHandler, optio
 		nats.MaxDeliver(subCfg.MaxRedeliver()),
 	}
 	cfg := &nats.ConsumerConfig{
-		MaxDeliver: subCfg.MaxRedeliver(),
+		MaxDeliver:     subCfg.MaxRedeliver(),
+		DeliverSubject: topicName,
+		FilterSubject:  topicName,
 	}
 	if groupName := subCfg.GroupName(); groupName != "" {
 		cfg.DeliverSubject = groupName
@@ -163,6 +171,7 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.RawMessageHandler
 				}
 				return
 			}
+			fmt.Println("handleMsg error:", err)
 			if nakErr := msg.NAck(); nakErr != nil {
 				// TODO logging?
 			}

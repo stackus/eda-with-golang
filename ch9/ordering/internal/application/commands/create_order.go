@@ -5,6 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 
+	"eda-in-golang/ch9/internal/ddd"
 	"eda-in-golang/ch9/ordering/internal/domain"
 )
 
@@ -17,19 +18,13 @@ type CreateOrder struct {
 
 type CreateOrderHandler struct {
 	orders    domain.OrderRepository
-	customers domain.CustomerRepository
-	payments  domain.PaymentRepository
-	shopping  domain.ShoppingRepository
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewCreateOrderHandler(orders domain.OrderRepository, customers domain.CustomerRepository,
-	payments domain.PaymentRepository, shopping domain.ShoppingRepository,
-) CreateOrderHandler {
+func NewCreateOrderHandler(orders domain.OrderRepository, publisher ddd.EventPublisher[ddd.Event]) CreateOrderHandler {
 	return CreateOrderHandler{
 		orders:    orders,
-		customers: customers,
-		payments:  payments,
-		shopping:  shopping,
+		publisher: publisher,
 	}
 }
 
@@ -39,40 +34,14 @@ func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) er
 		return err
 	}
 
-	// start saga
-
-	// 0. -RejectOrder
-	// 1. AuthorizeCustomer
-	// 2. CreateShoppingList, -CancelShoppingList
-	// 3. ConfirmPayment
-	// 4. InitiateShopping
-	// 5. ApproveOrder
-
-	// authorizeCustomer
-	if err = h.customers.Authorize(ctx, cmd.CustomerID); err != nil {
-		return errors.Wrap(err, "order customer authorization")
-	}
-
-	// validatePayment
-	if err = h.payments.Confirm(ctx, cmd.PaymentID); err != nil {
-		return errors.Wrap(err, "order payment confirmation")
-	}
-
-	// scheduleShopping
-	var shoppingID string
-	if shoppingID, err = h.shopping.Create(ctx, cmd.ID, cmd.Items); err != nil {
-		return errors.Wrap(err, "order shopping scheduling")
-	}
-
-	err = order.CreateOrder(cmd.ID, cmd.CustomerID, cmd.PaymentID, shoppingID, cmd.Items)
+	event, err := order.CreateOrder(cmd.ID, cmd.CustomerID, cmd.PaymentID, cmd.Items)
 	if err != nil {
 		return errors.Wrap(err, "create order command")
 	}
 
-	// orderCreation
 	if err = h.orders.Save(ctx, order); err != nil {
 		return errors.Wrap(err, "order creation")
 	}
 
-	return nil
+	return h.publisher.Publish(ctx, event)
 }

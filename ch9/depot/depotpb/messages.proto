@@ -18,6 +18,10 @@ message CancelShoppingList {
   string id = 1;
 }
 
+message InitiateShopping {
+  string id = 1;
+}
+
 // Replies
 
 message CreatedShoppingList {

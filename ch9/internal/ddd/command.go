@@ -61,3 +61,7 @@ func (e command) CommandName() string     { return e.name }
 func (e command) Payload() CommandPayload { return e.payload }
 func (e command) Metadata() Metadata      { return e.metadata }
 func (e command) OccurredAt() time.Time   { return e.occurredAt }
+
+func (f CommandHandlerFunc[T]) HandleCommand(ctx context.Context, cmd T) error {
+	return f(ctx, cmd)
+}

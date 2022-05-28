@@ -38,48 +38,65 @@ func NewOrder(id string) *Order {
 	}
 }
 
-func (o *Order) CreateOrder(id, customerID, paymentID, shoppingID string, items []Item) error {
+func (Order) Key() string { return OrderAggregate }
+
+func (o *Order) CreateOrder(id, customerID, paymentID string, items []Item) (ddd.Event, error) {
 	if o.Status != OrderUnknown {
-		return ErrOrderAlreadyCreated
+		return nil, ErrOrderAlreadyCreated
 	}
 
 	if len(items) == 0 {
-		return ErrOrderHasNoItems
+		return nil, ErrOrderHasNoItems
 	}
 
 	if customerID == "" {
-		return ErrCustomerIDCannotBeBlank
+		return nil, ErrCustomerIDCannotBeBlank
 	}
 
 	if paymentID == "" {
-		return ErrPaymentIDCannotBeBlank
+		return nil, ErrPaymentIDCannotBeBlank
 	}
 
 	o.AddEvent(OrderCreatedEvent, &OrderCreated{
 		CustomerID: customerID,
 		PaymentID:  paymentID,
-		ShoppingID: shoppingID,
 		Items:      items,
 	})
 
-	return nil
+	return ddd.NewEvent(OrderCreatedEvent, o), nil
 }
 
-func (Order) Key() string { return OrderAggregate }
+func (o *Order) Reject() (ddd.Event, error) {
+	// validate status
 
-func (o *Order) Cancel() error {
+	o.AddEvent(OrderRejectedEvent, &OrderRejected{})
+
+	return ddd.NewEvent(OrderRejectedEvent, o), nil
+}
+
+func (o *Order) Approve(shoppingID string) (ddd.Event, error) {
+	// validate status
+
+	o.AddEvent(OrderApprovedEvent, &OrderApproved{
+		ShoppingID: shoppingID,
+	})
+
+	return ddd.NewEvent(OrderApprovedEvent, o), nil
+}
+
+func (o *Order) Cancel() (ddd.Event, error) {
 	if o.Status != OrderIsPending {
-		return ErrOrderCannotBeCancelled
+		return nil, ErrOrderCannotBeCancelled
 	}
 
 	o.AddEvent(OrderCanceledEvent, &OrderCanceled{
 		CustomerID: o.CustomerID,
 		PaymentID:  o.PaymentID,
 	})
-	return nil
+	return ddd.NewEvent(OrderCanceledEvent, o), nil
 }
 
-func (o *Order) Ready() error {
+func (o *Order) Ready() (ddd.Event, error) {
 	// validate status
 
 	o.AddEvent(OrderReadiedEvent, &OrderReadied{
@@ -88,10 +105,10 @@ func (o *Order) Ready() error {
 		Total:      o.GetTotal(),
 	})
 
-	return nil
+	return ddd.NewEvent(OrderReadiedEvent, o), nil
 }
 
-func (o *Order) Complete(invoiceID string) error {
+func (o *Order) Complete(invoiceID string) (ddd.Event, error) {
 	// validate invoice exists
 
 	// validate status
@@ -101,7 +118,7 @@ func (o *Order) Complete(invoiceID string) error {
 		InvoiceID:  invoiceID,
 	})
 
-	return nil
+	return ddd.NewEvent(OrderCompletedEvent, o), nil
 }
 
 func (o Order) GetTotal() float64 {
@@ -119,9 +136,15 @@ func (o *Order) ApplyEvent(event ddd.Event) error {
 	case *OrderCreated:
 		o.CustomerID = payload.CustomerID
 		o.PaymentID = payload.PaymentID
-		o.ShoppingID = payload.ShoppingID
 		o.Items = payload.Items
 		o.Status = OrderIsPending
+
+	case *OrderRejected:
+		o.Status = OrderIsRejected
+
+	case *OrderApproved:
+		o.ShoppingID = payload.ShoppingID
+		o.Status = OrderIsApproved
 
 	case *OrderCanceled:
 		o.Status = OrderIsCancelled

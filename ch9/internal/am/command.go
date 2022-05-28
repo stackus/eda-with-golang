@@ -14,16 +14,16 @@ const (
 
 type (
 	CommandMessageHandler interface {
-		HandleMessage(ctx context.Context, msg IncomingCommandMessage) (Reply, error)
+		HandleMessage(ctx context.Context, msg IncomingCommandMessage) (ddd.Reply, error)
 	}
 
-	CommandMessageHandlerFunc func(ctx context.Context, msg IncomingCommandMessage) (Reply, error)
+	CommandMessageHandlerFunc func(ctx context.Context, msg IncomingCommandMessage) (ddd.Reply, error)
 
 	CommandHandler interface {
-		HandleCommand(ctx context.Context, command ddd.Command) (Reply, error)
+		HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error)
 	}
 
-	CommandHandlerFunc func(ctx context.Context, command ddd.Command) (Reply, error)
+	CommandHandlerFunc func(ctx context.Context, cmd ddd.Command) (ddd.Reply, error)
 
 	Command interface {
 		ddd.Command
@@ -46,10 +46,10 @@ func (c command) Destination() string {
 	return c.destination
 }
 
-func (f CommandMessageHandlerFunc) HandleMessage(ctx context.Context, cmd IncomingCommandMessage) (Reply, error) {
+func (f CommandMessageHandlerFunc) HandleMessage(ctx context.Context, cmd IncomingCommandMessage) (ddd.Reply, error) {
 	return f(ctx, cmd)
 }
 
-func (f CommandHandlerFunc) HandleCommand(ctx context.Context, cmd Command) (Reply, error) {
+func (f CommandHandlerFunc) HandleCommand(ctx context.Context, cmd Command) (ddd.Reply, error) {
 	return f(ctx, cmd)
 }

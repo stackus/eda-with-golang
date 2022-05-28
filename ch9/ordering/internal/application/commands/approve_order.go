@@ -7,32 +7,32 @@ import (
 	"eda-in-golang/ch9/ordering/internal/domain"
 )
 
-type CompleteOrder struct {
-	ID        string
-	InvoiceID string
+type ApproveOrder struct {
+	ID         string
+	ShoppingID string
 }
 
-type CompleteOrderHandler struct {
+type ApproveOrderHandler struct {
 	orders    domain.OrderRepository
 	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewCompleteOrderHandler(orders domain.OrderRepository, publisher ddd.EventPublisher[ddd.Event]) CompleteOrderHandler {
-	return CompleteOrderHandler{
+func NewApproveOrderHandler(orders domain.OrderRepository, publisher ddd.EventPublisher[ddd.Event]) ApproveOrderHandler {
+	return ApproveOrderHandler{
 		orders:    orders,
 		publisher: publisher,
 	}
 }
 
-func (h CompleteOrderHandler) CompleteOrder(ctx context.Context, cmd CompleteOrder) error {
+func (h ApproveOrderHandler) ApproveOrder(ctx context.Context, cmd ApproveOrder) error {
 	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
 
-	event, err := order.Complete(cmd.InvoiceID)
+	event, err := order.Approve(cmd.ShoppingID)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if err = h.orders.Save(ctx, order); err != nil {

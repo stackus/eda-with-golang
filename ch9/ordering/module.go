@@ -3,6 +3,9 @@ package ordering
 import (
 	"context"
 
+	"eda-in-golang/ch9/baskets/basketspb"
+	"eda-in-golang/ch9/customers/customerspb"
+	"eda-in-golang/ch9/depot/depotpb"
 	"eda-in-golang/ch9/internal/ac"
 	"eda-in-golang/ch9/internal/am"
 	"eda-in-golang/ch9/internal/ddd"
@@ -19,6 +22,7 @@ import (
 	"eda-in-golang/ch9/ordering/internal/logging"
 	"eda-in-golang/ch9/ordering/internal/rest"
 	"eda-in-golang/ch9/ordering/orderingpb"
+	"eda-in-golang/ch9/payments/paymentspb"
 )
 
 type Module struct{}
@@ -29,16 +33,29 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err = registrations(reg); err != nil {
 		return err
 	}
+	if err = basketspb.Registrations(reg); err != nil {
+		return err
+	}
 	if err = orderingpb.Registrations(reg); err != nil {
 		return err
 	}
-	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
+	if err = customerspb.Registrations(reg); err != nil {
+		return err
+	}
+	if err = depotpb.Registrations(reg); err != nil {
+		return err
+	}
+	if err = paymentspb.Registrations(reg); err != nil {
+		return err
+	}
+	domainDispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS())
 	eventStream := am.NewEventStream(reg, stream)
 	commandStream := am.NewCommandStream(reg, stream)
+	replyStream := am.NewReplyStream(reg, stream)
 	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("ordering.events", mono.DB(), reg),
-		es.NewEventPublisher(domainDispatcher),
+		// es.NewEventPublisher(domainDispatcher),
 		pg.NewSnapshotStore("ordering.snapshots", mono.DB(), reg),
 	)
 	orders := es.NewAggregateRepository[*domain.Order](domain.OrderAggregate, reg, aggregateStore)
@@ -48,23 +65,30 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err != nil {
 		return err
 	}
-	customers := grpc.NewCustomerRepository(conn)
-	payments := grpc.NewPaymentRepository(conn)
+	// customers := grpc.NewCustomerRepository(conn)
+	// payments := grpc.NewPaymentRepository(conn)
 	shopping := grpc.NewShoppingListRepository(conn)
 
 	// setup application
 	app := logging.LogApplicationAccess(
-		application.New(orders, customers, payments, shopping),
+		application.New(orders, shopping, domainDispatcher),
 		mono.Logger(),
 	)
-	createOrderSaga := ac.NewOrchestrator[*domain.CreateOrderData](application.NewCreateOrderSaga(), createOrderSagaRepo, commandStream)
-	domainEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
+	createOrderSaga := logging.LogReplyHandlerAccess[*domain.CreateOrderData](
+		ac.NewOrchestrator[*domain.CreateOrderData](application.NewCreateOrderSaga(), createOrderSagaRepo, commandStream),
+		"CreateOrderSaga", mono.Logger(),
+	)
+	domainEventHandlers := logging.LogEventHandlerAccess[ddd.Event](
 		handlers.NewDomainEventHandlers(eventStream),
 		"DomainEvents", mono.Logger(),
 	)
 	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.Event](
 		handlers.NewIntegrationEventHandlers(app, createOrderSaga),
 		"IntegrationEvents", mono.Logger(),
+	)
+	commandHandlers := logging.LogCommandHandlerAccess[ddd.Command](
+		handlers.NewCommandHandlers(app),
+		"Commands", mono.Logger(),
 	)
 
 	// setup Driver adapters
@@ -79,6 +103,12 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	}
 	handlers.RegisterDomainEventHandlers(domainDispatcher, domainEventHandlers)
 	if err = handlers.RegisterIntegrationEventHandlers(eventStream, integrationEventHandlers); err != nil {
+		return err
+	}
+	if err = handlers.RegisterCreateOrderReplies(replyStream, createOrderSaga); err != nil {
+		return err
+	}
+	if err = handlers.RegisterCommandHandlers(commandStream, commandHandlers); err != nil {
 		return err
 	}
 

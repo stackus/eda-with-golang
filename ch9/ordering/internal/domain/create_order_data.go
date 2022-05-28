@@ -6,4 +6,5 @@ type CreateOrderData struct {
 	PaymentID  string
 	ShoppingID string
 	Items      []Item
+	Total      float64
 }

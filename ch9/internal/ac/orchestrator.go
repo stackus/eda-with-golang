@@ -13,7 +13,7 @@ type (
 	Orchestrator[T any] interface {
 		Start(ctx context.Context, id string, data T) error
 		ReplyTopic() string
-		HandleMessage(ctx context.Context, message am.IncomingReplyMessage) error
+		HandleReply(ctx context.Context, reply ddd.Reply) error
 	}
 
 	orchestrator[T any] struct {
@@ -22,6 +22,8 @@ type (
 		publisher am.CommandPublisher
 	}
 )
+
+var _ Orchestrator[any] = (*orchestrator[any])(nil)
 
 func NewOrchestrator[T any](saga Saga[T], repo SagaRepository[T], publisher am.CommandPublisher) Orchestrator[T] {
 	return orchestrator[T]{
@@ -55,8 +57,8 @@ func (o orchestrator[T]) ReplyTopic() string {
 	return o.saga.ReplyTopic()
 }
 
-func (o orchestrator[T]) HandleMessage(ctx context.Context, replyMsg am.IncomingReplyMessage) error {
-	sagaID, sagaName := o.replySagaInfo(replyMsg)
+func (o orchestrator[T]) HandleReply(ctx context.Context, reply ddd.Reply) error {
+	sagaID, sagaName := o.replySagaInfo(reply)
 	if sagaID == "" || sagaName == "" || sagaName != o.saga.Name() {
 		// returning nil to drop bad replies
 		return nil
@@ -67,7 +69,7 @@ func (o orchestrator[T]) HandleMessage(ctx context.Context, replyMsg am.Incoming
 		return err
 	}
 
-	result, err := o.handle(ctx, sagaCtx, replyMsg)
+	result, err := o.handle(ctx, sagaCtx, reply)
 	if err != nil {
 		return err
 	}
@@ -75,16 +77,16 @@ func (o orchestrator[T]) HandleMessage(ctx context.Context, replyMsg am.Incoming
 	return o.processStep(ctx, result)
 }
 
-func (o orchestrator[T]) handle(ctx context.Context, sagaCtx *SagaContext[T], replyMsg am.ReplyMessage) (stepResult[T], error) {
+func (o orchestrator[T]) handle(ctx context.Context, sagaCtx *SagaContext[T], reply ddd.Reply) (stepResult[T], error) {
 	step := o.saga.Steps()[sagaCtx.Step]
 
-	err := step.handle(ctx, sagaCtx, replyMsg)
+	err := step.handle(ctx, sagaCtx, reply)
 	if err != nil {
 		return stepResult[T]{}, err
 	}
 
 	var success bool
-	if outcome, ok := replyMsg.Metadata().Get(am.ReplyOutcomeHdr).(string); !ok {
+	if outcome, ok := reply.Metadata().Get(am.ReplyOutcomeHdr).(string); !ok {
 		success = false
 	} else {
 		success = outcome == am.OutcomeSuccess
@@ -114,7 +116,7 @@ func (o orchestrator[T]) execute(ctx context.Context, sagaCtx *SagaContext[T]) s
 	stepCount := len(steps)
 
 	for i := sagaCtx.Step + direction; i > -1 && i < stepCount; i += direction {
-		if step := steps[i]; step != nil && step.isInvocable(sagaCtx.Compensating) {
+		if step = steps[i]; step != nil && step.isInvocable(sagaCtx.Compensating) {
 			break
 		}
 		delta += 1
@@ -142,13 +144,13 @@ func (o orchestrator[T]) processStep(ctx context.Context, result stepResult[T]) 
 }
 
 func (o orchestrator[T]) publishCommand(ctx context.Context, result stepResult[T]) error {
-	command := result.cmd
+	cmd := result.cmd
 
-	command.Metadata().Set(am.CommandReplyChannelHdr, o.saga.ReplyTopic())
-	command.Metadata().Set(SagaCommandIDHdr, result.ctx.ID)
-	command.Metadata().Set(SagaCommandNameHdr, o.saga.Name())
+	cmd.Metadata().Set(am.CommandReplyChannelHdr, o.saga.ReplyTopic())
+	cmd.Metadata().Set(SagaCommandIDHdr, result.ctx.ID)
+	cmd.Metadata().Set(SagaCommandNameHdr, o.saga.Name())
 
-	return o.publisher.Publish(ctx, command.Destination(), command)
+	return o.publisher.Publish(ctx, cmd.Destination(), cmd)
 }
 
 func (o orchestrator[T]) replySagaInfo(reply ddd.Reply) (string, string) {
