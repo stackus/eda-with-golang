@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"eda-in-golang/ch9/internal/ac"
 	"eda-in-golang/ch9/internal/registry"
+	"eda-in-golang/ch9/internal/sec"
 )
 
 type SagaStore struct {
@@ -15,7 +15,7 @@ type SagaStore struct {
 	registry  registry.Registry
 }
 
-var _ ac.SagaStore = (*SagaStore)(nil)
+var _ sec.SagaStore = (*SagaStore)(nil)
 
 func NewSagaStore(tableName string, db *sql.DB, registry registry.Registry) SagaStore {
 	return SagaStore{
@@ -25,10 +25,10 @@ func NewSagaStore(tableName string, db *sql.DB, registry registry.Registry) Saga
 	}
 }
 
-func (s SagaStore) Load(ctx context.Context, sagaName, sagaID string) (*ac.SagaContext[[]byte], error) {
+func (s SagaStore) Load(ctx context.Context, sagaName, sagaID string) (*sec.SagaContext[[]byte], error) {
 	const query = "SELECT data, step, done, compensating FROM %s WHERE name = $1 AND id = $2"
 
-	sagaCtx := &ac.SagaContext[[]byte]{
+	sagaCtx := &sec.SagaContext[[]byte]{
 		ID: sagaID,
 	}
 	err := s.db.QueryRowContext(ctx, s.table(query), sagaName, sagaID).Scan(&sagaCtx.Data, &sagaCtx.Step, &sagaCtx.Done, &sagaCtx.Compensating)
@@ -36,7 +36,7 @@ func (s SagaStore) Load(ctx context.Context, sagaName, sagaID string) (*ac.SagaC
 	return sagaCtx, err
 }
 
-func (s SagaStore) Save(ctx context.Context, sagaName string, sagaCtx *ac.SagaContext[[]byte]) error {
+func (s SagaStore) Save(ctx context.Context, sagaName string, sagaCtx *sec.SagaContext[[]byte]) error {
 	const query = `INSERT INTO %s (name, id, data, step, done, compensating) 
 VALUES ($1, $2, $3, $4, $5, $6) 
 ON CONFLICT (name, id) DO

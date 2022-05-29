@@ -15,8 +15,7 @@ const (
 	OrderCanceledEvent  = "ordersapi.OrderCanceled"
 	OrderCompletedEvent = "ordersapi.OrderCompleted"
 
-	CommandChannel          = "mallbots.ordering.commands"
-	CreateOrderReplyChannel = "mallbots.ordering.replies.CreateOrder"
+	CommandChannel = "mallbots.ordering.commands"
 
 	RejectOrderCommand  = "ordersapi.RejectOrder"
 	ApproveOrderCommand = "ordersapi.ApproveOrder"

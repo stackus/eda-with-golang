@@ -5,19 +5,19 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"eda-in-golang/ch9/internal/ac"
 	"eda-in-golang/ch9/internal/ddd"
+	"eda-in-golang/ch9/internal/sec"
 )
 
 type sagaReplyHandlers[T any] struct {
-	ac.Orchestrator[T]
+	sec.Orchestrator[T]
 	label  string
 	logger zerolog.Logger
 }
 
-var _ ac.Orchestrator[any] = (*sagaReplyHandlers[any])(nil)
+var _ sec.Orchestrator[any] = (*sagaReplyHandlers[any])(nil)
 
-func LogReplyHandlerAccess[T any](orc ac.Orchestrator[T], label string, logger zerolog.Logger) ac.Orchestrator[T] {
+func LogReplyHandlerAccess[T any](orc sec.Orchestrator[T], label string, logger zerolog.Logger) sec.Orchestrator[T] {
 	return sagaReplyHandlers[T]{
 		Orchestrator: orc,
 		label:        label,
@@ -26,7 +26,7 @@ func LogReplyHandlerAccess[T any](orc ac.Orchestrator[T], label string, logger z
 }
 
 func (h sagaReplyHandlers[T]) HandleReply(ctx context.Context, reply ddd.Reply) (err error) {
-	h.logger.Info().Msgf("--> Ordering.%s.On(%s)", h.label, reply.ReplyName())
-	defer func() { h.logger.Info().Err(err).Msgf("<-- Ordering.%s.On(%s)", h.label, reply.ReplyName()) }()
+	h.logger.Info().Msgf("--> COSEC.%s.On(%s)", h.label, reply.ReplyName())
+	defer func() { h.logger.Info().Err(err).Msgf("<-- COSEC.%s.On(%s)", h.label, reply.ReplyName()) }()
 	return h.Orchestrator.HandleReply(ctx, reply)
 }

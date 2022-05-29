@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"eda-in-golang/ch9/baskets"
+	"eda-in-golang/ch9/cosec"
 	"eda-in-golang/ch9/customers"
 	"eda-in-golang/ch9/depot"
 	"eda-in-golang/ch9/internal/config"
@@ -81,6 +82,7 @@ func run() (err error) {
 		&ordering.Module{},
 		&payments.Module{},
 		&stores.Module{},
+		&cosec.Module{},
 	}
 
 	if err = m.startupModules(); err != nil {
