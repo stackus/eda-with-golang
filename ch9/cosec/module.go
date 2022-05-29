@@ -62,7 +62,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err = handlers.RegisterIntegrationEventHandlers(eventStream, integrationEventHandlers); err != nil {
 		return err
 	}
-	if err = handlers.RegisterReplies(replyStream, createOrderSaga); err != nil {
+	if err = handlers.RegisterReplyHandlers(replyStream, createOrderSaga); err != nil {
 		return err
 	}
 
