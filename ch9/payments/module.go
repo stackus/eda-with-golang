@@ -15,6 +15,7 @@ import (
 	"eda-in-golang/ch9/payments/internal/logging"
 	"eda-in-golang/ch9/payments/internal/postgres"
 	"eda-in-golang/ch9/payments/internal/rest"
+	"eda-in-golang/ch9/payments/paymentspb"
 )
 
 type Module struct{}
@@ -25,7 +26,10 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	if err = orderingpb.Registrations(reg); err != nil {
 		return err
 	}
-	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS())
+	if err = paymentspb.Registrations(reg); err != nil {
+		return err
+	}
+	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), mono.Logger())
 	eventStream := am.NewEventStream(reg, stream)
 	commandStream := am.NewCommandStream(reg, stream)
 	domainDispatcher := ddd.NewEventDispatcher[ddd.Event]()

@@ -65,7 +65,7 @@ func (h commandHandlers) doCreateShoppingList(ctx context.Context, cmd ddd.Comma
 		Items:   items,
 	})
 
-	return ddd.NewReply(depotpb.CreatedShoppingListReply, depotpb.CreatedShoppingList{Id: id}), err
+	return ddd.NewReply(depotpb.CreatedShoppingListReply, &depotpb.CreatedShoppingList{Id: id}), err
 }
 
 func (h commandHandlers) doCancelShoppingList(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {

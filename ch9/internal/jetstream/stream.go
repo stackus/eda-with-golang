@@ -2,10 +2,10 @@ package jetstream
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/nats-io/nats.go"
+	"github.com/rs/zerolog"
 	"google.golang.org/protobuf/proto"
 
 	"eda-in-golang/ch9/internal/am"
@@ -17,14 +17,16 @@ type Stream struct {
 	streamName string
 	js         nats.JetStreamContext
 	mu         sync.Mutex
+	logger     zerolog.Logger
 }
 
 var _ am.RawMessageStream = (*Stream)(nil)
 
-func NewStream(streamName string, js nats.JetStreamContext) *Stream {
+func NewStream(streamName string, js nats.JetStreamContext, logger zerolog.Logger) *Stream {
 	return &Stream{
 		streamName: streamName,
 		js:         js,
+		logger:     logger,
 	}
 }
 
@@ -61,12 +63,13 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMes
 				// TODO add some variable delay between tries
 				tries = tries - 1
 				if tries <= 0 {
-					// TODO do more than give up
+					s.logger.Error().Msgf("unable to publish message after %d tries", maxRetries)
 					return
 				}
 				future, err = s.js.PublishMsgAsync(future.Msg())
 				if err != nil {
 					// TODO do more than give up
+					s.logger.Error().Err(err).Msg("failed to publish a message")
 					return
 				}
 			}
@@ -133,7 +136,7 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.RawMessageHandler
 		m := &StreamMessage{}
 		err = proto.Unmarshal(natsMsg.Data, m)
 		if err != nil {
-			// TODO Nak? ... logging?
+			s.logger.Warn().Err(err).Msg("failed to unmarshal the *nats.Msg")
 			return
 		}
 
@@ -159,7 +162,7 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.RawMessageHandler
 		if cfg.AckType() == am.AckTypeAuto {
 			err = msg.Ack()
 			if err != nil {
-				// TODO logging?
+				s.logger.Warn().Err(err).Msg("failed to auto-Ack a message")
 			}
 		}
 
@@ -167,13 +170,13 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.RawMessageHandler
 		case err = <-errc:
 			if err == nil {
 				if ackErr := msg.Ack(); ackErr != nil {
-					// TODO logging?
+					s.logger.Warn().Err(err).Msg("failed to Ack a message")
 				}
 				return
 			}
-			fmt.Println("handleMsg error:", err)
+			s.logger.Error().Err(err).Msg("error while handling message")
 			if nakErr := msg.NAck(); nakErr != nil {
-				// TODO logging?
+				s.logger.Warn().Err(err).Msg("failed to Nack a message")
 			}
 		case <-wCtx.Done():
 			// TODO logging?

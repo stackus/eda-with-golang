@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 
-	"eda-in-golang/ch9/depot/depotpb"
 	"eda-in-golang/ch9/internal/am"
 	"eda-in-golang/ch9/internal/ddd"
 	"eda-in-golang/ch9/payments/internal/application"
@@ -25,14 +24,14 @@ func RegisterCommandHandlers(subscriber am.CommandSubscriber, handlers am.Comman
 		return handlers.HandleCommand(ctx, cmdMsg)
 	})
 
-	return subscriber.Subscribe(depotpb.CommandChannel, cmdMsgHandler, am.MessageFilter{
+	return subscriber.Subscribe(paymentspb.CommandChannel, cmdMsgHandler, am.MessageFilter{
 		paymentspb.ConfirmPaymentCommand,
 	}, am.GroupName("payment-commands"))
 }
 
 func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {
 	switch cmd.CommandName() {
-	case depotpb.CreateShoppingListCommand:
+	case paymentspb.ConfirmPaymentCommand:
 		return h.doConfirmPayment(ctx, cmd)
 	}
 

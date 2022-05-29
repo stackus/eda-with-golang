@@ -58,7 +58,7 @@ func (sl *ShoppingList) AddItem(store *Store, product *Product, quantity int) er
 
 func (sl ShoppingList) isCancelable() bool {
 	switch sl.Status {
-	case ShoppingListIsAvailable, ShoppingListIsAssigned, ShoppingListIsActive:
+	case ShoppingListIsPending, ShoppingListIsAvailable, ShoppingListIsAssigned, ShoppingListIsActive:
 		return true
 	default:
 		return false

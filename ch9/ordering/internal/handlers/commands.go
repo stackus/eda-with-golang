@@ -51,5 +51,8 @@ func (h commandHandlers) doRejectOrder(ctx context.Context, cmd ddd.Command) (dd
 func (h commandHandlers) doApproveOrder(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {
 	payload := cmd.Payload().(*orderingpb.ApproveOrder)
 
-	return nil, h.app.ApproveOrder(ctx, commands.ApproveOrder{ID: payload.GetId()})
+	return nil, h.app.ApproveOrder(ctx, commands.ApproveOrder{
+		ID:         payload.GetId(),
+		ShoppingID: payload.GetShoppingId(),
+	})
 }

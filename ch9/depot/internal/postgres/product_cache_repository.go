@@ -52,14 +52,6 @@ func (r ProductCacheRepository) Rebrand(ctx context.Context, productID, name str
 	return err
 }
 
-func (r ProductCacheRepository) UpdatePrice(ctx context.Context, productID string, delta float64) error {
-	const query = `UPDATE %s SET price = price + $2 WHERE id = $1`
-
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, delta)
-
-	return err
-}
-
 func (r ProductCacheRepository) Remove(ctx context.Context, productID string) error {
 	const query = `DELETE FROM %s WHERE id = $1`
 
@@ -69,7 +61,7 @@ func (r ProductCacheRepository) Remove(ctx context.Context, productID string) er
 }
 
 func (r ProductCacheRepository) Find(ctx context.Context, productID string) (*domain.Product, error) {
-	const query = `SELECT store_id, name, price FROM %s WHERE id = $1 LIMIT 1`
+	const query = `SELECT store_id, name FROM %s WHERE id = $1 LIMIT 1`
 
 	product := &domain.Product{
 		ID: productID,

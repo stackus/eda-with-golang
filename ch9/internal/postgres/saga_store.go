@@ -31,7 +31,7 @@ func (s SagaStore) Load(ctx context.Context, sagaName, sagaID string) (*ac.SagaC
 	sagaCtx := &ac.SagaContext[[]byte]{
 		ID: sagaID,
 	}
-	err := s.db.QueryRowContext(ctx, s.table(query), sagaName, sagaID).Scan(sagaCtx.Data, sagaCtx.Step, sagaCtx.Done, sagaCtx.Compensating)
+	err := s.db.QueryRowContext(ctx, s.table(query), sagaName, sagaID).Scan(&sagaCtx.Data, &sagaCtx.Step, &sagaCtx.Done, &sagaCtx.Compensating)
 
 	return sagaCtx, err
 }

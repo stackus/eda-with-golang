@@ -50,7 +50,7 @@ func (o orchestrator[T]) Start(ctx context.Context, id string, data T) error {
 		return err
 	}
 
-	return o.processStep(ctx, result)
+	return o.processResult(ctx, result)
 }
 
 func (o orchestrator[T]) ReplyTopic() string {
@@ -74,7 +74,7 @@ func (o orchestrator[T]) HandleReply(ctx context.Context, reply ddd.Reply) error
 		return err
 	}
 
-	return o.processStep(ctx, result)
+	return o.processResult(ctx, result)
 }
 
 func (o orchestrator[T]) handle(ctx context.Context, sagaCtx *SagaContext[T], reply ddd.Reply) (stepResult[T], error) {
@@ -132,7 +132,7 @@ func (o orchestrator[T]) execute(ctx context.Context, sagaCtx *SagaContext[T]) s
 	return step.execute(ctx, sagaCtx)
 }
 
-func (o orchestrator[T]) processStep(ctx context.Context, result stepResult[T]) (err error) {
+func (o orchestrator[T]) processResult(ctx context.Context, result stepResult[T]) (err error) {
 	if result.cmd != nil {
 		err = o.publishCommand(ctx, result)
 		if err != nil {

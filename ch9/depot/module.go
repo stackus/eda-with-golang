@@ -3,6 +3,7 @@ package depot
 import (
 	"context"
 
+	"eda-in-golang/ch9/depot/depotpb"
 	"eda-in-golang/ch9/depot/internal/application"
 	"eda-in-golang/ch9/depot/internal/grpc"
 	"eda-in-golang/ch9/depot/internal/handlers"
@@ -25,7 +26,10 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err = storespb.Registrations(reg); err != nil {
 		return err
 	}
-	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS())
+	if err = depotpb.Registrations(reg); err != nil {
+		return err
+	}
+	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), mono.Logger())
 	eventStream := am.NewEventStream(reg, stream)
 	commandStream := am.NewCommandStream(reg, stream)
 	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()

@@ -48,6 +48,7 @@ func (h domainHandlers[T]) onOrderCreated(ctx context.Context, event ddd.Event) 
 	for i, item := range payload.Items {
 		items[i] = &orderingpb.OrderCreated_Item{
 			ProductId: item.ProductID,
+			StoreId:   item.StoreID,
 			Price:     item.Price,
 			Quantity:  int32(item.Quantity),
 		}

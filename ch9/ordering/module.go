@@ -49,7 +49,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 		return err
 	}
 	domainDispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS())
+	stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), mono.Logger())
 	eventStream := am.NewEventStream(reg, stream)
 	commandStream := am.NewCommandStream(reg, stream)
 	replyStream := am.NewReplyStream(reg, stream)
@@ -124,6 +124,12 @@ func registrations(reg registry.Registry) (err error) {
 	}
 	// order events
 	if err = serde.Register(domain.OrderCreated{}); err != nil {
+		return err
+	}
+	if err = serde.Register(domain.OrderRejected{}); err != nil {
+		return err
+	}
+	if err = serde.Register(domain.OrderApproved{}); err != nil {
 		return err
 	}
 	if err = serde.Register(domain.OrderCanceled{}); err != nil {
