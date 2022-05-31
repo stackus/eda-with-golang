@@ -3,10 +3,10 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch7/internal/am"
-	"eda-in-golang/ch7/internal/ddd"
-	"eda-in-golang/ch7/stores/internal/domain"
-	"eda-in-golang/ch7/stores/storespb"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/stores/internal/domain"
+	"eda-in-golang/stores/storespb"
 )
 
 type IntegrationEventHandlers[T ddd.AggregateEvent] struct {

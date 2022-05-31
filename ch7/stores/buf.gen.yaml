@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: eda-in-golang/ch7/stores/storespb
+    default: eda-in-golang/stores/storespb
     except:
       - buf.build/googleapis/googleapis
 plugins:

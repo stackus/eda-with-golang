@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 
-	"eda-in-golang/ch7/internal/am"
-	"eda-in-golang/ch7/internal/ddd"
-	"eda-in-golang/ch7/stores/storespb"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/stores/storespb"
 )
 
 func RegisterStoreHandlers(storeHandlers ddd.EventHandler[ddd.Event], stream am.EventSubscriber) error {

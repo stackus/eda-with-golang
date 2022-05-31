@@ -1,7 +1,7 @@
 package jetstream
 
 import (
-	"eda-in-golang/ch7/internal/am"
+	"eda-in-golang/internal/am"
 )
 
 type rawMessage struct {

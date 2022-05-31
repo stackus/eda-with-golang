@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch7/internal/ddd"
-	"eda-in-golang/ch7/ordering/internal/domain"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 type NotificationHandlers[T ddd.AggregateEvent] struct {

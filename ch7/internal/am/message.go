@@ -3,7 +3,7 @@ package am
 import (
 	"context"
 
-	"eda-in-golang/ch7/internal/ddd"
+	"eda-in-golang/internal/ddd"
 )
 
 type (

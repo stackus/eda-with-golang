@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"eda-in-golang/ch7/stores/internal/domain"
+	"eda-in-golang/stores/internal/domain"
 )
 
 type DisableParticipation struct {

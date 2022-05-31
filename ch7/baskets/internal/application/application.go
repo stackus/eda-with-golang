@@ -5,7 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch7/baskets/internal/domain"
+	"eda-in-golang/baskets/internal/domain"
 )
 
 type (

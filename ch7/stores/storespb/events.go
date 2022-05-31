@@ -1,8 +1,8 @@
 package storespb
 
 import (
-	"eda-in-golang/ch7/internal/registry"
-	"eda-in-golang/ch7/internal/registry/serdes"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/registry/serdes"
 )
 
 const (

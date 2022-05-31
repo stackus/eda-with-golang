@@ -3,18 +3,18 @@ package ordering
 import (
 	"context"
 
-	"eda-in-golang/ch7/internal/ddd"
-	es "eda-in-golang/ch7/internal/es"
-	"eda-in-golang/ch7/internal/monolith"
-	pg "eda-in-golang/ch7/internal/postgres"
-	"eda-in-golang/ch7/internal/registry"
-	"eda-in-golang/ch7/internal/registry/serdes"
-	"eda-in-golang/ch7/ordering/internal/application"
-	"eda-in-golang/ch7/ordering/internal/domain"
-	"eda-in-golang/ch7/ordering/internal/grpc"
-	"eda-in-golang/ch7/ordering/internal/handlers"
-	"eda-in-golang/ch7/ordering/internal/logging"
-	"eda-in-golang/ch7/ordering/internal/rest"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/es"
+	"eda-in-golang/internal/monolith"
+	pg "eda-in-golang/internal/postgres"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/registry/serdes"
+	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/domain"
+	"eda-in-golang/ordering/internal/grpc"
+	"eda-in-golang/ordering/internal/handlers"
+	"eda-in-golang/ordering/internal/logging"
+	"eda-in-golang/ordering/internal/rest"
 )
 
 type Module struct{}

@@ -5,8 +5,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"eda-in-golang/ch7/internal/ddd"
-	"eda-in-golang/ch7/stores/storespb"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/stores/storespb"
 )
 
 type StoreHandlers[T ddd.Event] struct {

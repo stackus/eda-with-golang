@@ -3,7 +3,7 @@ package domain
 import (
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch7/internal/ddd"
+	"eda-in-golang/internal/ddd"
 )
 
 const CustomerAggregate = "customers.CustomerAggregate"

@@ -9,8 +9,8 @@ import (
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch7/internal/config"
-	"eda-in-golang/ch7/internal/waiter"
+	"eda-in-golang/internal/config"
+	"eda-in-golang/internal/waiter"
 )
 
 type Monolith interface {

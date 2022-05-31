@@ -6,11 +6,11 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch7/ordering/internal/application"
-	"eda-in-golang/ch7/ordering/internal/application/commands"
-	"eda-in-golang/ch7/ordering/internal/application/queries"
-	"eda-in-golang/ch7/ordering/internal/domain"
-	"eda-in-golang/ch7/ordering/orderingpb"
+	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/application/commands"
+	"eda-in-golang/ordering/internal/application/queries"
+	"eda-in-golang/ordering/internal/domain"
+	"eda-in-golang/ordering/orderingpb"
 )
 
 type server struct {
