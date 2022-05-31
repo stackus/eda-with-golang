@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch6/ordering/internal/domain"
-	"eda-in-golang/ch6/payments/paymentspb"
+	"eda-in-golang/ordering/internal/domain"
+	"eda-in-golang/payments/paymentspb"
 )
 
 type PaymentRepository struct {

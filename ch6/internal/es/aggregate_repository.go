@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"eda-in-golang/ch6/internal/ddd"
-	"eda-in-golang/ch6/internal/registry"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/registry"
 )
 
 type AggregateRepository[T EventSourcedAggregate] struct {

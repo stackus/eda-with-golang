@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"eda-in-golang/ch6/depot/internal/domain"
-	"eda-in-golang/ch6/internal/ddd"
+	"eda-in-golang/depot/internal/domain"
+	"eda-in-golang/internal/ddd"
 )
 
 type CompleteShoppingList struct {

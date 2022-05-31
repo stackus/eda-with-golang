@@ -3,7 +3,7 @@ package ddd
 import (
 	"fmt"
 
-	"eda-in-golang/ch6/internal/registry"
+	"eda-in-golang/internal/registry"
 )
 
 type EventsSetter interface {

@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch6/internal/ddd"
-	"eda-in-golang/ch6/ordering/internal/domain"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 type InvoiceHandlers[T ddd.AggregateEvent] struct {

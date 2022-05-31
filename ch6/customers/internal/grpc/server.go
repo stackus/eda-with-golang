@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch6/customers/customerspb"
-	"eda-in-golang/ch6/customers/internal/application"
-	"eda-in-golang/ch6/customers/internal/domain"
+	"eda-in-golang/customers/customerspb"
+	"eda-in-golang/customers/internal/application"
+	"eda-in-golang/customers/internal/domain"
 )
 
 type server struct {

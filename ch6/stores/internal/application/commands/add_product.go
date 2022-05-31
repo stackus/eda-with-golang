@@ -5,7 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch6/stores/internal/domain"
+	"eda-in-golang/stores/internal/domain"
 )
 
 type AddProduct struct {

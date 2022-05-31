@@ -3,18 +3,18 @@ package baskets
 import (
 	"context"
 
-	"eda-in-golang/ch6/baskets/internal/application"
-	"eda-in-golang/ch6/baskets/internal/domain"
-	"eda-in-golang/ch6/baskets/internal/grpc"
-	"eda-in-golang/ch6/baskets/internal/handlers"
-	"eda-in-golang/ch6/baskets/internal/logging"
-	"eda-in-golang/ch6/baskets/internal/rest"
-	"eda-in-golang/ch6/internal/ddd"
-	"eda-in-golang/ch6/internal/es"
-	"eda-in-golang/ch6/internal/monolith"
-	pg "eda-in-golang/ch6/internal/postgres"
-	"eda-in-golang/ch6/internal/registry"
-	"eda-in-golang/ch6/internal/registry/serdes"
+	"eda-in-golang/baskets/internal/application"
+	"eda-in-golang/baskets/internal/domain"
+	"eda-in-golang/baskets/internal/grpc"
+	"eda-in-golang/baskets/internal/handlers"
+	"eda-in-golang/baskets/internal/logging"
+	"eda-in-golang/baskets/internal/rest"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/es"
+	"eda-in-golang/internal/monolith"
+	pg "eda-in-golang/internal/postgres"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/registry/serdes"
 )
 
 type Module struct{}

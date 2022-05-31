@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: eda-in-golang/ch6/payments/paymentspb
+    default: eda-in-golang/payments/paymentspb
     except:
       - buf.build/googleapis/googleapis
 plugins:

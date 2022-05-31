@@ -3,7 +3,7 @@ package es
 import (
 	"context"
 
-	"eda-in-golang/ch6/internal/ddd"
+	"eda-in-golang/internal/ddd"
 )
 
 type EventSourcedAggregate interface {

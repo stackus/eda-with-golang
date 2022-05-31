@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch6/customers/internal/domain"
-	"eda-in-golang/ch6/internal/ddd"
+	"eda-in-golang/customers/internal/domain"
+	"eda-in-golang/internal/ddd"
 )
 
 type (

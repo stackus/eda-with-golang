@@ -3,13 +3,13 @@ package customers
 import (
 	"context"
 
-	"eda-in-golang/ch6/customers/internal/application"
-	"eda-in-golang/ch6/customers/internal/grpc"
-	"eda-in-golang/ch6/customers/internal/logging"
-	"eda-in-golang/ch6/customers/internal/postgres"
-	"eda-in-golang/ch6/customers/internal/rest"
-	"eda-in-golang/ch6/internal/ddd"
-	"eda-in-golang/ch6/internal/monolith"
+	"eda-in-golang/customers/internal/application"
+	"eda-in-golang/customers/internal/grpc"
+	"eda-in-golang/customers/internal/logging"
+	"eda-in-golang/customers/internal/postgres"
+	"eda-in-golang/customers/internal/rest"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/monolith"
 )
 
 type Module struct{}

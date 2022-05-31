@@ -8,9 +8,9 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch6/internal/ddd"
-	"eda-in-golang/ch6/internal/es"
-	"eda-in-golang/ch6/internal/registry"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/es"
+	"eda-in-golang/internal/registry"
 )
 
 type (
