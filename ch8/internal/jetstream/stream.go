@@ -6,7 +6,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
 
-	"eda-in-golang/ch8/internal/am"
+	"eda-in-golang/internal/am"
 )
 
 const maxRetries = 5

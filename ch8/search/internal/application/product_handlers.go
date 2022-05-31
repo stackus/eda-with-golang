@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/stores/storespb"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/stores/storespb"
 )
 
 type ProductHandlers[T ddd.Event] struct {

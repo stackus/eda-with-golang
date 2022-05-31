@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 
-	"eda-in-golang/ch8/internal/am"
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/ordering/orderingpb"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/orderingpb"
 )
 
 func RegisterOrderHandlers(orderHandlers ddd.EventHandler[ddd.Event], stream am.EventSubscriber) error {

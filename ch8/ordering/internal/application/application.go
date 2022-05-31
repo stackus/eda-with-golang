@@ -3,9 +3,9 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch8/ordering/internal/application/commands"
-	"eda-in-golang/ch8/ordering/internal/application/queries"
-	"eda-in-golang/ch8/ordering/internal/domain"
+	"eda-in-golang/ordering/internal/application/commands"
+	"eda-in-golang/ordering/internal/application/queries"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 type (

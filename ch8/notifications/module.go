@@ -3,17 +3,17 @@ package notifications
 import (
 	"context"
 
-	"eda-in-golang/ch8/customers/customerspb"
-	"eda-in-golang/ch8/internal/am"
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/internal/jetstream"
-	"eda-in-golang/ch8/internal/monolith"
-	"eda-in-golang/ch8/internal/registry"
-	"eda-in-golang/ch8/notifications/internal/application"
-	"eda-in-golang/ch8/notifications/internal/grpc"
-	"eda-in-golang/ch8/notifications/internal/handlers"
-	"eda-in-golang/ch8/notifications/internal/logging"
-	"eda-in-golang/ch8/notifications/internal/postgres"
+	"eda-in-golang/customers/customerspb"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/jetstream"
+	"eda-in-golang/internal/monolith"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/notifications/internal/application"
+	"eda-in-golang/notifications/internal/grpc"
+	"eda-in-golang/notifications/internal/handlers"
+	"eda-in-golang/notifications/internal/logging"
+	"eda-in-golang/notifications/internal/postgres"
 )
 
 type Module struct{}

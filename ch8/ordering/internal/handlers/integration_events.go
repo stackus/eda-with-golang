@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/ordering/internal/domain"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 func RegisterIntegrationEventHandlers[T ddd.AggregateEvent](eventHandlers ddd.EventHandler[T], domainSubscriber ddd.EventSubscriber[T]) {

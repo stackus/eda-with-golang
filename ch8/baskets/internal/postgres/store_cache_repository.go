@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch8/baskets/internal/domain"
+	"eda-in-golang/baskets/internal/domain"
 )
 
 type StoreCacheRepository struct {

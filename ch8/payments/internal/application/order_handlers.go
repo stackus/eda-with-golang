@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/ordering/orderingpb"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/orderingpb"
 )
 
 type OrderHandlers[T ddd.Event] struct {

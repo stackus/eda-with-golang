@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: eda-in-golang/ch8/internal/jetstream
+    default: eda-in-golang/internal/jetstream
     except:
       - buf.build/googleapis/googleapis
 plugins:

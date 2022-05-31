@@ -5,7 +5,7 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"eda-in-golang/ch8/internal/ddd"
+	"eda-in-golang/internal/ddd"
 )
 
 type EventHandlers[T ddd.Event] struct {

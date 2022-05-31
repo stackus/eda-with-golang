@@ -8,8 +8,8 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/internal/registry"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/registry"
 )
 
 type (

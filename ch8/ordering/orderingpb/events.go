@@ -1,8 +1,8 @@
 package orderingpb
 
 import (
-	"eda-in-golang/ch8/internal/registry"
-	"eda-in-golang/ch8/internal/registry/serdes"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/registry/serdes"
 )
 
 const (

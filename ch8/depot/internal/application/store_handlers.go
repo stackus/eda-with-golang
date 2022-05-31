@@ -3,9 +3,9 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch8/depot/internal/domain"
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/stores/storespb"
+	"eda-in-golang/depot/internal/domain"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/stores/storespb"
 )
 
 type StoreHandlers[T ddd.Event] struct {

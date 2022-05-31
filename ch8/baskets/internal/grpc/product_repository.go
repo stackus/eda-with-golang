@@ -6,9 +6,9 @@ import (
 	"github.com/stackus/errors"
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch8/stores/storespb"
+	"eda-in-golang/stores/storespb"
 
-	"eda-in-golang/ch8/baskets/internal/domain"
+	"eda-in-golang/baskets/internal/domain"
 )
 
 type ProductRepository struct {

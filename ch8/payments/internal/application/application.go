@@ -5,8 +5,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/payments/internal/models"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/payments/internal/models"
 )
 
 type (

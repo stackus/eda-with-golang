@@ -3,18 +3,18 @@ package depot
 import (
 	"context"
 
-	"eda-in-golang/ch8/depot/internal/application"
-	"eda-in-golang/ch8/depot/internal/grpc"
-	"eda-in-golang/ch8/depot/internal/handlers"
-	"eda-in-golang/ch8/depot/internal/logging"
-	"eda-in-golang/ch8/depot/internal/postgres"
-	"eda-in-golang/ch8/depot/internal/rest"
-	"eda-in-golang/ch8/internal/am"
-	"eda-in-golang/ch8/internal/ddd"
-	"eda-in-golang/ch8/internal/jetstream"
-	"eda-in-golang/ch8/internal/monolith"
-	"eda-in-golang/ch8/internal/registry"
-	"eda-in-golang/ch8/stores/storespb"
+	"eda-in-golang/depot/internal/application"
+	"eda-in-golang/depot/internal/grpc"
+	"eda-in-golang/depot/internal/handlers"
+	"eda-in-golang/depot/internal/logging"
+	"eda-in-golang/depot/internal/postgres"
+	"eda-in-golang/depot/internal/rest"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/jetstream"
+	"eda-in-golang/internal/monolith"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/stores/storespb"
 )
 
 type Module struct{}

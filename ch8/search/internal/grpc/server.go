@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch8/search/internal/application"
-	"eda-in-golang/ch8/search/searchpb"
+	"eda-in-golang/search/internal/application"
+	"eda-in-golang/search/searchpb"
 )
 
 type server struct {
