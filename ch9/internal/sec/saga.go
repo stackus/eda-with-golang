@@ -3,7 +3,7 @@ package sec
 import (
 	"context"
 
-	"eda-in-golang/ch9/internal/am"
+	"eda-in-golang/internal/am"
 )
 
 const (

@@ -3,7 +3,7 @@ package es
 import (
 	"fmt"
 
-	"eda-in-golang/ch9/internal/registry"
+	"eda-in-golang/internal/registry"
 )
 
 type VersionSetter interface {

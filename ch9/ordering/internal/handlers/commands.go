@@ -3,11 +3,11 @@ package handlers
 import (
 	"context"
 
-	"eda-in-golang/ch9/internal/am"
-	"eda-in-golang/ch9/internal/ddd"
-	"eda-in-golang/ch9/ordering/internal/application"
-	"eda-in-golang/ch9/ordering/internal/application/commands"
-	"eda-in-golang/ch9/ordering/orderingpb"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/application/commands"
+	"eda-in-golang/ordering/orderingpb"
 )
 
 type commandHandlers struct {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"eda-in-golang/ch9/internal/ddd"
-	"eda-in-golang/ch9/internal/sec"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/sec"
 )
 
 type sagaReplyHandlers[T any] struct {

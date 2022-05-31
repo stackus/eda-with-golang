@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"eda-in-golang/ch9/internal/registry"
-	"eda-in-golang/ch9/internal/sec"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/sec"
 )
 
 type SagaStore struct {

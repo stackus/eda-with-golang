@@ -6,12 +6,12 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch9/stores/storespb"
+	"eda-in-golang/stores/storespb"
 
-	"eda-in-golang/ch9/stores/internal/application"
-	"eda-in-golang/ch9/stores/internal/application/commands"
-	"eda-in-golang/ch9/stores/internal/application/queries"
-	"eda-in-golang/ch9/stores/internal/domain"
+	"eda-in-golang/stores/internal/application"
+	"eda-in-golang/stores/internal/application/commands"
+	"eda-in-golang/stores/internal/application/queries"
+	"eda-in-golang/stores/internal/domain"
 )
 
 type server struct {

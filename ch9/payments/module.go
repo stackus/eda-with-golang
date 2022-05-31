@@ -3,19 +3,19 @@ package payments
 import (
 	"context"
 
-	"eda-in-golang/ch9/internal/am"
-	"eda-in-golang/ch9/internal/ddd"
-	"eda-in-golang/ch9/internal/jetstream"
-	"eda-in-golang/ch9/internal/monolith"
-	"eda-in-golang/ch9/internal/registry"
-	"eda-in-golang/ch9/ordering/orderingpb"
-	"eda-in-golang/ch9/payments/internal/application"
-	"eda-in-golang/ch9/payments/internal/grpc"
-	"eda-in-golang/ch9/payments/internal/handlers"
-	"eda-in-golang/ch9/payments/internal/logging"
-	"eda-in-golang/ch9/payments/internal/postgres"
-	"eda-in-golang/ch9/payments/internal/rest"
-	"eda-in-golang/ch9/payments/paymentspb"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/jetstream"
+	"eda-in-golang/internal/monolith"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/ordering/orderingpb"
+	"eda-in-golang/payments/internal/application"
+	"eda-in-golang/payments/internal/grpc"
+	"eda-in-golang/payments/internal/handlers"
+	"eda-in-golang/payments/internal/logging"
+	"eda-in-golang/payments/internal/postgres"
+	"eda-in-golang/payments/internal/rest"
+	"eda-in-golang/payments/paymentspb"
 )
 
 type Module struct{}

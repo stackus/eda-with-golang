@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 
-	"eda-in-golang/ch9/cosec/internal/models"
-	"eda-in-golang/ch9/internal/am"
-	"eda-in-golang/ch9/internal/sec"
+	"eda-in-golang/cosec/internal/models"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/sec"
 )
 
 func RegisterReplyHandlers(subscriber am.ReplySubscriber, saga sec.Orchestrator[*models.CreateOrderData]) error {

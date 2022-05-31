@@ -3,8 +3,8 @@ package domain
 import (
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch9/internal/ddd"
-	"eda-in-golang/ch9/internal/es"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/es"
 )
 
 const OrderAggregate = "ordering.Order"

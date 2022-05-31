@@ -11,8 +11,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch9/search/internal/application"
-	"eda-in-golang/ch9/search/internal/models"
+	"eda-in-golang/search/internal/application"
+	"eda-in-golang/search/internal/models"
 )
 
 type OrderRepository struct {

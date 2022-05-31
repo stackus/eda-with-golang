@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 
-	"eda-in-golang/ch9/internal/am"
-	"eda-in-golang/ch9/internal/ddd"
-	"eda-in-golang/ch9/ordering/internal/domain"
-	"eda-in-golang/ch9/ordering/orderingpb"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/internal/domain"
+	"eda-in-golang/ordering/orderingpb"
 )
 
 type domainHandlers[T ddd.Event] struct {

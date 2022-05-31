@@ -5,8 +5,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch9/depot/internal/domain"
-	"eda-in-golang/ch9/internal/ddd"
+	"eda-in-golang/depot/internal/domain"
+	"eda-in-golang/internal/ddd"
 )
 
 type CreateShoppingList struct {

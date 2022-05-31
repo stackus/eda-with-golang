@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch9/depot/internal/domain"
-	"eda-in-golang/ch9/stores/storespb"
+	"eda-in-golang/depot/internal/domain"
+	"eda-in-golang/stores/storespb"
 )
 
 type StoreRepository struct {

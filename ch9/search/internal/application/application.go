@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"eda-in-golang/ch9/search/internal/models"
+	"eda-in-golang/search/internal/models"
 )
 
 type (

@@ -1,8 +1,8 @@
 package paymentspb
 
 import (
-	"eda-in-golang/ch9/internal/registry"
-	"eda-in-golang/ch9/internal/registry/serdes"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/registry/serdes"
 )
 
 const (

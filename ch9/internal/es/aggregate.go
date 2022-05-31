@@ -1,7 +1,7 @@
 package es
 
 import (
-	"eda-in-golang/ch9/internal/ddd"
+	"eda-in-golang/internal/ddd"
 )
 
 type (

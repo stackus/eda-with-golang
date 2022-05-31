@@ -3,7 +3,7 @@ package am
 import (
 	"context"
 
-	"eda-in-golang/ch9/internal/ddd"
+	"eda-in-golang/internal/ddd"
 )
 
 const (

@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"eda-in-golang/ch9/depot/depotpb"
-	"eda-in-golang/ch9/depot/internal/application"
-	"eda-in-golang/ch9/depot/internal/application/commands"
-	"eda-in-golang/ch9/internal/am"
-	"eda-in-golang/ch9/internal/ddd"
+	"eda-in-golang/depot/depotpb"
+	"eda-in-golang/depot/internal/application"
+	"eda-in-golang/depot/internal/application/commands"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
 )
 
 type commandHandlers struct {

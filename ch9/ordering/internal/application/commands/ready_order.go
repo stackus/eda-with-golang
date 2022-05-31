@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 
-	"eda-in-golang/ch9/internal/ddd"
-	"eda-in-golang/ch9/ordering/internal/domain"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 type ReadyOrder struct {

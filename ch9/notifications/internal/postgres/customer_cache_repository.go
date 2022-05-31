@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch9/notifications/internal/application"
-	"eda-in-golang/ch9/notifications/internal/models"
+	"eda-in-golang/notifications/internal/application"
+	"eda-in-golang/notifications/internal/models"
 )
 
 type CustomerCacheRepository struct {

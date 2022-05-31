@@ -3,23 +3,23 @@ package ordering
 import (
 	"context"
 
-	"eda-in-golang/ch9/baskets/basketspb"
-	"eda-in-golang/ch9/depot/depotpb"
-	"eda-in-golang/ch9/internal/am"
-	"eda-in-golang/ch9/internal/ddd"
-	"eda-in-golang/ch9/internal/es"
-	"eda-in-golang/ch9/internal/jetstream"
-	"eda-in-golang/ch9/internal/monolith"
-	pg "eda-in-golang/ch9/internal/postgres"
-	"eda-in-golang/ch9/internal/registry"
-	"eda-in-golang/ch9/internal/registry/serdes"
-	"eda-in-golang/ch9/ordering/internal/application"
-	"eda-in-golang/ch9/ordering/internal/domain"
-	"eda-in-golang/ch9/ordering/internal/grpc"
-	"eda-in-golang/ch9/ordering/internal/handlers"
-	"eda-in-golang/ch9/ordering/internal/logging"
-	"eda-in-golang/ch9/ordering/internal/rest"
-	"eda-in-golang/ch9/ordering/orderingpb"
+	"eda-in-golang/baskets/basketspb"
+	"eda-in-golang/depot/depotpb"
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/es"
+	"eda-in-golang/internal/jetstream"
+	"eda-in-golang/internal/monolith"
+	pg "eda-in-golang/internal/postgres"
+	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/registry/serdes"
+	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/domain"
+	"eda-in-golang/ordering/internal/grpc"
+	"eda-in-golang/ordering/internal/handlers"
+	"eda-in-golang/ordering/internal/logging"
+	"eda-in-golang/ordering/internal/rest"
+	"eda-in-golang/ordering/orderingpb"
 )
 
 type Module struct{}
@@ -45,7 +45,6 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	commandStream := am.NewCommandStream(reg, stream)
 	aggregateStore := es.AggregateStoreWithMiddleware(
 		pg.NewEventStore("ordering.events", mono.DB(), reg),
-		// es.NewEventPublisher(domainDispatcher),
 		pg.NewSnapshotStore("ordering.snapshots", mono.DB(), reg),
 	)
 	orders := es.NewAggregateRepository[*domain.Order](domain.OrderAggregate, reg, aggregateStore)

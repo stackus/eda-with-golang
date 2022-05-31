@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: eda-in-golang/ch9/depot/depotpb
+    default: eda-in-golang/depot/depotpb
     except:
       - buf.build/googleapis/googleapis
 plugins:
