@@ -5,7 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch4/ordering/internal/domain"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 type CreateOrder struct {

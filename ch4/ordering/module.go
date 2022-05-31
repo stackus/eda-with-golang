@@ -3,12 +3,12 @@ package ordering
 import (
 	"context"
 
-	"eda-in-golang/ch4/internal/monolith"
-	"eda-in-golang/ch4/ordering/internal/application"
-	"eda-in-golang/ch4/ordering/internal/grpc"
-	"eda-in-golang/ch4/ordering/internal/logging"
-	"eda-in-golang/ch4/ordering/internal/postgres"
-	"eda-in-golang/ch4/ordering/internal/rest"
+	"eda-in-golang/internal/monolith"
+	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/grpc"
+	"eda-in-golang/ordering/internal/logging"
+	"eda-in-golang/ordering/internal/postgres"
+	"eda-in-golang/ordering/internal/rest"
 )
 
 type Module struct{}

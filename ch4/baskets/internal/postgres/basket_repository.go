@@ -8,7 +8,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch4/baskets/internal/domain"
+	"eda-in-golang/baskets/internal/domain"
 )
 
 type BasketRepository struct {

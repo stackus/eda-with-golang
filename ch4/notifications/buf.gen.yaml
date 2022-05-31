@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: eda-in-golang/ch4/notifications/notificationspb
+    default: eda-in-golang/notifications/notificationspb
     except:
       - buf.build/googleapis/googleapis
 plugins:

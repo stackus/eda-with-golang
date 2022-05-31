@@ -1,4 +1,4 @@
-module eda-in-golang/ch4
+module eda-in-golang
 
 go 1.17
 

@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: eda-in-golang/ch4/customers/customerspb
+    default: eda-in-golang/customers/customerspb
     except:
       - buf.build/googleapis/googleapis
 plugins:

@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch4/notifications/notificationspb"
-	"eda-in-golang/ch4/ordering/internal/domain"
+	"eda-in-golang/notifications/notificationspb"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 type NotificationRepository struct {

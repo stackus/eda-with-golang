@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"eda-in-golang/ch4/baskets/basketspb"
+	"eda-in-golang/baskets/basketspb"
 )
 
 func RegisterGateway(ctx context.Context, mux *chi.Mux, grpcAddr string) error {

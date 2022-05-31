@@ -5,10 +5,10 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"eda-in-golang/ch4/ordering/internal/application"
-	"eda-in-golang/ch4/ordering/internal/application/commands"
-	"eda-in-golang/ch4/ordering/internal/application/queries"
-	"eda-in-golang/ch4/ordering/internal/domain"
+	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/application/commands"
+	"eda-in-golang/ordering/internal/application/queries"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 type Application struct {

@@ -3,12 +3,12 @@ package baskets
 import (
 	"context"
 
-	"eda-in-golang/ch4/baskets/internal/application"
-	"eda-in-golang/ch4/baskets/internal/grpc"
-	"eda-in-golang/ch4/baskets/internal/logging"
-	"eda-in-golang/ch4/baskets/internal/postgres"
-	"eda-in-golang/ch4/baskets/internal/rest"
-	"eda-in-golang/ch4/internal/monolith"
+	"eda-in-golang/baskets/internal/application"
+	"eda-in-golang/baskets/internal/grpc"
+	"eda-in-golang/baskets/internal/logging"
+	"eda-in-golang/baskets/internal/postgres"
+	"eda-in-golang/baskets/internal/rest"
+	"eda-in-golang/internal/monolith"
 )
 
 type Module struct{}
