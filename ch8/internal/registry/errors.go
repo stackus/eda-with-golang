@@ -10,9 +10,9 @@ type (
 )
 
 func (key UnregisteredKey) Error() string {
-	return fmt.Sprintf("nothing has been registered with the key `%s`", key)
+	return fmt.Sprintf("nothing has been registered with the key `%s`", string(key))
 }
 
 func (key AlreadyRegisteredKey) Error() string {
-	return fmt.Sprintf("something with the key `%s` has already been registered", key)
+	return fmt.Sprintf("something with the key `%s` has already been registered", string(key))
 }
