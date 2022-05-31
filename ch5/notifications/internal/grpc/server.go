@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"eda-in-golang/ch5/notifications/internal/application"
-	"eda-in-golang/ch5/notifications/notificationspb"
+	"eda-in-golang/notifications/internal/application"
+	"eda-in-golang/notifications/notificationspb"
 )
 
 type server struct {

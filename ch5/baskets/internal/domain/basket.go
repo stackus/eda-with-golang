@@ -5,7 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/internal/ddd"
 )
 
 var (

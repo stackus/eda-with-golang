@@ -8,8 +8,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch5/depot/internal/domain"
-	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/depot/internal/domain"
+	"eda-in-golang/internal/ddd"
 )
 
 type ShoppingListRepository struct {

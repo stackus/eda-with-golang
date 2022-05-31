@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"eda-in-golang/ch5/baskets/internal/application"
-	"eda-in-golang/ch5/baskets/internal/domain"
-	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/baskets/internal/application"
+	"eda-in-golang/baskets/internal/domain"
+	"eda-in-golang/internal/ddd"
 )
 
 func RegisterOrderHandlers(orderHandlers application.DomainEventHandlers, domainSubscriber ddd.EventSubscriber) {

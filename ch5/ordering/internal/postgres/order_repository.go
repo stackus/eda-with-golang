@@ -8,8 +8,8 @@ import (
 
 	"github.com/stackus/errors"
 
-	"eda-in-golang/ch5/internal/ddd"
-	"eda-in-golang/ch5/ordering/internal/domain"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 type OrderRepository struct {

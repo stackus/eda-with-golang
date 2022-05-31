@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"eda-in-golang/ch5/internal/ddd"
-	"eda-in-golang/ch5/ordering/internal/application"
-	"eda-in-golang/ch5/ordering/internal/domain"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/domain"
 )
 
 func RegisterNotificationHandlers(notificationHandlers application.DomainEventHandlers, domainSubscriber ddd.EventSubscriber) {

@@ -3,10 +3,10 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch5/internal/ddd"
-	"eda-in-golang/ch5/stores/internal/application/commands"
-	"eda-in-golang/ch5/stores/internal/application/queries"
-	"eda-in-golang/ch5/stores/internal/domain"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/stores/internal/application/commands"
+	"eda-in-golang/stores/internal/application/queries"
+	"eda-in-golang/stores/internal/domain"
 )
 
 type (

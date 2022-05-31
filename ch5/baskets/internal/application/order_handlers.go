@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"eda-in-golang/ch5/baskets/internal/domain"
-	"eda-in-golang/ch5/internal/ddd"
+	"eda-in-golang/baskets/internal/domain"
+	"eda-in-golang/internal/ddd"
 )
 
 type OrderHandlers struct {

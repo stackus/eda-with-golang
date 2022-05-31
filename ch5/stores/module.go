@@ -3,13 +3,13 @@ package stores
 import (
 	"context"
 
-	"eda-in-golang/ch5/internal/ddd"
-	"eda-in-golang/ch5/internal/monolith"
-	"eda-in-golang/ch5/stores/internal/application"
-	"eda-in-golang/ch5/stores/internal/grpc"
-	"eda-in-golang/ch5/stores/internal/logging"
-	"eda-in-golang/ch5/stores/internal/postgres"
-	"eda-in-golang/ch5/stores/internal/rest"
+	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/monolith"
+	"eda-in-golang/stores/internal/application"
+	"eda-in-golang/stores/internal/grpc"
+	"eda-in-golang/stores/internal/logging"
+	"eda-in-golang/stores/internal/postgres"
+	"eda-in-golang/stores/internal/rest"
 )
 
 type Module struct {
