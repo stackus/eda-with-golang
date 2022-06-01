@@ -58,7 +58,7 @@ func (o orchestrator[T]) ReplyTopic() string {
 }
 
 func (o orchestrator[T]) HandleReply(ctx context.Context, reply ddd.Reply) error {
-	sagaID, sagaName := o.replySagaInfo(reply)
+	sagaID, sagaName := o.getSagaInfoFromReply(reply)
 	if sagaID == "" || sagaName == "" || sagaName != o.saga.Name() {
 		// returning nil to drop bad replies
 		return nil
@@ -78,7 +78,7 @@ func (o orchestrator[T]) HandleReply(ctx context.Context, reply ddd.Reply) error
 }
 
 func (o orchestrator[T]) handle(ctx context.Context, sagaCtx *SagaContext[T], reply ddd.Reply) (stepResult[T], error) {
-	step := o.saga.Steps()[sagaCtx.Step]
+	step := o.saga.getSteps()[sagaCtx.Step]
 
 	err := step.handle(ctx, sagaCtx, reply)
 	if err != nil {
@@ -112,7 +112,7 @@ func (o orchestrator[T]) execute(ctx context.Context, sagaCtx *SagaContext[T]) s
 		direction = -1
 	}
 
-	steps := o.saga.Steps()
+	steps := o.saga.getSteps()
 	stepCount := len(steps)
 
 	for i := sagaCtx.Step + direction; i > -1 && i < stepCount; i += direction {
@@ -153,7 +153,7 @@ func (o orchestrator[T]) publishCommand(ctx context.Context, result stepResult[T
 	return o.publisher.Publish(ctx, cmd.Destination(), cmd)
 }
 
-func (o orchestrator[T]) replySagaInfo(reply ddd.Reply) (string, string) {
+func (o orchestrator[T]) getSagaInfoFromReply(reply ddd.Reply) (string, string) {
 	var ok bool
 	var sagaID, sagaName string
 

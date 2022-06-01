@@ -1,8 +1,6 @@
 package sec
 
 import (
-	"context"
-
 	"eda-in-golang/internal/am"
 )
 
@@ -23,16 +21,11 @@ type (
 		Compensating bool
 	}
 
-	SagaStore interface {
-		Load(ctx context.Context, sagaName, sagaID string) (*SagaContext[[]byte], error)
-		Save(ctx context.Context, sagaName string, sagaCtx *SagaContext[[]byte]) error
-	}
-
 	Saga[T any] interface {
 		AddStep() SagaStep[T]
-		Steps() []SagaStep[T]
 		Name() string
 		ReplyTopic() string
+		getSteps() []SagaStep[T]
 	}
 
 	saga[T any] struct {
@@ -71,16 +64,16 @@ func (s *saga[T]) AddStep() SagaStep[T] {
 	return step
 }
 
-func (s *saga[T]) Steps() []SagaStep[T] {
-	return s.steps
-}
-
 func (s *saga[T]) Name() string {
 	return s.name
 }
 
 func (s *saga[T]) ReplyTopic() string {
 	return s.replyTopic
+}
+
+func (s *saga[T]) getSteps() []SagaStep[T] {
+	return s.steps
 }
 
 func (s *SagaContext[T]) advance(steps int) {

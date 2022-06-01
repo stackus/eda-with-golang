@@ -14,13 +14,13 @@ type commandHandlers struct {
 	app application.App
 }
 
-func NewCommandHandlers(app application.App) am.CommandHandler {
+func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 	return commandHandlers{
 		app: app,
 	}
 }
 
-func RegisterCommandHandlers(subscriber am.CommandSubscriber, handlers am.CommandHandler) error {
+func RegisterCommandHandlers(subscriber am.CommandSubscriber, handlers ddd.CommandHandler[ddd.Command]) error {
 	cmdMsgHandler := am.CommandMessageHandlerFunc(func(ctx context.Context, cmdMsg am.IncomingCommandMessage) (ddd.Reply, error) {
 		return handlers.HandleCommand(ctx, cmdMsg)
 	})

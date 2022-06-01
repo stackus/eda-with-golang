@@ -46,15 +46,15 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	commandStream := am.NewCommandStream(reg, stream)
 	replyStream := am.NewReplyStream(reg, stream)
 	sagaStore := pg.NewSagaStore("cosec.sagas", mono.DB(), reg)
-	createOrderSagaRepo := sec.NewSagaRepository[*models.CreateOrderData](reg, sagaStore)
+	sagaRepo := sec.NewSagaRepository[*models.CreateOrderData](reg, sagaStore)
 
 	// setup application
-	createOrderSaga := logging.LogReplyHandlerAccess[*models.CreateOrderData](
-		sec.NewOrchestrator[*models.CreateOrderData](internal.NewCreateOrderSaga(), createOrderSagaRepo, commandStream),
+	orchestrator := logging.LogReplyHandlerAccess[*models.CreateOrderData](
+		sec.NewOrchestrator[*models.CreateOrderData](internal.NewCreateOrderSaga(), sagaRepo, commandStream),
 		"CreateOrderSaga", mono.Logger(),
 	)
 	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.Event](
-		handlers.NewIntegrationEventHandlers(createOrderSaga),
+		handlers.NewIntegrationEventHandlers(orchestrator),
 		"IntegrationEvents", mono.Logger(),
 	)
 
@@ -62,7 +62,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err = handlers.RegisterIntegrationEventHandlers(eventStream, integrationEventHandlers); err != nil {
 		return err
 	}
-	if err = handlers.RegisterReplyHandlers(replyStream, createOrderSaga); err != nil {
+	if err = handlers.RegisterReplyHandlers(replyStream, orchestrator); err != nil {
 		return err
 	}
 

@@ -8,6 +8,11 @@ import (
 	"eda-in-golang/internal/registry"
 )
 
+type SagaStore interface {
+	Load(ctx context.Context, sagaName, sagaID string) (*SagaContext[[]byte], error)
+	Save(ctx context.Context, sagaName string, sagaCtx *SagaContext[[]byte]) error
+}
+
 type SagaRepository[T any] struct {
 	reg   registry.Registry
 	store SagaStore

@@ -8,9 +8,9 @@ import (
 	"eda-in-golang/internal/sec"
 )
 
-func RegisterReplyHandlers(subscriber am.ReplySubscriber, saga sec.Orchestrator[*models.CreateOrderData]) error {
+func RegisterReplyHandlers(subscriber am.ReplySubscriber, orchestrator sec.Orchestrator[*models.CreateOrderData]) error {
 	replyMsgHandler := am.MessageHandlerFunc[am.IncomingReplyMessage](func(ctx context.Context, replyMsg am.IncomingReplyMessage) error {
-		return saga.HandleReply(ctx, replyMsg)
+		return orchestrator.HandleReply(ctx, replyMsg)
 	})
-	return subscriber.Subscribe(saga.ReplyTopic(), replyMsgHandler, am.GroupName("cosec-replies"))
+	return subscriber.Subscribe(orchestrator.ReplyTopic(), replyMsgHandler, am.GroupName("cosec-replies"))
 }

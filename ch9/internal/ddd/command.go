@@ -9,10 +9,10 @@ import (
 
 type (
 	CommandHandler[T Command] interface {
-		HandleCommand(ctx context.Context, command T) error
+		HandleCommand(ctx context.Context, cmd T) (Reply, error)
 	}
 
-	CommandHandlerFunc[T Command] func(ctx context.Context, command T) error
+	CommandHandlerFunc[T Command] func(ctx context.Context, cmd T) (Reply, error)
 
 	CommandOption interface {
 		configureCommand(*command)
@@ -62,6 +62,6 @@ func (e command) Payload() CommandPayload { return e.payload }
 func (e command) Metadata() Metadata      { return e.metadata }
 func (e command) OccurredAt() time.Time   { return e.occurredAt }
 
-func (f CommandHandlerFunc[T]) HandleCommand(ctx context.Context, cmd T) error {
+func (f CommandHandlerFunc[T]) HandleCommand(ctx context.Context, cmd T) (Reply, error) {
 	return f(ctx, cmd)
 }

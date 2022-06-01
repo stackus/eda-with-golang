@@ -36,7 +36,7 @@ func NewCreateOrderSaga() sec.Saga[*models.CreateOrderData] {
 	// 2. CreateShoppingList, -CancelShoppingList
 	saga.AddStep().
 		Action(saga.createShoppingList).
-		OnActionReply(depotpb.CreatedShoppingListReply, saga.onCreateShoppingListReply).
+		OnActionReply(depotpb.CreatedShoppingListReply, saga.onCreatedShoppingListReply).
 		Compensation(saga.cancelShoppingList)
 
 	// 3. ConfirmPayment
@@ -78,7 +78,7 @@ func (s createOrderSaga) createShoppingList(ctx context.Context, data *models.Cr
 	})
 }
 
-func (s createOrderSaga) onCreateShoppingListReply(ctx context.Context, data *models.CreateOrderData, reply ddd.Reply) error {
+func (s createOrderSaga) onCreatedShoppingListReply(ctx context.Context, data *models.CreateOrderData, reply ddd.Reply) error {
 	payload := reply.Payload().(*depotpb.CreatedShoppingList)
 
 	data.ShoppingID = payload.GetId()

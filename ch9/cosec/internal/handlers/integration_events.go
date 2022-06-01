@@ -11,14 +11,14 @@ import (
 )
 
 type integrationHandlers[T ddd.Event] struct {
-	saga sec.Orchestrator[*models.CreateOrderData]
+	orchestrator sec.Orchestrator[*models.CreateOrderData]
 }
 
 var _ ddd.EventHandler[ddd.Event] = (*integrationHandlers[ddd.Event])(nil)
 
 func NewIntegrationEventHandlers(saga sec.Orchestrator[*models.CreateOrderData]) ddd.EventHandler[ddd.Event] {
 	return integrationHandlers[ddd.Event]{
-		saga: saga,
+		orchestrator: saga,
 	}
 }
 
@@ -65,5 +65,5 @@ func (h integrationHandlers[T]) onOrderCreated(ctx context.Context, event ddd.Ev
 	}
 
 	// Start the CreateOrderSaga
-	return h.saga.Start(ctx, event.ID(), data)
+	return h.orchestrator.Start(ctx, event.ID(), data)
 }

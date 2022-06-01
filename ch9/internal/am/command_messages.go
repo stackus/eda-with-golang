@@ -123,7 +123,7 @@ func (s commandStream) Subscribe(topicName string, handler CommandMessageHandler
 		commandMsg := commandMessage{
 			id:         msg.ID(),
 			name:       commandName,
-			payload:    payload.(ddd.CommandPayload),
+			payload:    payload,
 			metadata:   commandData.GetMetadata().AsMap(),
 			occurredAt: commandData.GetOccurredAt().AsTime(),
 			msg:        msg,
