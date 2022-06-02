@@ -2,7 +2,9 @@ module eda-in-golang
 
 go 1.17
 
-require github.com/cucumber/godog v0.12.3
+require github.com/cucumber/godog v0.12.5
+
+require gopkg.in/yaml.v3 v3.0.0 // indirect
 
 require (
 	github.com/cucumber/gherkin-go/v19 v19.0.3 // indirect
