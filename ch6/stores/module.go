@@ -63,8 +63,8 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterCatalogHandlers[ddd.AggregateEvent](catalogHandlers, domainDispatcher)
-	handlers.RegisterMallHandlers[ddd.AggregateEvent](mallHandlers, domainDispatcher)
+	handlers.RegisterCatalogHandlers(catalogHandlers, domainDispatcher)
+	handlers.RegisterMallHandlers(mallHandlers, domainDispatcher)
 
 	return nil
 }

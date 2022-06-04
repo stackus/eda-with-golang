@@ -47,7 +47,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) error {
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterOrderHandlers[ddd.AggregateEvent](orderHandlers, domainDispatcher)
+	handlers.RegisterOrderHandlers(orderHandlers, domainDispatcher)
 
 	return nil
 }

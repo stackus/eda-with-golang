@@ -5,6 +5,6 @@ import (
 	"eda-in-golang/internal/ddd"
 )
 
-func RegisterOrderHandlers[T ddd.AggregateEvent](orderHandlers ddd.EventHandler[T], domainSubscriber ddd.EventSubscriber[T]) {
+func RegisterOrderHandlers(orderHandlers ddd.EventHandler[ddd.AggregateEvent], domainSubscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
 	domainSubscriber.Subscribe(domain.BasketCheckedOutEvent, orderHandlers)
 }
