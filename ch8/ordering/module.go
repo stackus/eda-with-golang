@@ -66,7 +66,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err := rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterIntegrationEventHandlers[ddd.AggregateEvent](integrationEventHandlers, domainDispatcher)
+	handlers.RegisterIntegrationEventHandlers(integrationEventHandlers, domainDispatcher)
 
 	return nil
 }

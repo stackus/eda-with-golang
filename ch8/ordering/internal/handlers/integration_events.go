@@ -5,7 +5,7 @@ import (
 	"eda-in-golang/ordering/internal/domain"
 )
 
-func RegisterIntegrationEventHandlers[T ddd.AggregateEvent](eventHandlers ddd.EventHandler[T], domainSubscriber ddd.EventSubscriber[T]) {
+func RegisterIntegrationEventHandlers(eventHandlers ddd.EventHandler[ddd.AggregateEvent], domainSubscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
 	domainSubscriber.Subscribe(eventHandlers,
 		domain.OrderCreatedEvent,
 		domain.OrderReadiedEvent,

@@ -76,7 +76,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterOrderHandlers[ddd.AggregateEvent](orderHandlers, domainDispatcher)
+	handlers.RegisterOrderHandlers(orderHandlers, domainDispatcher)
 	if err = handlers.RegisterStoreHandlers(storeHandlers, eventStream); err != nil {
 		return err
 	}

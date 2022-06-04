@@ -57,7 +57,7 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	if err = handlers.RegisterOrderHandlers(orderHandlers, eventStream); err != nil {
 		return err
 	}
-	handlers.RegisterIntegrationEventHandlers[ddd.Event](integrationEventHandlers, domainDispatcher)
+	handlers.RegisterIntegrationEventHandlers(integrationEventHandlers, domainDispatcher)
 
 	return nil
 }
