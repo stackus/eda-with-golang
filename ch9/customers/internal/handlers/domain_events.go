@@ -21,7 +21,7 @@ func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) *domainHan
 	}
 }
 
-func RegisterDomainEventHandlers[T ddd.AggregateEvent](eventHandlers ddd.EventHandler[T], domainSubscriber ddd.EventSubscriber[T]) {
+func RegisterDomainEventHandlers(eventHandlers ddd.EventHandler[ddd.AggregateEvent], domainSubscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
 	domainSubscriber.Subscribe(eventHandlers,
 		domain.CustomerRegisteredEvent,
 		domain.CustomerSmsChangedEvent,

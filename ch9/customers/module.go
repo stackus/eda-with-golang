@@ -55,7 +55,7 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterDomainEventHandlers[ddd.AggregateEvent](domainEventHandlers, domainDispatcher)
+	handlers.RegisterDomainEventHandlers(domainEventHandlers, domainDispatcher)
 	if err = handlers.RegisterCommandHandlers(commandStream, commandHandlers); err != nil {
 		return err
 	}

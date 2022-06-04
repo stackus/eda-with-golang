@@ -73,8 +73,8 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterCatalogHandlers[ddd.AggregateEvent](catalogHandlers, domainDispatcher)
-	handlers.RegisterMallHandlers[ddd.AggregateEvent](mallHandlers, domainDispatcher)
+	handlers.RegisterCatalogHandlers(catalogHandlers, domainDispatcher)
+	handlers.RegisterMallHandlers(mallHandlers, domainDispatcher)
 	handlers.RegisterDomainEventHandlers(domainDispatcher, domainEventHandlers)
 	if err = storespb.RegisterAsyncAPI(mono.Mux()); err != nil {
 		return err

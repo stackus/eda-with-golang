@@ -5,7 +5,7 @@ import (
 	"eda-in-golang/stores/internal/domain"
 )
 
-func RegisterMallHandlers[T ddd.AggregateEvent](mallHandlers ddd.EventHandler[T], domainSubscriber ddd.EventSubscriber[T]) {
+func RegisterMallHandlers(mallHandlers ddd.EventHandler[ddd.AggregateEvent], domainSubscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
 	domainSubscriber.Subscribe(mallHandlers,
 		domain.StoreCreatedEvent,
 		domain.StoreParticipationEnabledEvent,
