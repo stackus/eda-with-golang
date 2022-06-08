@@ -7,7 +7,6 @@ import (
 	"eda-in-golang/customers/internal/domain"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
-	"eda-in-golang/internal/di"
 )
 
 type domainHandlers[T ddd.AggregateEvent] struct {
@@ -22,14 +21,8 @@ func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) ddd.EventH
 	}
 }
 
-func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
-	handlers := ddd.EventHandlerFunc[ddd.AggregateEvent](func(ctx context.Context, event ddd.AggregateEvent) error {
-		domainHandler := di.Get(ctx, "domainEventHandlers").(ddd.EventHandler[ddd.AggregateEvent])
-
-		return domainHandler.HandleEvent(ctx, event)
-	})
-
-	subscriber.Subscribe(handlers,
+func RegisterDomainEventHandlers(eventHandlers ddd.EventHandler[ddd.AggregateEvent], domainSubscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
+	domainSubscriber.Subscribe(eventHandlers,
 		domain.CustomerRegisteredEvent,
 		domain.CustomerSmsChangedEvent,
 		domain.CustomerEnabledEvent,

@@ -101,6 +101,15 @@ func run() (err error) {
 		m.waitForStream,
 	)
 
+	// go func() {
+	// 	for {
+	// 		var mem runtime.MemStats
+	// 		runtime.ReadMemStats(&mem)
+	// 		m.logger.Debug().Msgf("Alloc = %v  TotalAlloc = %v  Sys = %v  NumGC = %v", mem.Alloc/1024, mem.TotalAlloc/1024, mem.Sys/1024, mem.NumGC)
+	// 		time.Sleep(10 * time.Second)
+	// 	}
+	// }()
+
 	return m.waiter.Wait()
 }
 

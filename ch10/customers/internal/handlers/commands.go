@@ -7,7 +7,6 @@ import (
 	"eda-in-golang/customers/internal/application"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
-	"eda-in-golang/internal/di"
 )
 
 type commandHandlers struct {
@@ -20,13 +19,8 @@ func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 	}
 }
 
-func RegisterCommandHandlers(subscriber am.CommandSubscriber, container di.Container) error {
+func RegisterCommandHandlers(subscriber am.CommandSubscriber, handlers ddd.CommandHandler[ddd.Command]) error {
 	cmdMsgHandler := am.CommandMessageHandlerFunc(func(ctx context.Context, cmdMsg am.IncomingCommandMessage) (ddd.Reply, error) {
-		ctx, cleanup := container.Scoped(ctx)
-		defer cleanup()
-
-		handlers := di.Get(ctx, "commandHandlers").(ddd.CommandHandler[ddd.Command])
-
 		return handlers.HandleCommand(ctx, cmdMsg)
 	})
 

@@ -4,10 +4,10 @@ import (
 	"strings"
 )
 
-type seen map[string]int
+type tracked map[string]int
 
-func (s seen) add(info dependencyInfo) seen {
-	newList := make(seen, len(s))
+func (s tracked) add(info dependencyInfo) tracked {
+	newList := make(tracked, len(s))
 
 	for k, v := range s {
 		newList[k] = v
@@ -17,7 +17,7 @@ func (s seen) add(info dependencyInfo) seen {
 	return newList
 }
 
-func (s seen) ordered() []string {
+func (s tracked) ordered() []string {
 	keys := make([]string, len(s))
 
 	for key, i := range s {
@@ -27,6 +27,6 @@ func (s seen) ordered() []string {
 	return keys
 }
 
-func (s seen) String() string {
+func (s tracked) String() string {
 	return strings.Join(s.ordered(), ",")
 }

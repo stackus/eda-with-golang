@@ -42,7 +42,7 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		return mono.Logger(), nil
 	})
 	container.AddSingleton("stream", func(c di.Container) (any, error) {
-		return jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), c.Get("logger").(zerolog.Logger)), nil
+		return jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), mono.Logger()), nil
 	})
 	// stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), mono.Logger())
 
@@ -113,7 +113,7 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	// )
 
 	// setup Driver adapters
-	if err = grpc.RegisterServer(container, mono.RPC()); err != nil {
+	if err = grpc.RegisterServerTx(container, mono.RPC()); err != nil {
 		return err
 	}
 	if err = rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
@@ -122,8 +122,8 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterDomainEventHandlers(container.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.AggregateEvent]))
-	if err = handlers.RegisterCommandHandlers(container.Get("commandStream").(am.CommandStream), container); err != nil {
+	handlers.RegisterDomainEventHandlersTx(container.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.AggregateEvent]))
+	if err = handlers.RegisterCommandHandlersTx(container.Get("commandStream").(am.CommandStream), container); err != nil {
 		return err
 	}
 
