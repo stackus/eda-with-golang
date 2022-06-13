@@ -9,19 +9,20 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
 
+	"eda-in-golang/internal/postgres"
 	"eda-in-golang/search/internal/application"
 	"eda-in-golang/search/internal/models"
 )
 
 type StoreCacheRepository struct {
 	tableName string
-	db        *sql.DB
+	db        postgres.DB
 	fallback  application.StoreRepository
 }
 
 var _ application.StoreCacheRepository = (*StoreCacheRepository)(nil)
 
-func NewStoreCacheRepository(tableName string, db *sql.DB, fallback application.StoreRepository) StoreCacheRepository {
+func NewStoreCacheRepository(tableName string, db postgres.DB, fallback application.StoreRepository) StoreCacheRepository {
 	return StoreCacheRepository{
 		tableName: tableName,
 		db:        db,

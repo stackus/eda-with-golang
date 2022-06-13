@@ -7,17 +7,18 @@ import (
 
 	"github.com/stackus/errors"
 
+	"eda-in-golang/internal/postgres"
 	"eda-in-golang/stores/internal/domain"
 )
 
 type CatalogRepository struct {
 	tableName string
-	db        *sql.DB
+	db        postgres.DB
 }
 
 var _ domain.CatalogRepository = (*CatalogRepository)(nil)
 
-func NewCatalogRepository(tableName string, db *sql.DB) CatalogRepository {
+func NewCatalogRepository(tableName string, db postgres.DB) CatalogRepository {
 	return CatalogRepository{
 		tableName: tableName,
 		db:        db,

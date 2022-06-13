@@ -46,9 +46,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
     order_id       text NOT NULL,
     customer_id    text NOT NULL,
     customer_name  text NOT NULL,
---    payment_id     text NOT NULL,
---    invoice_id     text NOT NULL,
---    shopping_id    text NOT NULL,
     items          bytea NOT NULL,
     status         text NOT NULL,
     product_ids    text ARRAY NOT NULL,
@@ -58,9 +55,27 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
     PRIMARY KEY (order_id)
   );
 
-  -- CREATE TRIGGER created_at_sorders_trgr BEFORE UPDATE ON search.orders FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
   CREATE TRIGGER updated_at_sorders_trgr BEFORE UPDATE ON search.orders FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
+  CREATE TABLE search.inbox
+  (
+    id          text NOT NULL,
+    name        text NOT NULL,
+    subject     text NOT NULL,
+    data        bytea NOT NULL,
+    received_at timestamptz NOT NULL,
+    PRIMARY KEY (id)
+  );
+
+  CREATE TABLE search.outbox
+  (
+    id           text NOT NULL,
+    name         text NOT NULL,
+    subject      text NOT NULL,
+    data         bytea NOT NULL,
+    published_at timestamptz,
+    PRIMARY KEY (id)
+  );
 
   GRANT USAGE ON SCHEMA search TO mallbots_user;
   GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA search TO mallbots_user;

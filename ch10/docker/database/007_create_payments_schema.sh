@@ -33,6 +33,26 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
   CREATE TRIGGER created_at_invoices_trgr BEFORE UPDATE ON payments.invoices FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
   CREATE TRIGGER updated_at_invoices_trgr BEFORE UPDATE ON payments.invoices FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
+  CREATE TABLE payments.inbox
+  (
+    id          text NOT NULL,
+    name        text NOT NULL,
+    subject     text NOT NULL,
+    data        bytea NOT NULL,
+    received_at timestamptz NOT NULL,
+    PRIMARY KEY (id)
+  );
+
+  CREATE TABLE payments.outbox
+  (
+    id           text NOT NULL,
+    name         text NOT NULL,
+    subject      text NOT NULL,
+    data         bytea NOT NULL,
+    published_at timestamptz,
+    PRIMARY KEY (id)
+  );
+
   GRANT USAGE ON SCHEMA payments TO mallbots_user;
   GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA payments TO mallbots_user;
 EOSQL
