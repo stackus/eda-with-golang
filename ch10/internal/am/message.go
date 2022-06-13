@@ -9,6 +9,7 @@ import (
 type (
 	Message interface {
 		ddd.IDer
+		Subject() string
 		MessageName() string
 	}
 

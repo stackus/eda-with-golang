@@ -24,6 +24,7 @@ func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) ddd.EventH
 func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], handlers ddd.EventHandler[ddd.Event]) {
 	subscriber.Subscribe(handlers,
 		domain.BasketStartedEvent,
+		domain.BasketCanceledEvent,
 		domain.BasketCheckedOutEvent,
 	)
 }

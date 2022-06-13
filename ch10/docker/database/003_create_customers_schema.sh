@@ -18,6 +18,27 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
   CREATE TRIGGER created_at_customers_trgr BEFORE UPDATE ON customers.customers FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
   CREATE TRIGGER updated_at_customers_trgr BEFORE UPDATE ON customers.customers FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
+  CREATE TABLE customers.inbox
+  (
+    id          text NOT NULL,
+    name        text NOT NULL,
+    subject     text NOT NULL,
+    data        bytea NOT NULL,
+    received_at timestamptz NOT NULL,
+    PRIMARY KEY (id)
+  );
+
+  CREATE TABLE customers.outbox
+  (
+    id           text NOT NULL,
+    name         text NOT NULL,
+    subject      text NOT NULL,
+    data         bytea NOT NULL,
+    published_at timestamptz,
+    PRIMARY KEY (id)
+  );
+
+
   GRANT USAGE ON SCHEMA customers TO mallbots_user;
   GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA customers TO mallbots_user;
 EOSQL

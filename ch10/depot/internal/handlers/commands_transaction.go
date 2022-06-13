@@ -11,7 +11,7 @@ import (
 )
 
 func RegisterCommandHandlersTx(container di.Container) error {
-	cmdMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.IncomingRawMessage) (err error) {
+	cmdMsgHandlers := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.IncomingRawMessage) (err error) {
 		ctx = container.Scoped(ctx)
 		defer func(tx *sql.Tx) {
 			if p := recover(); p != nil {
@@ -35,5 +35,5 @@ func RegisterCommandHandlersTx(container di.Container) error {
 
 	subscriber := container.Get("stream").(am.RawMessageStream)
 
-	return RegisterCommandHandlers(subscriber, cmdMsgHandler)
+	return RegisterCommandHandlers(subscriber, cmdMsgHandlers)
 }

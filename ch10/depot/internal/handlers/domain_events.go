@@ -21,18 +21,8 @@ func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) ddd.EventH
 	}
 }
 
-func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.AggregateEvent], handler ddd.EventHandler[ddd.AggregateEvent]) {
-	/*
-
-		handler := ddd.EventHandlerFunc[ddd.AggregateEvent](func(ctx context.Context, event T) error {
-			domainHandler := di.Get(ctx, "domainHandler").(ddd.EventHandler[ddd.AggregateEvent])
-
-			return domainHandler.HandleEvent(ctx, event)
-		})
-
-	*/
-
-	subscriber.Subscribe(handler, domain.ShoppingListCompletedEvent)
+func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.AggregateEvent], handlers ddd.EventHandler[ddd.AggregateEvent]) {
+	subscriber.Subscribe(handlers, domain.ShoppingListCompletedEvent)
 }
 
 func (h domainHandlers[T]) HandleEvent(ctx context.Context, event T) error {

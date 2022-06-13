@@ -13,14 +13,12 @@ type CancelOrder struct {
 
 type CancelOrderHandler struct {
 	orders    domain.OrderRepository
-	shopping  domain.ShoppingRepository
 	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewCancelOrderHandler(orders domain.OrderRepository, shopping domain.ShoppingRepository, publisher ddd.EventPublisher[ddd.Event]) CancelOrderHandler {
+func NewCancelOrderHandler(orders domain.OrderRepository, publisher ddd.EventPublisher[ddd.Event]) CancelOrderHandler {
 	return CancelOrderHandler{
 		orders:    orders,
-		shopping:  shopping,
 		publisher: publisher,
 	}
 }
@@ -36,10 +34,10 @@ func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) er
 		return err
 	}
 
-	// TODO CH8 remove; handled in the saga
-	if err = h.shopping.Cancel(ctx, order.ShoppingID); err != nil {
-		return err
-	}
+	// // TODO CH8 remove; handled in the saga
+	// if err = h.shopping.Cancel(ctx, order.ShoppingID); err != nil {
+	// 	return err
+	// }
 
 	if err = h.orders.Save(ctx, order); err != nil {
 		return err

@@ -19,60 +19,58 @@ import (
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/jetstream"
 	"eda-in-golang/internal/monolith"
+	pg "eda-in-golang/internal/postgres"
 	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/tm"
 )
 
 type Module struct{}
 
 func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	container := di.New()
+	// setup Driven adapters
 	container.AddSingleton("registry", func(c di.Container) (any, error) {
 		reg := registry.New()
-		if err = customerspb.Registrations(reg); err != nil {
+		if err := customerspb.Registrations(reg); err != nil {
 			return nil, err
 		}
 		return reg, nil
 	})
-	// setup Driven adapters
-	// reg := registry.New()
-	// if err = customerspb.Registrations(reg); err != nil {
-	// 	return err
-	// }
 	container.AddSingleton("logger", func(c di.Container) (any, error) {
 		return mono.Logger(), nil
 	})
 	container.AddSingleton("stream", func(c di.Container) (any, error) {
 		return jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), mono.Logger()), nil
 	})
-	// stream := jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), mono.Logger())
-
-	container.AddSingleton("eventStream", func(c di.Container) (any, error) {
-		return am.NewEventStream(c.Get("registry").(registry.Registry), c.Get("stream").(am.RawMessageStream)), nil
-	})
-	// eventStream := am.NewEventStream(reg, stream)
-
-	container.AddSingleton("commandStream", func(c di.Container) (any, error) {
-		return am.NewCommandStream(c.Get("registry").(registry.Registry), c.Get("stream").(am.RawMessageStream)), nil
-	})
-	// commandStream := am.NewCommandStream(reg, stream)
-
 	container.AddSingleton("domainDispatcher", func(c di.Container) (any, error) {
 		return ddd.NewEventDispatcher[ddd.AggregateEvent](), nil
 	})
-	// domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
-
 	container.AddSingleton("db", func(c di.Container) (any, error) {
 		return mono.DB(), nil
 	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		db := c.Get("db").(*sql.DB)
-
 		return db.Begin()
 	})
 	container.AddScoped("customers", func(c di.Container) (any, error) {
 		return postgres.NewCustomerRepository("customers.customers", c.Get("tx").(*sql.Tx)), nil
 	})
-	// customers := postgres.NewCustomerRepository("customers.customers", mono.DB())
+	container.AddScoped("txStream", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(*sql.Tx)
+		outboxStore := pg.NewOutboxStore("customers.outbox", tx)
+		inboxStore := pg.NewInboxStore("customers.inbox", tx)
+		return am.RawMessageStreamWithMiddleware(
+			c.Get("stream").(am.RawMessageStream),
+			tm.NewOutboxMiddleware(outboxStore),
+			tm.NewInboxMiddleware(inboxStore),
+		), nil
+	})
+	container.AddScoped("eventStream", func(c di.Container) (any, error) {
+		return am.NewEventStream(c.Get("registry").(registry.Registry), c.Get("txStream").(am.RawMessageStream)), nil
+	})
+	container.AddScoped("replyStream", func(c di.Container) (any, error) {
+		return am.NewReplyStream(c.Get("registry").(registry.Registry), c.Get("txStream").(am.RawMessageStream)), nil
+	})
 
 	// setup application
 	container.AddScoped("app", func(c di.Container) (any, error) {
@@ -84,33 +82,18 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 			c.Get("logger").(zerolog.Logger),
 		), nil
 	})
-	// app := logging.LogApplicationAccess(
-	// 	application.New(customers, domainDispatcher),
-	// 	mono.Logger(),
-	// )
-
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
 		return logging.LogEventHandlerAccess[ddd.AggregateEvent](
-			// TODO this will need a scoped outboxEventStream
-			handlers.NewDomainEventHandlers(container.Get("eventStream").(am.EventStream)),
+			handlers.NewDomainEventHandlers(c.Get("eventStream").(am.EventStream)),
 			"DomainEvents", c.Get("logger").(zerolog.Logger),
 		), nil
 	})
-	// domainEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
-	// 	handlers.NewDomainEventHandlers(eventStream),
-	// 	"DomainEvents", mono.Logger(),
-	// )
-
 	container.AddScoped("commandHandlers", func(c di.Container) (any, error) {
 		return logging.LogCommandHandlerAccess[ddd.Command](
 			handlers.NewCommandHandlers(c.Get("app").(application.App)),
 			"Commands", c.Get("logger").(zerolog.Logger),
 		), nil
 	})
-	// commandHandlers := logging.LogCommandHandlerAccess[ddd.Command](
-	// 	handlers.NewCommandHandlers(app),
-	// 	"Commands", mono.Logger(),
-	// )
 
 	// setup Driver adapters
 	if err = grpc.RegisterServerTx(container, mono.RPC()); err != nil {
@@ -122,8 +105,8 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterDomainEventHandlersTx(container.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.AggregateEvent]))
-	if err = handlers.RegisterCommandHandlersTx(container.Get("commandStream").(am.CommandStream), container); err != nil {
+	handlers.RegisterDomainEventHandlersTx(container)
+	if err = handlers.RegisterCommandHandlersTx(container); err != nil {
 		return err
 	}
 

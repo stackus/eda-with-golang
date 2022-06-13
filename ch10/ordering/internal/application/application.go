@@ -45,13 +45,13 @@ type (
 
 var _ App = (*Application)(nil)
 
-func New(orders domain.OrderRepository, shopping domain.ShoppingRepository, publisher ddd.EventPublisher[ddd.Event]) *Application {
+func New(orders domain.OrderRepository, publisher ddd.EventPublisher[ddd.Event]) *Application {
 	return &Application{
 		appCommands: appCommands{
 			CreateOrderHandler:   commands.NewCreateOrderHandler(orders, publisher),
 			RejectOrderHandler:   commands.NewRejectOrderHandler(orders, publisher),
 			ApproveOrderHandler:  commands.NewApproveOrderHandler(orders, publisher),
-			CancelOrderHandler:   commands.NewCancelOrderHandler(orders, shopping, publisher),
+			CancelOrderHandler:   commands.NewCancelOrderHandler(orders, publisher),
 			ReadyOrderHandler:    commands.NewReadyOrderHandler(orders, publisher),
 			CompleteOrderHandler: commands.NewCompleteOrderHandler(orders, publisher),
 		},

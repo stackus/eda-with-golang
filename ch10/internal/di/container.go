@@ -95,6 +95,7 @@ func (c *container) getFromParent(info dependencyInfo) any {
 	if c.parent != nil {
 		return c.parent.getFromParent(info)
 	}
+
 	return c.get(info)
 }
 
@@ -122,6 +123,8 @@ func (c *container) get(info dependencyInfo) any {
 
 func (c *container) build(info dependencyInfo, tv tempValue) any {
 	v, err := info.factory(c.builder(info))
+
+	//	fmt.Printf("## building: %s, parent: %p\n", info.key, c.parent)
 
 	c.mu.Lock()
 

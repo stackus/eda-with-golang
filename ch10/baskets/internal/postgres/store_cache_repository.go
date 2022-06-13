@@ -10,17 +10,18 @@ import (
 	"github.com/stackus/errors"
 
 	"eda-in-golang/baskets/internal/domain"
+	"eda-in-golang/internal/postgres"
 )
 
 type StoreCacheRepository struct {
 	tableName string
-	db        *sql.DB
+	db        postgres.DB
 	fallback  domain.StoreRepository
 }
 
 var _ domain.StoreCacheRepository = (*StoreCacheRepository)(nil)
 
-func NewStoreCacheRepository(tableName string, db *sql.DB, fallback domain.StoreRepository) StoreCacheRepository {
+func NewStoreCacheRepository(tableName string, db postgres.DB, fallback domain.StoreRepository) StoreCacheRepository {
 	return StoreCacheRepository{
 		tableName: tableName,
 		db:        db,
