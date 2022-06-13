@@ -47,11 +47,20 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	container.AddSingleton("stream", func(c di.Container) (any, error) {
 		return jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), c.Get("logger").(zerolog.Logger)), nil
 	})
+	container.AddSingleton("domainDispatcher", func(c di.Container) (any, error) {
+		return ddd.NewEventDispatcher[ddd.AggregateEvent](), nil
+	})
 	container.AddSingleton("db", func(c di.Container) (any, error) {
 		return mono.DB(), nil
 	})
 	container.AddSingleton("conn", func(c di.Container) (any, error) {
 		return grpc.Dial(ctx, mono.Config().Rpc.Address())
+	})
+	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
+		return tm.NewOutboxProcessor(
+			c.Get("stream").(am.RawMessageStream),
+			pg.NewOutboxStore("depot.outbox", c.Get("db").(*sql.DB)),
+		), nil
 	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		db := c.Get("db").(*sql.DB)
@@ -60,11 +69,9 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	container.AddScoped("txStream", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("depot.outbox", tx)
-		inboxStore := pg.NewInboxStore("depot.inbox", tx)
 		return am.RawMessageStreamWithMiddleware(
 			c.Get("stream").(am.RawMessageStream),
-			tm.NewOutboxMiddleware(outboxStore),
-			tm.NewInboxMiddleware(inboxStore),
+			tm.NewOutboxStreamMiddleware(outboxStore),
 		), nil
 	})
 	container.AddScoped("eventStream", func(c di.Container) (any, error) {
@@ -75,6 +82,11 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	})
 	container.AddScoped("replyStream", func(c di.Container) (any, error) {
 		return am.NewReplyStream(c.Get("registry").(registry.Registry), c.Get("txStream").(am.RawMessageStream)), nil
+	})
+	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(*sql.Tx)
+		inboxStore := pg.NewInboxStore("depot.inbox", tx)
+		return tm.NewInboxHandlerMiddleware(inboxStore), nil
 	})
 	container.AddScoped("shoppingLists", func(c di.Container) (any, error) {
 		return postgres.NewShoppingListRepository("depot.shopping_lists", c.Get("tx").(*sql.DB)), nil
@@ -145,6 +157,19 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err = handlers.RegisterCommandHandlersTx(container); err != nil {
 		return err
 	}
+	startOutboxProcessor(ctx, container)
 
 	return nil
+}
+
+func startOutboxProcessor(ctx context.Context, container di.Container) {
+	outboxProcessor := container.Get("outboxProcessor").(tm.OutboxProcessor)
+	logger := container.Get("logger").(zerolog.Logger)
+
+	go func() {
+		err := outboxProcessor.Start(ctx)
+		if err != nil {
+			logger.Error().Err(err).Msg("depot outbox processor encountered an error")
+		}
+	}()
 }

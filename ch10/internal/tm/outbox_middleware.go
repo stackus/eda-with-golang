@@ -10,6 +10,8 @@ import (
 
 type OutboxStore interface {
 	Save(ctx context.Context, msg am.RawMessage) error
+	FindUnpublished(ctx context.Context, limit int) ([]am.RawMessage, error)
+	MarkPublished(ctx context.Context, ids ...string) error
 }
 
 type outbox struct {
@@ -19,7 +21,7 @@ type outbox struct {
 
 var _ am.RawMessageStream = (*outbox)(nil)
 
-func NewOutboxMiddleware(store OutboxStore) am.RawMessageStreamMiddleware {
+func NewOutboxStreamMiddleware(store OutboxStore) am.RawMessageStreamMiddleware {
 	o := outbox{store: store}
 
 	return func(stream am.RawMessageStream) am.RawMessageStream {

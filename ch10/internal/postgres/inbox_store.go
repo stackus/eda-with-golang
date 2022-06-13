@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
@@ -27,15 +26,10 @@ func NewInboxStore(tableName string, db DB) InboxStore {
 	}
 }
 
-func (s InboxStore) Find(ctx context.Context, msgID string) (am.RawMessage, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
 func (s InboxStore) Save(ctx context.Context, msg am.RawMessage) error {
-	const query = "INSERT INTO %s (id, name, subject, data, received_at) VALUES ($1, $2, $3, $4, $5)"
+	const query = "INSERT INTO %s (id, name, subject, data, received_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)"
 
-	_, err := s.db.ExecContext(ctx, s.table(query), msg.ID(), msg.MessageName(), msg.Subject(), msg.Data(), time.Now())
+	_, err := s.db.ExecContext(ctx, s.table(query), msg.ID(), msg.MessageName(), msg.Subject(), msg.Data())
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {

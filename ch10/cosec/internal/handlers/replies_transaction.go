@@ -26,9 +26,12 @@ func RegisterReplyHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		replyHandlers := am.NewReplyMessageHandler(
-			di.Get(ctx, "registry").(registry.Registry),
-			di.Get(ctx, "orchestrator").(sec.Orchestrator[*models.CreateOrderData]),
+		replyHandlers := am.RawMessageHandlerWithMiddleware(
+			am.NewReplyMessageHandler(
+				di.Get(ctx, "registry").(registry.Registry),
+				di.Get(ctx, "orchestrator").(sec.Orchestrator[*models.CreateOrderData]),
+			),
+			di.Get(ctx, "inboxMiddleware").(am.RawMessageHandlerMiddleware),
 		)
 
 		return replyHandlers.HandleMessage(ctx, msg)

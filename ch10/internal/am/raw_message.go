@@ -6,12 +6,13 @@ import (
 
 type (
 	RawMessageStream           = MessageStream[RawMessage, IncomingRawMessage]
-	RawMessageHandler          = MessageHandler[IncomingRawMessage]
 	RawMessagePublisher        = MessagePublisher[RawMessage]
 	RawMessageSubscriber       = MessageSubscriber[IncomingRawMessage]
 	RawMessageStreamMiddleware = func(stream RawMessageStream) RawMessageStream
 
-	RawMessageHandlerFunc func(ctx context.Context, msg IncomingRawMessage) error
+	RawMessageHandler           = MessageHandler[IncomingRawMessage]
+	RawMessageHandlerFunc       func(ctx context.Context, msg IncomingRawMessage) error
+	RawMessageHandlerMiddleware = func(handler RawMessageHandler) RawMessageHandler
 
 	RawMessage interface {
 		Message
@@ -52,4 +53,16 @@ func RawMessageStreamWithMiddleware(stream RawMessageStream, mws ...RawMessageSt
 		s = mws[i](s)
 	}
 	return s
+}
+
+func RawMessageHandlerWithMiddleware(handler RawMessageHandler, mws ...RawMessageHandlerMiddleware) RawMessageHandler {
+	h := handler
+	// middleware are applied in reverse; this makes the first middleware
+	// in the slice the outermost i.e. first to enter, last to exit
+	// given: store, A, B, C
+	// result: A(B(C(store)))
+	for i := len(mws) - 1; i >= 0; i-- {
+		h = mws[i](h)
+	}
+	return h
 }

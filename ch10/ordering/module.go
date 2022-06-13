@@ -63,6 +63,12 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	container.AddSingleton("conn", func(c di.Container) (any, error) {
 		return grpc.Dial(ctx, mono.Config().Rpc.Address())
 	})
+	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
+		return tm.NewOutboxProcessor(
+			c.Get("stream").(am.RawMessageStream),
+			pg.NewOutboxStore("ordering.outbox", c.Get("db").(*sql.DB)),
+		), nil
+	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		db := c.Get("db").(*sql.DB)
 		return db.Begin()
@@ -70,11 +76,9 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	container.AddScoped("txStream", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("ordering.outbox", tx)
-		inboxStore := pg.NewInboxStore("ordering.inbox", tx)
 		return am.RawMessageStreamWithMiddleware(
 			c.Get("stream").(am.RawMessageStream),
-			tm.NewOutboxMiddleware(outboxStore),
-			tm.NewInboxMiddleware(inboxStore),
+			tm.NewOutboxStreamMiddleware(outboxStore),
 		), nil
 	})
 	container.AddScoped("eventStream", func(c di.Container) (any, error) {
@@ -82,6 +86,11 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	})
 	container.AddScoped("replyStream", func(c di.Container) (any, error) {
 		return am.NewReplyStream(c.Get("registry").(registry.Registry), c.Get("txStream").(am.RawMessageStream)), nil
+	})
+	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(*sql.Tx)
+		inboxStore := pg.NewInboxStore("ordering.inbox", tx)
+		return tm.NewInboxHandlerMiddleware(inboxStore), nil
 	})
 	container.AddScoped("aggregateStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
@@ -147,6 +156,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 	if err = handlers.RegisterCommandHandlersTx(container); err != nil {
 		return err
 	}
+	startOutboxProcessor(ctx, container)
 
 	return nil
 }
@@ -183,4 +193,16 @@ func registrations(reg registry.Registry) (err error) {
 	}
 
 	return nil
+}
+
+func startOutboxProcessor(ctx context.Context, container di.Container) {
+	outboxProcessor := container.Get("outboxProcessor").(tm.OutboxProcessor)
+	logger := container.Get("logger").(zerolog.Logger)
+
+	go func() {
+		err := outboxProcessor.Start(ctx)
+		if err != nil {
+			logger.Error().Err(err).Msg("ordering outbox processor encountered an error")
+		}
+	}()
 }

@@ -60,6 +60,12 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	container.AddSingleton("conn", func(c di.Container) (any, error) {
 		return grpc.Dial(ctx, mono.Config().Rpc.Address())
 	})
+	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
+		return tm.NewOutboxProcessor(
+			c.Get("stream").(am.RawMessageStream),
+			pg.NewOutboxStore("baskets.outbox", c.Get("db").(*sql.DB)),
+		), nil
+	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		db := c.Get("db").(*sql.DB)
 		return db.Begin()
@@ -67,15 +73,19 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	container.AddScoped("txStream", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("baskets.outbox", tx)
-		inboxStore := pg.NewInboxStore("baskets.inbox", tx)
 		return am.RawMessageStreamWithMiddleware(
 			c.Get("stream").(am.RawMessageStream),
-			tm.NewOutboxMiddleware(outboxStore),
-			tm.NewInboxMiddleware(inboxStore),
+			tm.NewOutboxStreamMiddleware(outboxStore),
 		), nil
 	})
+
 	container.AddScoped("eventStream", func(c di.Container) (any, error) {
 		return am.NewEventStream(c.Get("registry").(registry.Registry), c.Get("txStream").(am.RawMessageStream)), nil
+	})
+	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(*sql.Tx)
+		inboxStore := pg.NewInboxStore("baskets.inbox", tx)
+		return tm.NewInboxHandlerMiddleware(inboxStore), nil
 	})
 	container.AddScoped("aggregateStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
@@ -149,7 +159,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	if err = handlers.RegisterIntegrationEventHandlersTx(container); err != nil {
 		return err
 	}
-
+	startOutboxProcessor(ctx, container)
 	return
 }
 
@@ -186,4 +196,16 @@ func registrations(reg registry.Registry) error {
 	}
 
 	return nil
+}
+
+func startOutboxProcessor(ctx context.Context, container di.Container) {
+	outboxProcessor := container.Get("outboxProcessor").(tm.OutboxProcessor)
+	logger := container.Get("logger").(zerolog.Logger)
+
+	go func() {
+		err := outboxProcessor.Start(ctx)
+		if err != nil {
+			logger.Error().Err(err).Msg("baskets outbox processor encountered an error")
+		}
+	}()
 }

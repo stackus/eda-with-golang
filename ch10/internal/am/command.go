@@ -17,11 +17,7 @@ const (
 )
 
 type (
-	CommandMessageHandler = MessageHandler[IncomingCommandMessage]
-	// CommandMessageHandler interface {
-	// 	HandleMessage(ctx context.Context, msg IncomingCommandMessage) (ddd.Reply, error)
-	// }
-
+	CommandMessageHandler     = MessageHandler[IncomingCommandMessage]
 	CommandMessageHandlerFunc func(ctx context.Context, msg IncomingCommandMessage) error
 
 	Command interface {

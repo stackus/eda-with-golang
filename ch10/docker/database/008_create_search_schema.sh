@@ -77,6 +77,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL
     PRIMARY KEY (id)
   );
 
+  CREATE INDEX search_unpublished_idx ON search.outbox (published_at) WHERE published_at IS NULL;
+
   GRANT USAGE ON SCHEMA search TO mallbots_user;
   GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA search TO mallbots_user;
 EOSQL

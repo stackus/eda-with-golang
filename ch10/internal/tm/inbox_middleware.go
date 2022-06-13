@@ -12,44 +12,39 @@ import (
 type ErrDuplicateMessage string
 
 type InboxStore interface {
-	Find(ctx context.Context, msgID string) (am.RawMessage, error)
 	Save(ctx context.Context, msg am.RawMessage) error
 }
 
 type inbox struct {
-	am.RawMessageStream
-	store InboxStore
+	handler am.RawMessageHandler
+	store   InboxStore
 }
 
-var _ am.RawMessageStream = (*inbox)(nil)
+var _ am.RawMessageHandler = (*inbox)(nil)
 
-func NewInboxMiddleware(store InboxStore) am.RawMessageStreamMiddleware {
-	o := inbox{store: store}
+func NewInboxHandlerMiddleware(store InboxStore) am.RawMessageHandlerMiddleware {
+	i := inbox{store: store}
 
-	return func(stream am.RawMessageStream) am.RawMessageStream {
-		o.RawMessageStream = stream
+	return func(handler am.RawMessageHandler) am.RawMessageHandler {
+		i.handler = handler
 
-		return o
+		return i
 	}
 }
 
-func (i inbox) Subscribe(topicName string, handler am.RawMessageHandler, options ...am.SubscriberOption) error {
-	fn := am.MessageHandlerFunc[am.IncomingRawMessage](func(ctx context.Context, msg am.IncomingRawMessage) error {
-		err := i.store.Save(ctx, msg)
-		if err != nil {
-			var errDupe ErrDuplicateMessage
-			if errors.As(err, &errDupe) {
-				// duplicate message; return without an error to let the message Ack
-				return nil
-			}
-			return err
+func (i inbox) HandleMessage(ctx context.Context, msg am.IncomingRawMessage) error {
+	// try to insert the message
+	err := i.store.Save(ctx, msg)
+	if err != nil {
+		var errDupe ErrDuplicateMessage
+		if errors.As(err, &errDupe) {
+			// duplicate message; return without an error to let the message Ack
+			return nil
 		}
+		return err
+	}
 
-		// try to insert the message
-		return handler.HandleMessage(ctx, msg)
-
-	})
-	return i.RawMessageStream.Subscribe(topicName, fn, options...)
+	return i.handler.HandleMessage(ctx, msg)
 }
 
 func (e ErrDuplicateMessage) Error() string {

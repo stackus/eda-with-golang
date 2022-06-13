@@ -25,9 +25,12 @@ func RegisterIntegrationEventHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		evtHandlers := am.NewEventMessageHandler(
-			di.Get(ctx, "registry").(registry.Registry),
-			di.Get(ctx, "integrationEventHandlers").(ddd.EventHandler[ddd.Event]),
+		evtHandlers := am.RawMessageHandlerWithMiddleware(
+			am.NewEventMessageHandler(
+				di.Get(ctx, "registry").(registry.Registry),
+				di.Get(ctx, "integrationEventHandlers").(ddd.EventHandler[ddd.Event]),
+			),
+			di.Get(ctx, "inboxMiddleware").(am.RawMessageHandlerMiddleware),
 		)
 
 		return evtHandlers.HandleMessage(ctx, msg)

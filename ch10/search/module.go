@@ -7,7 +7,6 @@ import (
 	"github.com/rs/zerolog"
 
 	"eda-in-golang/customers/customerspb"
-	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/jetstream"
@@ -59,18 +58,11 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		db := c.Get("db").(*sql.DB)
 		return db.Begin()
 	})
-	container.AddScoped("txStream", func(c di.Container) (any, error) {
+	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		inboxStore := pg.NewInboxStore("search.inbox", tx)
-		return am.RawMessageStreamWithMiddleware(
-			c.Get("stream").(am.RawMessageStream),
-			tm.NewInboxMiddleware(inboxStore),
-		), nil
+		return tm.NewInboxHandlerMiddleware(inboxStore), nil
 	})
-	container.AddScoped("eventStream", func(c di.Container) (any, error) {
-		return am.NewEventStream(c.Get("registry").(registry.Registry), c.Get("txStream").(am.RawMessageStream)), nil
-	})
-
 	container.AddScoped("customers", func(c di.Container) (any, error) {
 		return postgres.NewCustomerCacheRepository(
 			"search.customers_cache",
