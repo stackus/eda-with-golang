@@ -19,28 +19,28 @@ type contextKey int
 
 const containerKey contextKey = 1
 
-type DependencyFactoryFunc func(c Container) (any, error)
+type DepFactoryFunc func(c Container) (any, error)
 
 type tempValue = chan struct{}
 
 type Container interface {
-	AddSingleton(key string, fn DependencyFactoryFunc)
-	AddScoped(key string, fn DependencyFactoryFunc)
+	AddSingleton(key string, fn DepFactoryFunc)
+	AddScoped(key string, fn DepFactoryFunc)
 	Scoped(ctx context.Context) context.Context
 	Get(key string) any
 }
 
-type dependencyInfo struct {
+type depInfo struct {
 	key     string
 	scope   Scope
-	factory DependencyFactoryFunc
+	factory DepFactoryFunc
 }
 
 var _ Container = (*container)(nil)
 
 type container struct {
 	parent  *container
-	deps    map[string]dependencyInfo
+	deps    map[string]depInfo
 	vals    map[string]any
 	tracked tracked
 	mu      sync.Mutex
@@ -48,21 +48,21 @@ type container struct {
 
 func New() Container {
 	return &container{
-		deps: make(map[string]dependencyInfo),
+		deps: make(map[string]depInfo),
 		vals: make(map[string]any),
 	}
 }
 
-func (c *container) AddSingleton(key string, fn DependencyFactoryFunc) {
-	c.deps[key] = dependencyInfo{
+func (c *container) AddSingleton(key string, fn DepFactoryFunc) {
+	c.deps[key] = depInfo{
 		key:     key,
 		scope:   Singleton,
 		factory: fn,
 	}
 }
 
-func (c *container) AddScoped(key string, fn DependencyFactoryFunc) {
-	c.deps[key] = dependencyInfo{
+func (c *container) AddScoped(key string, fn DepFactoryFunc) {
+	c.deps[key] = depInfo{
 		key:     key,
 		scope:   Scoped,
 		factory: fn,
@@ -91,7 +91,7 @@ func (c *container) Get(key string) any {
 	return c.get(info)
 }
 
-func (c *container) getFromParent(info dependencyInfo) any {
+func (c *container) getFromParent(info depInfo) any {
 	if c.parent != nil {
 		return c.parent.getFromParent(info)
 	}
@@ -99,7 +99,7 @@ func (c *container) getFromParent(info dependencyInfo) any {
 	return c.get(info)
 }
 
-func (c *container) get(info dependencyInfo) any {
+func (c *container) get(info depInfo) any {
 	c.mu.Lock()
 
 	v, exists := c.vals[info.key]
@@ -121,7 +121,7 @@ func (c *container) get(info dependencyInfo) any {
 	return c.get(info)
 }
 
-func (c *container) build(info dependencyInfo, tv tempValue) any {
+func (c *container) build(info depInfo, tv tempValue) any {
 	v, err := info.factory(c.builder(info))
 
 	c.mu.Lock()
@@ -148,7 +148,7 @@ func (c *container) scoped() *container {
 	}
 }
 
-func (c *container) builder(info dependencyInfo) *container {
+func (c *container) builder(info depInfo) *container {
 	return &container{
 		parent:  c.parent,
 		deps:    c.deps,

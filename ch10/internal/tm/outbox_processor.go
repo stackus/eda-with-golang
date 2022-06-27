@@ -15,14 +15,14 @@ type OutboxProcessor interface {
 }
 
 type outboxProcessor struct {
-	stream am.RawMessagePublisher
-	store  OutboxStore
+	publisher am.RawMessagePublisher
+	store     OutboxStore
 }
 
-func NewOutboxProcessor(stream am.RawMessagePublisher, store OutboxStore) OutboxProcessor {
+func NewOutboxProcessor(publisher am.RawMessagePublisher, store OutboxStore) OutboxProcessor {
 	return outboxProcessor{
-		stream: stream,
-		store:  store,
+		publisher: publisher,
+		store:     store,
 	}
 }
 
@@ -53,7 +53,7 @@ func (p outboxProcessor) processMessages(ctx context.Context) error {
 			ids := make([]string, len(msgs))
 			for i, msg := range msgs {
 				ids[i] = msg.ID()
-				err = p.stream.Publish(ctx, msg.Subject(), msg)
+				err = p.publisher.Publish(ctx, msg.Subject(), msg)
 				if err != nil {
 					return err
 				}

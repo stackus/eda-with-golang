@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/jackc/pgconn"
@@ -58,7 +59,12 @@ func (s OutboxStore) FindUnpublished(ctx context.Context, limit int) ([]am.RawMe
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			err = errors.Wrap(err, "closing event rows")
+		}
+	}(rows)
 
 	var msgs []am.RawMessage
 

@@ -6,7 +6,7 @@ import (
 
 type tracked map[string]int
 
-func (s tracked) add(info dependencyInfo) tracked {
+func (s tracked) add(info depInfo) tracked {
 	newList := make(tracked, len(s))
 
 	for k, v := range s {

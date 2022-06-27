@@ -89,7 +89,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 		return tm.NewInboxHandlerMiddleware(inboxStore), nil
 	})
 	container.AddScoped("shoppingLists", func(c di.Container) (any, error) {
-		return postgres.NewShoppingListRepository("depot.shopping_lists", c.Get("tx").(*sql.DB)), nil
+		return postgres.NewShoppingListRepository("depot.shopping_lists", c.Get("tx").(*sql.Tx)), nil
 	})
 	container.AddScoped("stores", func(c di.Container) (any, error) {
 		return postgres.NewStoreCacheRepository(

@@ -37,3 +37,40 @@ a -> 2pc: Done
 b -> 2pc: Done
 
 @enduml
+
+@startuml
+!theme plain
+skinparam dpi 400
+skinparam defaultFontName Jetbrains Mono
+
+actor User as u
+participant "Payments" as p
+participant "Ordering" as o
+database Database as db
+
+u -> p: Pay Invoice
+db -> p: Get Invoice
+p -> o: Complete Order
+o -> p: Order Completed
+p -> db: Update Invoice
+p -> u: Invoice Paid
+
+@enduml
+
+@startuml
+!theme plain
+skinparam dpi 400
+skinparam defaultFontName Jetbrains Mono
+
+actor User as u
+participant "Payments" as p
+queue "Message Broker" as m
+database Database as db
+
+u -> p: Pay Invoice
+db -> p: Get Invoice
+p -> m: Publish InvoicePaid
+p -> db: Update Invoice
+p -> u: Invoice Paid
+
+@enduml
