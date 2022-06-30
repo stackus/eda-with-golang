@@ -135,7 +135,7 @@ func (a Application) AddItem(ctx context.Context, add AddItem) error {
 
 	store, err := a.stores.Find(ctx, product.StoreID)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	err = basket.AddItem(store, product, add.Quantity)

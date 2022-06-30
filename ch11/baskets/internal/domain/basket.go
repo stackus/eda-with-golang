@@ -39,24 +39,6 @@ func NewBasket(id string) *Basket {
 	}
 }
 
-func StartBasket(id, customerID string) (*Basket, error) {
-	if id == "" {
-		return nil, ErrBasketIDCannotBeBlank
-	}
-
-	if customerID == "" {
-		return nil, ErrCustomerIDCannotBeBlank
-	}
-
-	basket := NewBasket(id)
-
-	basket.AddEvent(BasketStartedEvent, &BasketStarted{
-		CustomerID: customerID,
-	})
-
-	return basket, nil
-}
-
 func (Basket) Key() string { return BasketAggregate }
 
 func (b *Basket) Start(customerID string) (ddd.Event, error) {

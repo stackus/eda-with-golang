@@ -169,6 +169,7 @@ func registrations(reg registry.Registry) error {
 	// Basket
 	if err := serde.Register(domain.Basket{}, func(v interface{}) error {
 		basket := v.(*domain.Basket)
+		basket.Aggregate = es.NewAggregate("", domain.BasketAggregate)
 		basket.Items = make(map[string]domain.Item)
 		return nil
 	}); err != nil {

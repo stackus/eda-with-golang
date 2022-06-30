@@ -50,7 +50,7 @@ func newEvent(name string, payload EventPayload, options ...EventOption) event {
 	return evt
 }
 
-func (e event) EventName() string     { return e.name }
+func (e event) EventName() string     { return e.EntityName() }
 func (e event) Payload() EventPayload { return e.payload }
 func (e event) Metadata() Metadata    { return e.metadata }
 func (e event) OccurredAt() time.Time { return e.occurredAt }

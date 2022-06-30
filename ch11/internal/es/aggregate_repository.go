@@ -8,21 +8,30 @@ import (
 	"eda-in-golang/internal/registry"
 )
 
-type AggregateRepository[T EventSourcedAggregate] struct {
-	aggregateName string
-	registry      registry.Registry
-	store         AggregateStore
-}
+type (
+	AggregateRepository[T EventSourcedAggregate] interface {
+		Load(ctx context.Context, aggregateID string) (agg T, err error)
+		Save(ctx context.Context, aggregate T) error
+	}
 
-func NewAggregateRepository[T EventSourcedAggregate](aggregateName string, registry registry.Registry, store AggregateStore) AggregateRepository[T] {
-	return AggregateRepository[T]{
+	aggregateRepository[T EventSourcedAggregate] struct {
+		aggregateName string
+		registry      registry.Registry
+		store         AggregateStore
+	}
+)
+
+var _ AggregateRepository[EventSourcedAggregate] = (*aggregateRepository[EventSourcedAggregate])(nil)
+
+func NewAggregateRepository[T EventSourcedAggregate](aggregateName string, registry registry.Registry, store AggregateStore) aggregateRepository[T] {
+	return aggregateRepository[T]{
 		aggregateName: aggregateName,
 		registry:      registry,
 		store:         store,
 	}
 }
 
-func (r AggregateRepository[T]) Load(ctx context.Context, aggregateID string) (agg T, err error) {
+func (r aggregateRepository[T]) Load(ctx context.Context, aggregateID string) (agg T, err error) {
 	var v any
 	v, err = r.registry.Build(
 		r.aggregateName,
@@ -45,7 +54,7 @@ func (r AggregateRepository[T]) Load(ctx context.Context, aggregateID string) (a
 	return agg, nil
 }
 
-func (r AggregateRepository[T]) Save(ctx context.Context, aggregate T) error {
+func (r aggregateRepository[T]) Save(ctx context.Context, aggregate T) error {
 	if aggregate.Version() == aggregate.PendingVersion() {
 		return nil
 	}
