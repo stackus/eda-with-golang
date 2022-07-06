@@ -6,7 +6,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 
   CREATE USER mallbots_user WITH ENCRYPTED PASSWORD 'mallbots_pass';
 
-  GRANT CONNECT ON DATABASE mallbots TO mallbots_user;
+  GRANT CREATE, CONNECT ON DATABASE mallbots TO mallbots_user;
 EOSQL
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "mallbots" <<-EOSQL

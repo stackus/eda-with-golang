@@ -337,6 +337,27 @@ func TestApplication_CheckoutBasket(t *testing.T) {
 				f.publisher.On("Publish", context.Background(), mock.AnythingOfType("ddd.event")).Return(nil)
 			},
 		},
+		"MissingPaymentID": {
+			args: args{
+				ctx: context.Background(),
+				checkout: CheckoutBasket{
+					ID:        "basket-id",
+					PaymentID: "",
+				},
+			},
+			on: func(f fields) {
+				f.baskets.On("Load", context.Background(), "basket-id").Return(&domain.Basket{
+					Aggregate:  es.NewAggregate("basket-id", domain.BasketAggregate),
+					CustomerID: "customer-id",
+					PaymentID:  "",
+					Items: map[string]domain.Item{
+						product.ID: item,
+					},
+					Status: domain.BasketIsOpen,
+				}, nil)
+			},
+			wantErr: true,
+		},
 		"NoBasket": {
 			args: args{
 				ctx: context.Background(),
@@ -659,59 +680,116 @@ func TestApplication_RemoveItem(t *testing.T) {
 	}
 }
 
-//
-// func TestApplication_StartBasket(t *testing.T) {
-// 	type fields struct {
-// 		baskets   domain.BasketRepository
-// 		stores    domain.StoreRepository
-// 		products  domain.ProductRepository
-// 		publisher ddd.EventPublisher[ddd.Event]
-// 	}
-// 	type args struct {
-// 		ctx   context.Context
-// 		start StartBasket
-// 	}
-// 	tests := map[string]struct {
-// 		fields  fields
-// 		args    args
-// 		wantErr bool
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for name, tt := range tests {
-// 		t.Run(name, func(t *testing.T) {
-// 			a := Application{
-// 				baskets:   tt.fields.baskets,
-// 				stores:    tt.fields.stores,
-// 				products:  tt.fields.products,
-// 				publisher: tt.fields.publisher,
-// 			}
-// 			if err := a.StartBasket(tt.args.ctx, tt.args.start); (err != nil) != tt.wantErr {
-// 				t.Errorf("StartBasket() error = %v, wantErr %v", err, tt.wantErr)
-// 			}
-// 		})
-// 	}
-// }
-//
-// func TestNew(t *testing.T) {
-// 	type args struct {
-// 		baskets   domain.BasketRepository
-// 		stores    domain.StoreRepository
-// 		products  domain.ProductRepository
-// 		publisher ddd.EventPublisher[ddd.Event]
-// 	}
-// 	tests := map[string]struct {
-// 		name string
-// 		args args
-// 		want *Application
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for name, tt := range tests {
-// 		t.Run(name, func(t *testing.T) {
-// 			if got := New(tt.args.baskets, tt.args.stores, tt.args.products, tt.args.publisher); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("New() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+func TestApplication_StartBasket(t *testing.T) {
+	type fields struct {
+		baskets   *domain.MockBasketRepository
+		stores    *domain.MockStoreRepository
+		products  *domain.MockProductRepository
+		publisher *ddd.MockEventPublisher[ddd.Event]
+	}
+	type args struct {
+		ctx   context.Context
+		start StartBasket
+	}
+	tests := map[string]struct {
+		fields  fields
+		args    args
+		on      func(f fields)
+		wantErr bool
+	}{
+		"Success": {
+			args: args{
+				ctx: context.Background(),
+				start: StartBasket{
+					ID:         "basket-id",
+					CustomerID: "customer-id",
+				},
+			},
+			on: func(f fields) {
+				f.baskets.On("Load", context.Background(), "basket-id").Return(&domain.Basket{
+					Aggregate:  es.NewAggregate("basket-id", domain.BasketAggregate),
+					CustomerID: "customer-id",
+					PaymentID:  "",
+					Items:      make(map[string]domain.Item),
+				}, nil)
+				f.baskets.On("Save", context.Background(), mock.AnythingOfType("*domain.Basket")).Return(nil)
+				f.publisher.On("Publish", context.Background(), mock.AnythingOfType("ddd.event")).Return(nil)
+			},
+		},
+		"NoBasket": {
+			args: args{
+				ctx: context.Background(),
+				start: StartBasket{
+					ID:         "basket-id",
+					CustomerID: "customer-id",
+				},
+			},
+			on: func(f fields) {
+				f.baskets.On("Load", context.Background(), "basket-id").Return(nil, fmt.Errorf("no basket"))
+			},
+			wantErr: true,
+		},
+		"SaveFailed": {
+			args: args{
+				ctx: context.Background(),
+				start: StartBasket{
+					ID:         "basket-id",
+					CustomerID: "customer-id",
+				},
+			},
+			on: func(f fields) {
+				f.baskets.On("Load", context.Background(), "basket-id").Return(&domain.Basket{
+					Aggregate:  es.NewAggregate("basket-id", domain.BasketAggregate),
+					CustomerID: "customer-id",
+					PaymentID:  "",
+					Items:      make(map[string]domain.Item),
+				}, nil)
+				f.baskets.On("Save", context.Background(), mock.AnythingOfType("*domain.Basket")).Return(fmt.Errorf("save failed"))
+			},
+			wantErr: true,
+		},
+		"PublishFailed": {
+			args: args{
+				ctx: context.Background(),
+				start: StartBasket{
+					ID:         "basket-id",
+					CustomerID: "customer-id",
+				},
+			},
+			on: func(f fields) {
+				f.baskets.On("Load", context.Background(), "basket-id").Return(&domain.Basket{
+					Aggregate:  es.NewAggregate("basket-id", domain.BasketAggregate),
+					CustomerID: "customer-id",
+					PaymentID:  "",
+					Items:      make(map[string]domain.Item),
+				}, nil)
+				f.baskets.On("Save", context.Background(), mock.AnythingOfType("*domain.Basket")).Return(nil)
+				f.publisher.On("Publish", context.Background(), mock.AnythingOfType("ddd.event")).Return(fmt.Errorf("publish failed"))
+			},
+			wantErr: true,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			f := fields{
+				baskets:   domain.NewMockBasketRepository(t),
+				stores:    domain.NewMockStoreRepository(t),
+				products:  domain.NewMockProductRepository(t),
+				publisher: ddd.NewMockEventPublisher[ddd.Event](t),
+			}
+			a := Application{
+				baskets:   f.baskets,
+				stores:    f.stores,
+				products:  f.products,
+				publisher: f.publisher,
+			}
+			if tt.on != nil {
+				tt.on(f)
+			}
+
+			if err := a.StartBasket(tt.args.ctx, tt.args.start); (err != nil) != tt.wantErr {
+				t.Errorf("StartBasket() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

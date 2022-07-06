@@ -11,7 +11,7 @@ const (
 	AckTypeManual
 )
 
-var defaultAckWait = 5 * time.Second
+var defaultAckWait = 30 * time.Second
 var defaultMaxRedeliver = 5
 
 type SubscriberConfig struct {

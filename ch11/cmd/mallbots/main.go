@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/nats-io/nats.go"
+	"github.com/pressly/goose/v3"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -23,6 +24,7 @@ import (
 	"eda-in-golang/internal/rpc"
 	"eda-in-golang/internal/waiter"
 	"eda-in-golang/internal/web"
+	"eda-in-golang/migrations"
 	"eda-in-golang/notifications"
 	"eda-in-golang/ordering"
 	"eda-in-golang/payments"
@@ -58,6 +60,11 @@ func run() (err error) {
 			return
 		}
 	}(m.db)
+	// migration database
+	err = migrateDB(m.db)
+	if err != nil {
+		return err
+	}
 	// init nats & jetstream
 	m.nc, err = nats.Connect(cfg.Nats.URL)
 	if err != nil {
@@ -111,6 +118,17 @@ func run() (err error) {
 	// }()
 
 	return m.waiter.Wait()
+}
+
+func migrateDB(db *sql.DB) error {
+	goose.SetBaseFS(migrations.FS)
+	if err := goose.SetDialect("postgres"); err != nil {
+		return err
+	}
+	if err := goose.Up(db, "."); err != nil {
+		return err
+	}
+	return nil
 }
 
 func initLogger(cfg config.AppConfig) zerolog.Logger {
