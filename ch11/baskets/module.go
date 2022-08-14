@@ -22,7 +22,6 @@ import (
 	"eda-in-golang/internal/monolith"
 	pg "eda-in-golang/internal/postgres"
 	"eda-in-golang/internal/registry"
-	"eda-in-golang/internal/registry/serdes"
 	"eda-in-golang/internal/tm"
 	"eda-in-golang/stores/storespb"
 )
@@ -34,7 +33,7 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	// setup Driven adapters
 	container.AddSingleton("registry", func(c di.Container) (any, error) {
 		reg := registry.New()
-		if err := registrations(reg); err != nil {
+		if err := domain.Registrations(reg); err != nil {
 			return nil, err
 		}
 		if err := basketspb.Registrations(reg); err != nil {
@@ -87,19 +86,16 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 		inboxStore := pg.NewInboxStore("baskets.inbox", tx)
 		return tm.NewInboxHandlerMiddleware(inboxStore), nil
 	})
-	container.AddScoped("aggregateStore", func(c di.Container) (any, error) {
+	container.AddScoped("baskets", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		reg := c.Get("registry").(registry.Registry)
-		return es.AggregateStoreWithMiddleware(
-			pg.NewEventStore("baskets.events", tx, reg),
-			pg.NewSnapshotStore("baskets.snapshots", tx, reg),
-		), nil
-	})
-	container.AddScoped("baskets", func(c di.Container) (any, error) {
 		return es.NewAggregateRepository[*domain.Basket](
 			domain.BasketAggregate,
-			c.Get("registry").(registry.Registry),
-			c.Get("aggregateStore").(es.AggregateStore),
+			reg,
+			es.AggregateStoreWithMiddleware(
+				pg.NewEventStore("baskets.events", tx, reg),
+				pg.NewSnapshotStore("baskets.snapshots", tx, reg),
+			),
 		), nil
 	})
 	container.AddScoped("stores", func(c di.Container) (any, error) {
@@ -161,42 +157,6 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 	}
 	startOutboxProcessor(ctx, container)
 	return
-}
-
-func registrations(reg registry.Registry) error {
-	serde := serdes.NewJsonSerde(reg)
-
-	// Basket
-	if err := serde.Register(domain.Basket{}, func(v interface{}) error {
-		basket := v.(*domain.Basket)
-		basket.Aggregate = es.NewAggregate("", domain.BasketAggregate)
-		basket.Items = make(map[string]domain.Item)
-		return nil
-	}); err != nil {
-		return err
-	}
-	// basket events
-	if err := serde.Register(domain.BasketStarted{}); err != nil {
-		return err
-	}
-	if err := serde.Register(domain.BasketCanceled{}); err != nil {
-		return err
-	}
-	if err := serde.Register(domain.BasketCheckedOut{}); err != nil {
-		return err
-	}
-	if err := serde.Register(domain.BasketItemAdded{}); err != nil {
-		return err
-	}
-	if err := serde.Register(domain.BasketItemRemoved{}); err != nil {
-		return err
-	}
-	// basket snapshots
-	if err := serde.RegisterKey(domain.BasketV1{}.SnapshotName(), domain.BasketV1{}); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func startOutboxProcessor(ctx context.Context, container di.Container) {

@@ -103,20 +103,8 @@
           "format": "double"
         },
         "quantity": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "OrderStatusHistory": {
-      "type": "object",
-      "properties": {
-        "when": {
           "type": "string",
-          "format": "date-time"
-        },
-        "status": {
-          "type": "string"
+          "format": "int64"
         }
       }
     },
@@ -216,11 +204,8 @@
           "type": "number",
           "format": "double"
         },
-        "statusHistory": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OrderStatusHistory"
-          }
+        "status": {
+          "type": "string"
         }
       }
     },

@@ -25,7 +25,7 @@ func TestApplication_AddItem(t *testing.T) {
 		Name: "store-name",
 	}
 
-	type fields struct {
+	type mocks struct {
 		baskets   *domain.MockBasketRepository
 		stores    *domain.MockStoreRepository
 		products  *domain.MockProductRepository
@@ -37,7 +37,7 @@ func TestApplication_AddItem(t *testing.T) {
 	}
 	tests := map[string]struct {
 		args    args
-		on      func(f fields)
+		on      func(f mocks)
 		wantErr bool
 	}{
 		"Success": {
@@ -49,7 +49,7 @@ func TestApplication_AddItem(t *testing.T) {
 					Quantity:  1,
 				},
 			},
-			on: func(f fields) {
+			on: func(f mocks) {
 				f.baskets.On("Load", context.Background(), "basket-id").Return(&domain.Basket{
 					Aggregate:  es.NewAggregate("basket-id", domain.BasketAggregate),
 					CustomerID: "customer-id",
@@ -71,7 +71,7 @@ func TestApplication_AddItem(t *testing.T) {
 					Quantity:  1,
 				},
 			},
-			on: func(f fields) {
+			on: func(f mocks) {
 				f.baskets.On("Load", context.Background(), "basket-id").Return(nil, fmt.Errorf("no basket"))
 			},
 			wantErr: true,
@@ -85,7 +85,7 @@ func TestApplication_AddItem(t *testing.T) {
 					Quantity:  1,
 				},
 			},
-			on: func(f fields) {
+			on: func(f mocks) {
 				f.baskets.On("Load", context.Background(), "basket-id").Return(&domain.Basket{
 					Aggregate:  es.NewAggregate("basket-id", domain.BasketAggregate),
 					CustomerID: "customer-id",
@@ -106,7 +106,7 @@ func TestApplication_AddItem(t *testing.T) {
 					Quantity:  1,
 				},
 			},
-			on: func(f fields) {
+			on: func(f mocks) {
 				f.baskets.On("Load", context.Background(), "basket-id").Return(&domain.Basket{
 					Aggregate:  es.NewAggregate("basket-id", domain.BasketAggregate),
 					CustomerID: "customer-id",
@@ -128,7 +128,7 @@ func TestApplication_AddItem(t *testing.T) {
 					Quantity:  1,
 				},
 			},
-			on: func(f fields) {
+			on: func(f mocks) {
 				f.baskets.On("Load", context.Background(), "basket-id").Return(&domain.Basket{
 					Aggregate:  es.NewAggregate("basket-id", domain.BasketAggregate),
 					CustomerID: "customer-id",
@@ -145,7 +145,7 @@ func TestApplication_AddItem(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			f := fields{
+			f := mocks{
 				baskets:   domain.NewMockBasketRepository(t),
 				stores:    domain.NewMockStoreRepository(t),
 				products:  domain.NewMockProductRepository(t),

@@ -1,5 +1,3 @@
-//go:build integration
-
 package handlers
 
 import (
@@ -67,17 +65,7 @@ func (s *integrationEventsTestSuite) SetupSuite() {
 	if err = storespb.Registrations(s.reg); err != nil {
 		s.T().Fatal(err)
 	}
-}
 
-func (s *integrationEventsTestSuite) TearDownSuite() {
-	s.natsConn.Close()
-	if err := s.container.Terminate(context.Background()); err != nil {
-		s.T().Fatal(err)
-	}
-}
-
-func (s *integrationEventsTestSuite) SetupTest() {
-	ctx := context.Background()
 	endpoint, err := s.container.Endpoint(ctx, "")
 	if err != nil {
 		s.T().Fatal(err)
@@ -85,13 +73,13 @@ func (s *integrationEventsTestSuite) SetupTest() {
 
 	s.natsConn, err = nats.Connect(
 		endpoint,
-		//		nats.Timeout(5*time.Second),
-		//		nats.RetryOnFailedConnect(true),
+		nats.Timeout(5*time.Second),
+		nats.RetryOnFailedConnect(true),
 	)
+
 	if err != nil {
 		s.T().Fatal(err)
 	}
-
 	s.js, err = s.natsConn.JetStream()
 	if err != nil {
 		s.T().Fatal(err)
@@ -105,6 +93,16 @@ func (s *integrationEventsTestSuite) SetupTest() {
 		s.T().Fatal(err)
 	}
 
+}
+
+func (s *integrationEventsTestSuite) TearDownSuite() {
+	s.natsConn.Close()
+	if err := s.container.Terminate(context.Background()); err != nil {
+		s.T().Fatal(err)
+	}
+}
+
+func (s *integrationEventsTestSuite) SetupTest() {
 	s.mocks = struct {
 		products *domain.MockProductCacheRepository
 		stores   *domain.MockStoreCacheRepository
@@ -130,7 +128,7 @@ func (s *integrationEventsTestSuite) SetupTest() {
 }
 
 func (s *integrationEventsTestSuite) TearDownTest() {
-	if err := s.natsConn.Drain(); err != nil {
+	if err := s.stream.Unsubscribe(); err != nil {
 		s.T().Fatal(err)
 	}
 }

@@ -1,4 +1,4 @@
-// go:build integration
+//go:build integration
 
 package postgres
 
@@ -37,14 +37,6 @@ func TestProductCacheRepository(t *testing.T) {
 
 func (s *productCacheSuite) SetupSuite() {
 	var err error
-
-	// s.compose = testcontainers.NewLocalDockerCompose([]string{"../../../docker/postgres-test.yaml"}, "mallbots")
-	// execErr := s.compose.WithExposedService("postgres", 5432, wait.ForSQL("5432/tcp", "postgres", func(port nat.Port) string {
-	// 	return fmt.Sprintf("postgres://mallbots_user:mallbots_pass@localhost:%s/mallbots?sslmode=disable", port.Port())
-	// }).Timeout(5*time.Second)).Invoke()
-	// if execErr.Error != nil {
-	// 	s.T().Fatal(err)
-	// }
 
 	ctx := context.Background()
 	initDir, err := filepath.Abs("./../../../docker/database")
@@ -124,7 +116,7 @@ func (s *productCacheSuite) TestProductCacheRepository_Add() {
 
 func (s *productCacheSuite) TestProductCacheRepository_AddDupe() {
 	s.Assert().NoError(s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00))
-	s.Assert().NoError(s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00))
+	s.Assert().NoError(s.repo.Add(context.Background(), "product-id", "store-id", "dupe-product-name", 10.00))
 	row := s.db.QueryRow("SELECT name FROM baskets.products_cache WHERE id = $1", "product-id")
 	if s.Assert().NoError(row.Err()) {
 		var name string

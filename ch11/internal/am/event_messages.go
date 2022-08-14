@@ -59,9 +59,7 @@ func (s eventStream) Publish(ctx context.Context, topicName string, event ddd.Ev
 		return err
 	}
 
-	payload, err := s.reg.Serialize(
-		event.EventName(), event.Payload(),
-	)
+	payload, err := s.reg.Serialize(event.EventName(), event.Payload())
 	if err != nil {
 		return err
 	}
@@ -83,7 +81,7 @@ func (s eventStream) Publish(ctx context.Context, topicName string, event ddd.Ev
 	})
 }
 
-func (s eventStream) Subscribe(topicName string, handler MessageHandler[IncomingEventMessage], options ...SubscriberOption) error {
+func (s eventStream) Subscribe(topicName string, handler MessageHandler[IncomingEventMessage], options ...SubscriberOption) (Subscription, error) {
 	cfg := NewSubscriberConfig(options)
 
 	var filters map[string]struct{}
@@ -128,6 +126,10 @@ func (s eventStream) Subscribe(topicName string, handler MessageHandler[Incoming
 	})
 
 	return s.stream.Subscribe(topicName, fn, options...)
+}
+
+func (s eventStream) Unsubscribe() error {
+	return s.stream.Unsubscribe()
 }
 
 func (e eventMessage) ID() string                { return e.id }

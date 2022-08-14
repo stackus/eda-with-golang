@@ -1,3 +1,3 @@
 package es
 
-//go:generate mockery --name ".*(Aggregate|Repository|Store|Handler)$"  --inpackage --case underscore
+//go:generate mockery --quiet --name ".*(Aggregate|Repository|Store|Handler)$"  --inpackage --case underscore

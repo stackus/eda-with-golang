@@ -32,7 +32,8 @@ type (
 	}
 
 	MessageSubscriber[I IncomingMessage] interface {
-		Subscribe(topicName string, handler MessageHandler[I], options ...SubscriberOption) error
+		Subscribe(topicName string, handler MessageHandler[I], options ...SubscriberOption) (Subscription, error)
+		Unsubscribe() error
 	}
 
 	MessageStream[O any, I IncomingMessage] interface {

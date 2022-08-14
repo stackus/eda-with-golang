@@ -23,11 +23,13 @@ func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 }
 
 func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
-	return subscriber.Subscribe(depotpb.CommandChannel, handlers, am.MessageFilter{
+	_, err := subscriber.Subscribe(depotpb.CommandChannel, handlers, am.MessageFilter{
 		depotpb.CreateShoppingListCommand,
 		depotpb.CancelShoppingListCommand,
 		depotpb.InitiateShoppingCommand,
 	}, am.GroupName("depot-commands"))
+
+	return err
 }
 
 func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {

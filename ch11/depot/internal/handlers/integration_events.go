@@ -28,7 +28,7 @@ func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers dd
 		return handlers.HandleEvent(ctx, eventMsg)
 	})
 
-	err = subscriber.Subscribe(storespb.StoreAggregateChannel, evtMsgHandler, am.MessageFilter{
+	_, err = subscriber.Subscribe(storespb.StoreAggregateChannel, evtMsgHandler, am.MessageFilter{
 		storespb.StoreCreatedEvent,
 		storespb.StoreRebrandedEvent,
 	}, am.GroupName("depot-stores"))
@@ -36,11 +36,13 @@ func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers dd
 		return err
 	}
 
-	return subscriber.Subscribe(storespb.ProductAggregateChannel, evtMsgHandler, am.MessageFilter{
+	_, err = subscriber.Subscribe(storespb.ProductAggregateChannel, evtMsgHandler, am.MessageFilter{
 		storespb.ProductAddedEvent,
 		storespb.ProductRebrandedEvent,
 		storespb.ProductRemovedEvent,
 	}, am.GroupName("depot-products"))
+
+	return err
 }
 
 func (h integrationHandlers[T]) HandleEvent(ctx context.Context, event T) error {

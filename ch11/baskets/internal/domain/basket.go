@@ -39,8 +39,6 @@ func NewBasket(id string) *Basket {
 	}
 }
 
-func (Basket) Key() string { return BasketAggregate }
-
 func (b *Basket) Start(customerID string) (ddd.Event, error) {
 	if b.Status != BasketUnknown {
 		return nil, ErrBasketCannotBeModified

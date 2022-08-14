@@ -38,7 +38,7 @@ func RegisterIntegrationEventHandlersTx(container di.Container) error {
 
 	subscriber := container.Get("stream").(am.RawMessageStream)
 
-	err := subscriber.Subscribe(storespb.StoreAggregateChannel, evtMsgHandler, am.MessageFilter{
+	_, err := subscriber.Subscribe(storespb.StoreAggregateChannel, evtMsgHandler, am.MessageFilter{
 		storespb.StoreCreatedEvent,
 		storespb.StoreRebrandedEvent,
 	}, am.GroupName("depot-stores"))
@@ -46,9 +46,11 @@ func RegisterIntegrationEventHandlersTx(container di.Container) error {
 		return err
 	}
 
-	return subscriber.Subscribe(storespb.ProductAggregateChannel, evtMsgHandler, am.MessageFilter{
+	_, err = subscriber.Subscribe(storespb.ProductAggregateChannel, evtMsgHandler, am.MessageFilter{
 		storespb.ProductAddedEvent,
 		storespb.ProductRebrandedEvent,
 		storespb.ProductRemovedEvent,
 	}, am.GroupName("depot-products"))
+
+	return err
 }
