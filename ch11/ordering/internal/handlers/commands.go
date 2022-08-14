@@ -21,10 +21,11 @@ func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 }
 
 func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
-	return subscriber.Subscribe(orderingpb.CommandChannel, handlers, am.MessageFilter{
+	_, err := subscriber.Subscribe(orderingpb.CommandChannel, handlers, am.MessageFilter{
 		orderingpb.RejectOrderCommand,
 		orderingpb.ApproveOrderCommand,
 	}, am.GroupName("ordering-commands"))
+	return err
 }
 
 func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {

@@ -20,9 +20,10 @@ func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 }
 
 func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
-	return subscriber.Subscribe(paymentspb.CommandChannel, handlers, am.MessageFilter{
+	_, err := subscriber.Subscribe(paymentspb.CommandChannel, handlers, am.MessageFilter{
 		paymentspb.ConfirmPaymentCommand,
 	}, am.GroupName("payment-commands"))
+	return err
 }
 
 func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {

@@ -29,14 +29,14 @@ func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers dd
 		return handlers.HandleEvent(ctx, eventMsg)
 	})
 
-	err = subscriber.Subscribe(basketspb.BasketAggregateChannel, evtMsgHandler, am.MessageFilter{
+	_, err = subscriber.Subscribe(basketspb.BasketAggregateChannel, evtMsgHandler, am.MessageFilter{
 		basketspb.BasketCheckedOutEvent,
 	}, am.GroupName("ordering-baskets"))
 	if err != nil {
 		return err
 	}
 
-	err = subscriber.Subscribe(depotpb.ShoppingListAggregateChannel, evtMsgHandler, am.MessageFilter{
+	_, err = subscriber.Subscribe(depotpb.ShoppingListAggregateChannel, evtMsgHandler, am.MessageFilter{
 		depotpb.ShoppingListCompletedEvent,
 	}, am.GroupName("ordering-depot"))
 

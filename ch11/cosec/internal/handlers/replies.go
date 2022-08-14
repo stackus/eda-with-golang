@@ -12,5 +12,6 @@ func RegisterReplyHandlers(subscriber am.ReplySubscriber, orchestrator sec.Orche
 	replyMsgHandler := am.MessageHandlerFunc[am.IncomingReplyMessage](func(ctx context.Context, replyMsg am.IncomingReplyMessage) error {
 		return orchestrator.HandleReply(ctx, replyMsg)
 	})
-	return subscriber.Subscribe(orchestrator.ReplyTopic(), replyMsgHandler, am.GroupName("cosec-replies"))
+	_, err := subscriber.Subscribe(orchestrator.ReplyTopic(), replyMsgHandler, am.GroupName("cosec-replies"))
+	return err
 }

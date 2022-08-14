@@ -20,9 +20,10 @@ func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 }
 
 func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
-	return subscriber.Subscribe(customerspb.CommandChannel, handlers, am.MessageFilter{
+	_, err := subscriber.Subscribe(customerspb.CommandChannel, handlers, am.MessageFilter{
 		customerspb.AuthorizeCustomerCommand,
 	}, am.GroupName("customer-commands"))
+	return err
 }
 
 func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {

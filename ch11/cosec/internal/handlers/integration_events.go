@@ -27,9 +27,10 @@ func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers dd
 		return handlers.HandleEvent(ctx, eventMsg)
 	})
 
-	return subscriber.Subscribe(orderingpb.OrderAggregateChannel, evtMsgHandler, am.MessageFilter{
+	_, err = subscriber.Subscribe(orderingpb.OrderAggregateChannel, evtMsgHandler, am.MessageFilter{
 		orderingpb.OrderCreatedEvent,
 	}, am.GroupName("cosec-ordering"))
+	return
 }
 
 func (h integrationHandlers[T]) HandleEvent(ctx context.Context, event T) error {
