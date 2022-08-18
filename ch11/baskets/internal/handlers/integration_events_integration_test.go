@@ -1,3 +1,5 @@
+//go:build integration
+
 package handlers
 
 import (
@@ -155,7 +157,7 @@ func (s *integrationEventsTestSuite) TestStoreAggregateChannel_StoreRebranded() 
 			close(done)
 		})
 
-		s.Assert().NoError(s.stream.Publish(context.Background(), storespb.StoreAggregateChannel,
+		s.NoError(s.stream.Publish(context.Background(), storespb.StoreAggregateChannel,
 			ddd.NewEvent(storespb.StoreRebrandedEvent, &storespb.StoreRebranded{
 				Id:   "store-id",
 				Name: "store-name",
@@ -170,7 +172,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductAdded() 
 			close(done)
 		})
 
-		s.Assert().NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductAddedEvent, &storespb.ProductAdded{
 				Id:      "product-id",
 				StoreId: "store-id",
@@ -187,7 +189,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductRebrande
 			close(done)
 		})
 
-		s.Assert().NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductRebrandedEvent, &storespb.ProductRebranded{
 				Id:   "product-id",
 				Name: "product-name",
@@ -202,7 +204,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductPriceInc
 			close(done)
 		})
 
-		s.Assert().NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductPriceIncreasedEvent, &storespb.ProductPriceChanged{
 				Id:    "product-id",
 				Delta: 1.00,
@@ -217,7 +219,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductPriceDec
 			close(done)
 		})
 
-		s.Assert().NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductPriceDecreasedEvent, &storespb.ProductPriceChanged{
 				Id:    "product-id",
 				Delta: -1.00,
@@ -232,7 +234,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductRemoved(
 			close(done)
 		})
 
-		s.Assert().NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductRemovedEvent, &storespb.ProductRemoved{
 				Id: "product-id",
 			}),

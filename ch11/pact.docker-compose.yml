@@ -26,5 +26,7 @@ services:
       PACT_BROKER_BASIC_AUTH_USERNAME: pactuser
       PACT_BROKER_BASIC_AUTH_PASSWORD: pactpass
       PACT_BROKER_ALLOW_PUBLIC_READ: true
+      PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES: 5
+      PACT_BROKER_BASE_URL: 'http://localhost:9292 http://pact-broker:9292'
 volumes:
   pgdata:

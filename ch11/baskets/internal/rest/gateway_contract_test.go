@@ -8,8 +8,9 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/pact-foundation/pact-go/dsl"
-	"github.com/pact-foundation/pact-go/types"
+	"github.com/pact-foundation/pact-go/v2/models"
+	"github.com/pact-foundation/pact-go/v2/provider"
+	"github.com/stretchr/testify/assert"
 	grpcstd "google.golang.org/grpc"
 
 	"eda-in-golang/baskets/internal/application"
@@ -98,10 +99,9 @@ func TestProvider(t *testing.T) {
 		}()
 	}
 
-	pact := dsl.Pact{
-		Provider: "baskets-api",
-	}
-	_, err = pact.VerifyProvider(t, types.VerifyRequest{
+	p := provider.HTTPVerifier{}
+	assert.NoError(t, p.VerifyProvider(t, provider.VerifyRequest{
+		Provider:                   "baskets-api",
 		ProviderBaseURL:            fmt.Sprintf("http://%s", webConfig.Address()),
 		ProviderVersion:            "1.0.0",
 		BrokerURL:                  "http://127.0.0.1:9292",
@@ -109,8 +109,117 @@ func TestProvider(t *testing.T) {
 		BrokerPassword:             "pactpass",
 		PublishVerificationResults: true,
 		FailIfNoPactsFound:         true,
-	})
-	if err != nil {
-		t.Error(err)
-	}
+		AfterEach: func() error {
+			baskets.Reset()
+			products.Reset()
+			stores.Reset()
+			return nil
+		},
+		StateHandlers: map[string]models.StateHandler{
+			"a basket exists": func(setup bool, state models.ProviderState) (models.ProviderStateResponse, error) {
+				basket := domain.NewBasket("basket-id")
+				if v, exists := state.Parameters["id"]; exists {
+					basket = domain.NewBasket(v.(string))
+				}
+				basket.Items = map[string]domain.Item{}
+				basket.CustomerID = "customer-id"
+				if v, exists := state.Parameters["customerId"]; exists {
+					basket.CustomerID = v.(string)
+				}
+				basket.Status = domain.BasketIsOpen
+				if v, exists := state.Parameters["status"]; exists && domain.BasketStatus(v.(string)).String() != "" {
+					basket.Status = domain.BasketStatus(v.(string))
+				}
+				baskets.Reset(basket)
+
+				return nil, nil
+			},
+			"a product exists": func(setup bool, state models.ProviderState) (models.ProviderStateResponse, error) {
+				product := &domain.Product{
+					ID:      "product-id",
+					StoreID: "store-id",
+					Name:    "TheProduct",
+					Price:   10.00,
+				}
+				if v, exists := state.Parameters["id"]; exists {
+					product.ID = v.(string)
+				}
+				if v, exists := state.Parameters["storeId"]; exists {
+					product.StoreID = v.(string)
+				}
+				if v, exists := state.Parameters["name"]; exists {
+					product.Name = v.(string)
+				}
+				if v, exists := state.Parameters["price"]; exists {
+					product.Price = v.(float64)
+				}
+				products.Reset(product)
+				return nil, nil
+			},
+			"a store exists": func(setup bool, state models.ProviderState) (models.ProviderStateResponse, error) {
+				store := &domain.Store{
+					ID:   "store-id",
+					Name: "TheStore",
+				}
+				if v, exists := state.Parameters["id"]; exists {
+					store.ID = v.(string)
+				}
+				if v, exists := state.Parameters["name"]; exists {
+					store.Name = v.(string)
+				}
+				stores.Reset(store)
+				return nil, nil
+			},
+		},
+	}))
+	// pact, err := provider.HTTPVerifier{}(v4.Config{
+	// 	Provider: "stores-pub",
+	// 	Consumer: "baskets-sub",
+	// 	PactDir:  "./pacts",
+	// })
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+	//
+	// pact := dsl.Pact{
+	// 	Provider: "baskets-api",
+	// }
+	// _, err = pact.VerifyProvider(t, types.VerifyRequest{
+	// 	ProviderBaseURL:            fmt.Sprintf("http://%s", webConfig.Address()),
+	// 	ProviderVersion:            "1.0.0",
+	// 	BrokerURL:                  "http://127.0.0.1:9292",
+	// 	BrokerUsername:             "pactuser",
+	// 	BrokerPassword:             "pactpass",
+	// 	PublishVerificationResults: true,
+	// 	FailIfNoPactsFound:         true,
+	// 	AfterEach: func() error {
+	// 		baskets.Reset()
+	// 		products.Reset()
+	// 		stores.Reset()
+	// 		return nil
+	// 	},
+	// 	StateHandlers: map[string]types.StateHandler{
+	// 		"the product exists": func() error {
+	// 			basket := domain.NewBasket("basket-id")
+	// 			basket.CustomerID = "customer-id"
+	// 			basket.Items = map[string]domain.Item{}
+	// 			basket.Status = domain.BasketIsOpen
+	// 			baskets.Reset(basket)
+	// 			products.Reset(&domain.Product{
+	// 				ID:      "product-id",
+	// 				StoreID: "store-id",
+	// 				Name:    "TheProduct",
+	// 				Price:   10.00,
+	// 			})
+	// 			stores.Reset(&domain.Store{
+	// 				ID:   "store-id",
+	// 				Name: "TheStore",
+	// 			})
+	// 			return nil
+	// 		},
+	// 	},
+	// })
+	// if err != nil {
+	// 	t.Error(err)
+	// }
 }

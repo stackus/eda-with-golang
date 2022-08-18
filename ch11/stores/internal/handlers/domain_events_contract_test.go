@@ -16,7 +16,7 @@ import (
 func TestStoresProducer(t *testing.T) {
 	var err error
 
-	type rawEvent struct {
+	type rawMessage struct {
 		Name    string
 		Payload json.RawMessage
 	}
@@ -40,7 +40,7 @@ func TestStoresProducer(t *testing.T) {
 		},
 		MessageHandlers: map[string]message.Handler{
 			"a StoreCreated message": func(states []models.ProviderState) (message.Body, message.Metadata, error) {
-				event := rawEvent{
+				msg := rawMessage{
 					Name: storespb.StoreCreatedEvent,
 					Payload: reg.MustSerialize(storespb.StoreCreatedEvent, &storespb.StoreCreated{
 						Id:       "store-id",
@@ -49,7 +49,18 @@ func TestStoresProducer(t *testing.T) {
 					}),
 				}
 
-				return event, nil, nil
+				return msg, nil, nil
+			},
+			"a StoreRebranded message": func(states []models.ProviderState) (message.Body, message.Metadata, error) {
+				msg := rawMessage{
+					Name: storespb.StoreRebrandedEvent,
+					Payload: reg.MustSerialize(storespb.StoreRebrandedEvent, &storespb.StoreRebranded{
+						Id:   "store-id",
+						Name: "RebrandedStore",
+					}),
+				}
+
+				return msg, nil, nil
 			},
 		},
 	})

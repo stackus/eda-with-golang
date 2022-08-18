@@ -8,7 +8,6 @@
         "Name": "storesapi.StoreCreated",
         "Payload": {
           "id": "store-id",
-          "location": "NewLocation",
           "name": "NewStore"
         }
       },
@@ -27,12 +26,32 @@
       },
       "metadata": {
         "contentType": "application/json"
-      },
-      "providerStates": [
-        {
-          "name": "a new store is created"
+      }
+    },
+    {
+      "contents": {
+        "Name": "storesapi.StoreRebranded",
+        "Payload": {
+          "id": "store-id",
+          "name": "RebrandedStore"
         }
-      ]
+      },
+      "description": "a StoreRebranded message",
+      "matchingRules": {
+        "body": {
+          "$.Payload": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "contentType": "application/json"
+      }
     }
   ],
   "metadata": {

@@ -1,4 +1,4 @@
-//go:build integration
+//go:build integration || database
 
 package postgres
 
@@ -32,6 +32,9 @@ type productCacheSuite struct {
 }
 
 func TestProductCacheRepository(t *testing.T) {
+	if testing.Short() {
+		t.Skip("short mode: skipping")
+	}
 	suite.Run(t, &productCacheSuite{})
 }
 
@@ -94,78 +97,86 @@ func (s *productCacheSuite) TearDownSuite() {
 }
 
 func (s *productCacheSuite) SetupTest() {
-	_, err := s.db.ExecContext(context.Background(), "TRUNCATE baskets.products_cache")
-	if err != nil {
-		s.T().Fatal(err)
-	}
 	s.mock = domain.NewMockProductRepository(s.T())
 	s.repo = NewProductCacheRepository("baskets.products_cache", s.db, s.mock)
 }
 func (s *productCacheSuite) TearDownTest() {
+	_, err := s.db.ExecContext(context.Background(), "TRUNCATE baskets.products_cache")
+	if err != nil {
+		s.T().Fatal(err)
+	}
 }
 
 func (s *productCacheSuite) TestProductCacheRepository_Add() {
-	s.Assert().NoError(s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00))
+	s.NoError(s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00))
 	row := s.db.QueryRow("SELECT name FROM baskets.products_cache WHERE id = $1", "product-id")
-	if s.Assert().NoError(row.Err()) {
+	if s.NoError(row.Err()) {
 		var name string
-		s.Assert().NoError(row.Scan(&name))
-		s.Assert().Equal("product-name", name)
+		s.NoError(row.Scan(&name))
+		s.Equal("product-name", name)
 	}
 }
 
 func (s *productCacheSuite) TestProductCacheRepository_AddDupe() {
-	s.Assert().NoError(s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00))
-	s.Assert().NoError(s.repo.Add(context.Background(), "product-id", "store-id", "dupe-product-name", 10.00))
+	s.NoError(s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00))
+	s.NoError(s.repo.Add(context.Background(), "product-id", "store-id", "dupe-product-name", 10.00))
 	row := s.db.QueryRow("SELECT name FROM baskets.products_cache WHERE id = $1", "product-id")
-	if s.Assert().NoError(row.Err()) {
+	if s.NoError(row.Err()) {
 		var name string
-		s.Assert().NoError(row.Scan(&name))
-		s.Assert().Equal("product-name", name)
+		s.NoError(row.Scan(&name))
+		s.Equal("product-name", name)
 	}
 }
 
 func (s *productCacheSuite) TestProductCacheRepository_Rebrand() {
-	_ = s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00)
+	// Arrange
+	_, err := s.db.Exec("INSERT INTO baskets.products_cache (id, store_id, name, price) VALUES ('product-id', 'store-id', 'product-name', 10.00)")
+	s.NoError(err)
 
-	s.Assert().NoError(s.repo.Rebrand(context.Background(), "product-id", "new-product-name"))
+	// Act
+	s.NoError(s.repo.Rebrand(context.Background(), "product-id", "new-product-name"))
+
+	// Assert
 	row := s.db.QueryRow("SELECT name FROM baskets.products_cache WHERE id = $1", "product-id")
-	if s.Assert().NoError(row.Err()) {
+	if s.NoError(row.Err()) {
 		var name string
-		s.Assert().NoError(row.Scan(&name))
-		s.Assert().Equal("new-product-name", name)
+		s.NoError(row.Scan(&name))
+		s.Equal("new-product-name", name)
 	}
 }
 
 func (s *productCacheSuite) TestProductCacheRepository_UpdatePrice() {
-	_ = s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00)
+	_, err := s.db.Exec("INSERT INTO baskets.products_cache (id, store_id, name, price) VALUES ('product-id', 'store-id', 'product-name', 10.00)")
+	s.NoError(err)
 
-	s.Assert().NoError(s.repo.UpdatePrice(context.Background(), "product-id", 2.00))
+	s.NoError(s.repo.UpdatePrice(context.Background(), "product-id", 2.00))
 	row := s.db.QueryRow("SELECT price FROM baskets.products_cache WHERE id = $1", "product-id")
-	if s.Assert().NoError(row.Err()) {
+	if s.NoError(row.Err()) {
 		var price float64
-		s.Assert().NoError(row.Scan(&price))
-		s.Assert().Equal(12.00, price)
+		s.NoError(row.Scan(&price))
+		s.Equal(12.00, price)
 	}
 }
 func (s *productCacheSuite) TestProductCacheRepository_Remove() {
-	_ = s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00)
+	_, err := s.db.Exec("INSERT INTO baskets.products_cache (id, store_id, name, price) VALUES ('product-id', 'store-id', 'product-name', 10.00)")
+	s.NoError(err)
 
-	s.Assert().NoError(s.repo.Remove(context.Background(), "product-id"))
+	s.NoError(s.repo.Remove(context.Background(), "product-id"))
 	row := s.db.QueryRow("SELECT name FROM baskets.products_cache WHERE id = $1", "product-id")
-	if s.Assert().NoError(row.Err()) {
+	if s.NoError(row.Err()) {
 		var name string
-		s.Assert().Error(row.Scan(&name))
+		s.Error(row.Scan(&name))
 	}
 }
 
 func (s *productCacheSuite) TestProductCacheRepository_Find() {
-	_ = s.repo.Add(context.Background(), "product-id", "store-id", "product-name", 10.00)
+	_, err := s.db.Exec("INSERT INTO baskets.products_cache (id, store_id, name, price) VALUES ('product-id', 'store-id', 'product-name', 10.00)")
+	s.NoError(err)
 
 	product, err := s.repo.Find(context.Background(), "product-id")
-	if s.Assert().NoError(err) {
-		s.Assert().NotNil(product)
-		s.Assert().Equal("product-name", product.Name)
+	if s.NoError(err) {
+		s.NotNil(product)
+		s.Equal("product-name", product.Name)
 	}
 }
 
@@ -178,8 +189,8 @@ func (s *productCacheSuite) TestProductCacheRepository_FindFromFallback() {
 	}, nil)
 
 	product, err := s.repo.Find(context.Background(), "product-id")
-	if s.Assert().NoError(err) {
-		s.Assert().NotNil(product)
-		s.Assert().Equal("product-name", product.Name)
+	if s.NoError(err) {
+		s.NotNil(product)
+		s.Equal("product-name", product.Name)
 	}
 }

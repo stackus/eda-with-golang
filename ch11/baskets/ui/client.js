@@ -10,7 +10,10 @@ class Client {
   }
 
   addItem(basketId, productId, quantity = 1) {
-    return axios.put(`${this.host}/api/baskets/${basketId}/addItem`, {productId, quantity})
+    return axios.put(
+      `${this.host}/api/baskets/${basketId}/addItem`,
+      {productId, quantity}
+    )
   }
 }
 

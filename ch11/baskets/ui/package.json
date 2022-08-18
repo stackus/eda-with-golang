@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "test": "mocha *.spec.js",
-    "pact:publish": "pact-broker publish ./pacts --consumer-app-version=1.0.0 --auto-detect-version-properties --broker-base-url=http://127.0.0.1:9292 --broker-username=pactuser --broker-password=pactpass"
+    "pact:publish": "pact-broker publish ./pacts --merge --consumer-app-version=1.0.0 --auto-detect-version-properties --broker-base-url=http://127.0.0.1:9292 --broker-username=pactuser --broker-password=pactpass"
   },
   "dependencies": {
     "axios": "^0.27.2"
