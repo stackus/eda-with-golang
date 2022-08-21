@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"eda-in-golang/internal/ddd"
 	"eda-in-golang/stores/internal/domain"
 )
 
@@ -12,12 +13,14 @@ type RebrandStore struct {
 }
 
 type RebrandStoreHandler struct {
-	stores domain.StoreRepository
+	stores    domain.StoreRepository
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewRebrandStoreHandler(stores domain.StoreRepository) RebrandStoreHandler {
+func NewRebrandStoreHandler(stores domain.StoreRepository, publisher ddd.EventPublisher[ddd.Event]) RebrandStoreHandler {
 	return RebrandStoreHandler{
-		stores: stores,
+		stores:    stores,
+		publisher: publisher,
 	}
 }
 
@@ -27,9 +30,15 @@ func (h RebrandStoreHandler) RebrandStore(ctx context.Context, cmd RebrandStore)
 		return err
 	}
 
-	if err = store.Rebrand(cmd.Name); err != nil {
+	event, err := store.Rebrand(cmd.Name)
+	if err != nil {
 		return err
 	}
 
-	return h.stores.Save(ctx, store)
+	err = h.stores.Save(ctx, store)
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, event)
 }

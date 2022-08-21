@@ -29,6 +29,11 @@ func TestStoresConsumer(t *testing.T) {
 		products *domain.MockProductCacheRepository
 	}
 
+	type rawEvent struct {
+		Name    string
+		Payload map[string]any
+	}
+
 	reg := registry.New()
 	err := storespb.RegistrationsWithSerde(serdes.NewJsonSerde(reg))
 	if err != nil {
@@ -45,14 +50,16 @@ func TestStoresConsumer(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		given   []models.ProviderState
-		expects string
-		message Map
-		on      func(m mocks)
+		given    []models.ProviderState
+		metadata map[string]string
+		content  Map
+		on       func(m mocks)
 	}{
-		"AddStore": {
-			expects: "a StoreCreated message",
-			message: Map{
+		"a StoreCreated message": {
+			metadata: map[string]string{
+				"subject": storespb.StoreAggregateChannel,
+			},
+			content: Map{
 				"Name": String(storespb.StoreCreatedEvent),
 				"Payload": Like(Map{
 					"id":   String("store-id"),
@@ -63,9 +70,11 @@ func TestStoresConsumer(t *testing.T) {
 				m.stores.On("Add", mock.Anything, "store-id", "NewStore").Return(nil)
 			},
 		},
-		"RebrandStore": {
-			expects: "a StoreRebranded message",
-			message: Map{
+		"a StoreRebranded message": {
+			metadata: map[string]string{
+				"subject": storespb.StoreAggregateChannel,
+			},
+			content: Map{
 				"Name": String(storespb.StoreRebrandedEvent),
 				"Payload": Like(Map{
 					"id":   String("store-id"),
@@ -87,29 +96,33 @@ func TestStoresConsumer(t *testing.T) {
 				tc.on(m)
 			}
 			handlers := NewIntegrationEventHandlers(m.stores, m.products)
+			msgConsumerFn := func(contents v4.MessageContents) error {
+				event := contents.Content.(*rawEvent)
+
+				data, err := json.Marshal(event.Payload)
+				if err != nil {
+					return err
+				}
+				payload := reg.MustDeserialize(event.Name, data)
+
+				return handlers.HandleEvent(
+					context.Background(),
+					ddd.NewEvent(event.Name, payload),
+				)
+			}
 
 			message := pact.AddAsynchronousMessage()
 			for _, given := range tc.given {
 				message = message.GivenWithParameter(given)
 			}
 			assert.NoError(t, message.
-				ExpectsToReceive(tc.expects).
-				WithJSONContent(tc.message).
-				ConsumedBy(func(contents v4.MessageContents) error {
-					message := contents.Content.(map[string]any)
-
-					data, err := json.Marshal(message["Payload"])
-					if err != nil {
-						return err
-					}
-					payload, err := reg.Deserialize(message["Name"].(string), data)
-					if err != nil {
-						return err
-					}
-
-					return handlers.HandleEvent(context.Background(), ddd.NewEvent(message["Name"].(string), payload))
-				}).
-				Verify(t))
+				ExpectsToReceive(name).
+				WithMetadata(tc.metadata).
+				WithJSONContent(tc.content).
+				AsType(&rawEvent{}).
+				ConsumedBy(msgConsumerFn).
+				Verify(t),
+			)
 		})
 	}
 }

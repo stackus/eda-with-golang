@@ -25,7 +25,8 @@
         }
       },
       "metadata": {
-        "contentType": "application/json"
+        "contentType": "application/json",
+        "subject": "mallbots.stores.events.Store"
       }
     },
     {
@@ -50,7 +51,8 @@
         }
       },
       "metadata": {
-        "contentType": "application/json"
+        "contentType": "application/json",
+        "subject": "mallbots.stores.events.Store"
       }
     }
   ],

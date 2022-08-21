@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 
+	"eda-in-golang/internal/ddd"
 	"eda-in-golang/stores/internal/application/commands"
 	"eda-in-golang/stores/internal/application/queries"
 	"eda-in-golang/stores/internal/domain"
@@ -60,18 +61,19 @@ var _ App = (*Application)(nil)
 
 func New(stores domain.StoreRepository, products domain.ProductRepository,
 	catalog domain.CatalogRepository, mall domain.MallRepository,
+	publisher ddd.EventPublisher[ddd.Event],
 ) *Application {
 	return &Application{
 		appCommands: appCommands{
-			CreateStoreHandler:          commands.NewCreateStoreHandler(stores),
-			EnableParticipationHandler:  commands.NewEnableParticipationHandler(stores),
-			DisableParticipationHandler: commands.NewDisableParticipationHandler(stores),
-			RebrandStoreHandler:         commands.NewRebrandStoreHandler(stores),
-			AddProductHandler:           commands.NewAddProductHandler(products),
-			RebrandProductHandler:       commands.NewRebrandProductHandler(products),
-			IncreaseProductPriceHandler: commands.NewIncreaseProductPriceHandler(products),
-			DecreaseProductPriceHandler: commands.NewDecreaseProductPriceHandler(products),
-			RemoveProductHandler:        commands.NewRemoveProductHandler(products),
+			CreateStoreHandler:          commands.NewCreateStoreHandler(stores, publisher),
+			EnableParticipationHandler:  commands.NewEnableParticipationHandler(stores, publisher),
+			DisableParticipationHandler: commands.NewDisableParticipationHandler(stores, publisher),
+			RebrandStoreHandler:         commands.NewRebrandStoreHandler(stores, publisher),
+			AddProductHandler:           commands.NewAddProductHandler(products, publisher),
+			RebrandProductHandler:       commands.NewRebrandProductHandler(products, publisher),
+			IncreaseProductPriceHandler: commands.NewIncreaseProductPriceHandler(products, publisher),
+			DecreaseProductPriceHandler: commands.NewDecreaseProductPriceHandler(products, publisher),
+			RemoveProductHandler:        commands.NewRemoveProductHandler(products, publisher),
 		},
 		appQueries: appQueries{
 			GetStoreHandler:               queries.NewGetStoreHandler(mall),

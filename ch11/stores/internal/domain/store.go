@@ -34,7 +34,7 @@ func NewStore(id string) *Store {
 	}
 }
 
-func CreateStore(id, name, location string) (*Store, error) {
+func (s *Store) InitStore(id, name, location string) (ddd.Event, error) {
 	if name == "" {
 		return nil, ErrStoreNameIsBlank
 	}
@@ -43,49 +43,47 @@ func CreateStore(id, name, location string) (*Store, error) {
 		return nil, ErrStoreLocationIsBlank
 	}
 
-	store := NewStore(id)
-
-	store.AddEvent(StoreCreatedEvent, &StoreCreated{
+	s.AddEvent(StoreCreatedEvent, &StoreCreated{
 		Name:     name,
 		Location: location,
 	})
 
-	return store, nil
+	return ddd.NewEvent(StoreCreatedEvent, s), nil
 }
 
 // Key implements registry.Registerable
 func (Store) Key() string { return StoreAggregate }
 
-func (s *Store) EnableParticipation() (err error) {
+func (s *Store) EnableParticipation() (ddd.Event, error) {
 	if s.Participating {
-		return ErrStoreIsAlreadyParticipating
+		return nil, ErrStoreIsAlreadyParticipating
 	}
 
 	s.AddEvent(StoreParticipationEnabledEvent, &StoreParticipationToggled{
 		Participating: true,
 	})
 
-	return
+	return ddd.NewEvent(StoreParticipationEnabledEvent, s), nil
 }
 
-func (s *Store) DisableParticipation() (err error) {
+func (s *Store) DisableParticipation() (ddd.Event, error) {
 	if !s.Participating {
-		return ErrStoreIsAlreadyNotParticipating
+		return nil, ErrStoreIsAlreadyNotParticipating
 	}
 
 	s.AddEvent(StoreParticipationDisabledEvent, &StoreParticipationToggled{
 		Participating: false,
 	})
 
-	return
+	return ddd.NewEvent(StoreParticipationDisabledEvent, s), nil
 }
 
-func (s *Store) Rebrand(name string) error {
+func (s *Store) Rebrand(name string) (ddd.Event, error) {
 	s.AddEvent(StoreRebrandedEvent, &StoreRebranded{
 		Name: name,
 	})
 
-	return nil
+	return ddd.NewEvent(StoreRebrandedEvent, s), nil
 }
 
 // ApplyEvent implements es.EventApplier

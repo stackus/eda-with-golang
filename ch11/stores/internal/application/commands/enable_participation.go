@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"eda-in-golang/internal/ddd"
 	"eda-in-golang/stores/internal/domain"
 )
 
@@ -11,12 +12,14 @@ type EnableParticipation struct {
 }
 
 type EnableParticipationHandler struct {
-	stores domain.StoreRepository
+	stores    domain.StoreRepository
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewEnableParticipationHandler(stores domain.StoreRepository) EnableParticipationHandler {
+func NewEnableParticipationHandler(stores domain.StoreRepository, publisher ddd.EventPublisher[ddd.Event]) EnableParticipationHandler {
 	return EnableParticipationHandler{
-		stores: stores,
+		stores:    stores,
+		publisher: publisher,
 	}
 }
 
@@ -26,9 +29,15 @@ func (h EnableParticipationHandler) EnableParticipation(ctx context.Context, cmd
 		return err
 	}
 
-	if err = store.EnableParticipation(); err != nil {
+	event, err := store.EnableParticipation()
+	if err != nil {
 		return err
 	}
 
-	return h.stores.Save(ctx, store)
+	err = h.stores.Save(ctx, store)
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, event)
 }

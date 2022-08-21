@@ -35,3 +35,10 @@ type ProductRemoved struct{}
 
 // Key implements registry.Registerable
 func (ProductRemoved) Key() string { return ProductRemovedEvent }
+
+// Domain Events
+
+type ProductPriceDelta struct {
+	Product *Product
+	Delta   float64
+}

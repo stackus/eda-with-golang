@@ -99,8 +99,8 @@ func TestProvider(t *testing.T) {
 		}()
 	}
 
-	p := provider.HTTPVerifier{}
-	assert.NoError(t, p.VerifyProvider(t, provider.VerifyRequest{
+	verifier := provider.HTTPVerifier{}
+	assert.NoError(t, verifier.VerifyProvider(t, provider.VerifyRequest{
 		Provider:                   "baskets-api",
 		ProviderBaseURL:            fmt.Sprintf("http://%s", webConfig.Address()),
 		ProviderVersion:            "1.0.0",
@@ -108,7 +108,6 @@ func TestProvider(t *testing.T) {
 		BrokerUsername:             "pactuser",
 		BrokerPassword:             "pactpass",
 		PublishVerificationResults: true,
-		FailIfNoPactsFound:         true,
 		AfterEach: func() error {
 			baskets.Reset()
 			products.Reset()
@@ -172,54 +171,4 @@ func TestProvider(t *testing.T) {
 			},
 		},
 	}))
-	// pact, err := provider.HTTPVerifier{}(v4.Config{
-	// 	Provider: "stores-pub",
-	// 	Consumer: "baskets-sub",
-	// 	PactDir:  "./pacts",
-	// })
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	//
-	// pact := dsl.Pact{
-	// 	Provider: "baskets-api",
-	// }
-	// _, err = pact.VerifyProvider(t, types.VerifyRequest{
-	// 	ProviderBaseURL:            fmt.Sprintf("http://%s", webConfig.Address()),
-	// 	ProviderVersion:            "1.0.0",
-	// 	BrokerURL:                  "http://127.0.0.1:9292",
-	// 	BrokerUsername:             "pactuser",
-	// 	BrokerPassword:             "pactpass",
-	// 	PublishVerificationResults: true,
-	// 	FailIfNoPactsFound:         true,
-	// 	AfterEach: func() error {
-	// 		baskets.Reset()
-	// 		products.Reset()
-	// 		stores.Reset()
-	// 		return nil
-	// 	},
-	// 	StateHandlers: map[string]types.StateHandler{
-	// 		"the product exists": func() error {
-	// 			basket := domain.NewBasket("basket-id")
-	// 			basket.CustomerID = "customer-id"
-	// 			basket.Items = map[string]domain.Item{}
-	// 			basket.Status = domain.BasketIsOpen
-	// 			baskets.Reset(basket)
-	// 			products.Reset(&domain.Product{
-	// 				ID:      "product-id",
-	// 				StoreID: "store-id",
-	// 				Name:    "TheProduct",
-	// 				Price:   10.00,
-	// 			})
-	// 			stores.Reset(&domain.Store{
-	// 				ID:   "store-id",
-	// 				Name: "TheStore",
-	// 			})
-	// 			return nil
-	// 		},
-	// 	},
-	// })
-	// if err != nil {
-	// 	t.Error(err)
-	// }
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -8,13 +9,23 @@ import (
 	"github.com/pact-foundation/pact-go/v2/models"
 	"github.com/pact-foundation/pact-go/v2/provider"
 
+	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/registry"
 	"eda-in-golang/internal/registry/serdes"
+	"eda-in-golang/stores/internal/application"
+	"eda-in-golang/stores/internal/application/commands"
+	"eda-in-golang/stores/internal/domain"
 	"eda-in-golang/stores/storespb"
 )
 
 func TestStoresProducer(t *testing.T) {
 	var err error
+
+	stores := domain.NewFakeStoreRepository()
+	products := domain.NewFakeProductRepository()
+	mall := domain.NewFakeMallRepository()
+	catalog := domain.NewFakeCatalogRepository()
 
 	type rawMessage struct {
 		Name    string
@@ -36,31 +47,72 @@ func TestStoresProducer(t *testing.T) {
 			BrokerUsername:             "pactuser",
 			BrokerPassword:             "pactpass",
 			PublishVerificationResults: true,
-			FailIfNoPactsFound:         true,
+			AfterEach: func() error {
+				stores.Reset()
+				products.Reset()
+				return nil
+			},
 		},
 		MessageHandlers: map[string]message.Handler{
 			"a StoreCreated message": func(states []models.ProviderState) (message.Body, message.Metadata, error) {
-				msg := rawMessage{
-					Name: storespb.StoreCreatedEvent,
-					Payload: reg.MustSerialize(storespb.StoreCreatedEvent, &storespb.StoreCreated{
-						Id:       "store-id",
-						Name:     "NewStore",
-						Location: "NewLocation",
-					}),
+				dispatcher := ddd.NewEventDispatcher[ddd.Event]()
+				app := application.New(stores, products, catalog, mall, dispatcher)
+				publisher := am.NewFakeMessagePublisher[ddd.Event]()
+				handler := NewDomainEventHandlers(publisher)
+				RegisterDomainEventHandlers(dispatcher, handler)
+
+				err := app.CreateStore(context.Background(), commands.CreateStore{
+					ID:       "store-id",
+					Name:     "NewStore",
+					Location: "NewLocation",
+				})
+				if err != nil {
+					return nil, nil, err
 				}
 
-				return msg, nil, nil
+				subject, event, err := publisher.Last()
+				if err != nil {
+					return nil, nil, err
+				}
+
+				return rawMessage{
+						Name:    event.EventName(),
+						Payload: reg.MustSerialize(event.EventName(), event.Payload()),
+					}, map[string]any{
+						"subject": subject,
+					}, nil
 			},
 			"a StoreRebranded message": func(states []models.ProviderState) (message.Body, message.Metadata, error) {
-				msg := rawMessage{
-					Name: storespb.StoreRebrandedEvent,
-					Payload: reg.MustSerialize(storespb.StoreRebrandedEvent, &storespb.StoreRebranded{
-						Id:   "store-id",
-						Name: "RebrandedStore",
-					}),
+				dispatcher := ddd.NewEventDispatcher[ddd.Event]()
+				app := application.New(stores, products, catalog, mall, dispatcher)
+				publisher := am.NewFakeMessagePublisher[ddd.Event]()
+				handler := NewDomainEventHandlers(publisher)
+				RegisterDomainEventHandlers(dispatcher, handler)
+
+				store := domain.NewStore("store-id")
+				store.Name = "NewStore"
+				store.Location = "NewLocation"
+				stores.Reset(store)
+
+				err := app.RebrandStore(context.Background(), commands.RebrandStore{
+					ID:   "store-id",
+					Name: "RebrandedStore",
+				})
+				if err != nil {
+					return nil, nil, err
 				}
 
-				return msg, nil, nil
+				subject, event, err := publisher.Last()
+				if err != nil {
+					return nil, nil, err
+				}
+
+				return rawMessage{
+						Name:    event.EventName(),
+						Payload: reg.MustSerialize(event.EventName(), event.Payload()),
+					}, map[string]any{
+						"subject": subject,
+					}, nil
 			},
 		},
 	})
