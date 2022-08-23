@@ -80,7 +80,6 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 		reg := c.Get("registry").(registry.Registry)
 		return es.AggregateStoreWithMiddleware(
 			pg.NewEventStore("stores.events", tx, reg),
-			// es.NewEventPublisher(c.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.AggregateEvent])),
 			pg.NewSnapshotStore("stores.snapshots", tx, reg),
 		), nil
 	})
@@ -119,13 +118,13 @@ func (m *Module) Startup(ctx context.Context, mono monolith.Monolith) (err error
 		), nil
 	})
 	container.AddScoped("catalogHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.AggregateEvent](
+		return logging.LogEventHandlerAccess[ddd.Event](
 			handlers.NewCatalogHandlers(c.Get("catalog").(domain.CatalogRepository)),
 			"Catalog", c.Get("logger").(zerolog.Logger),
 		), nil
 	})
 	container.AddScoped("mallHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.AggregateEvent](
+		return logging.LogEventHandlerAccess[ddd.Event](
 			handlers.NewMallHandlers(c.Get("mall").(domain.MallRepository)),
 			"Mall", c.Get("logger").(zerolog.Logger),
 		), nil
@@ -162,7 +161,11 @@ func registrations(reg registry.Registry) (err error) {
 	serde := serdes.NewJsonSerde(reg)
 
 	// Store
-	if err = serde.Register(domain.Store{}); err != nil {
+	if err = serde.Register(domain.Store{}, func(v any) error {
+		store := v.(*domain.Store)
+		store.Aggregate = es.NewAggregate("", domain.StoreAggregate)
+		return nil
+	}); err != nil {
 		return
 	}
 	// store events

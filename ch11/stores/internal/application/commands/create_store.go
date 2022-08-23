@@ -33,7 +33,7 @@ func (h CreateStoreHandler) CreateStore(ctx context.Context, cmd CreateStore) er
 		return err
 	}
 
-	event, err := store.InitStore(cmd.ID, cmd.Name, cmd.Location)
+	event, err := store.InitStore(cmd.Name, cmd.Location)
 	if err != nil {
 		return err
 	}

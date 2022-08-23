@@ -27,7 +27,7 @@ func TestStoresProducer(t *testing.T) {
 	mall := domain.NewFakeMallRepository()
 	catalog := domain.NewFakeCatalogRepository()
 
-	type rawMessage struct {
+	type rawEvent struct {
 		Name    string
 		Payload json.RawMessage
 	}
@@ -55,12 +55,14 @@ func TestStoresProducer(t *testing.T) {
 		},
 		MessageHandlers: map[string]message.Handler{
 			"a StoreCreated message": func(states []models.ProviderState) (message.Body, message.Metadata, error) {
+				// Assign
 				dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 				app := application.New(stores, products, catalog, mall, dispatcher)
 				publisher := am.NewFakeMessagePublisher[ddd.Event]()
 				handler := NewDomainEventHandlers(publisher)
 				RegisterDomainEventHandlers(dispatcher, handler)
 
+				// Act
 				err := app.CreateStore(context.Background(), commands.CreateStore{
 					ID:       "store-id",
 					Name:     "NewStore",
@@ -70,12 +72,13 @@ func TestStoresProducer(t *testing.T) {
 					return nil, nil, err
 				}
 
+				// Assert
 				subject, event, err := publisher.Last()
 				if err != nil {
 					return nil, nil, err
 				}
 
-				return rawMessage{
+				return rawEvent{
 						Name:    event.EventName(),
 						Payload: reg.MustSerialize(event.EventName(), event.Payload()),
 					}, map[string]any{
@@ -107,7 +110,7 @@ func TestStoresProducer(t *testing.T) {
 					return nil, nil, err
 				}
 
-				return rawMessage{
+				return rawEvent{
 						Name:    event.EventName(),
 						Payload: reg.MustSerialize(event.EventName(), event.Payload()),
 					}, map[string]any{

@@ -5,8 +5,8 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/stackus/errors"
 
-	"eda-in-golang/stores/models"
 	"eda-in-golang/stores/storesclient"
+	"eda-in-golang/stores/storesclient/models"
 	"eda-in-golang/stores/storesclient/store"
 )
 
@@ -95,8 +95,8 @@ func (c *storesContext) fetchStores() error {
 		return err
 	}
 
-	for _, store := range resp.Payload.Stores {
-		c.stores[store.Name] = store.ID
+	for _, s := range resp.Payload.Stores {
+		c.stores[s.Name] = s.ID
 	}
 
 	c.fetchedStores = true

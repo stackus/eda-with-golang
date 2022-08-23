@@ -34,7 +34,7 @@ func NewStore(id string) *Store {
 	}
 }
 
-func (s *Store) InitStore(id, name, location string) (ddd.Event, error) {
+func (s *Store) InitStore(name, location string) (ddd.Event, error) {
 	if name == "" {
 		return nil, ErrStoreNameIsBlank
 	}

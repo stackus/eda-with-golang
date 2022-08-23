@@ -7,7 +7,7 @@ import (
 
 	"eda-in-golang/customers/customersclient"
 	"eda-in-golang/customers/customersclient/customer"
-	"eda-in-golang/customers/models"
+	"eda-in-golang/customers/customersclient/models"
 )
 
 type customersContext struct {
@@ -24,7 +24,7 @@ func newCustomersContext(sc *suiteContext) featureContext {
 }
 
 func (c *customersContext) register(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I register a new customer as "([^"]*)" and number "([^"]*)"$`, c.iRegisterANewCustomerAsAndNumber)
+	ctx.Step(`^I register a new customer as "([^"]*)"$`, c.iRegisterANewCustomerAs)
 	ctx.Step(`^(?:ensure |expect )?a customer named "([^"]*)" (?:to )?exists?$`, c.expectACustomerNamedToExist)
 	ctx.Step(`^(?:ensure |expect )?no customer named "([^"]*)" (?:to )?exists?$`, c.expectNoCustomerNamedToExist)
 
@@ -38,10 +38,10 @@ func (c *customersContext) reset() {
 	c.truncate("customers.outbox")
 }
 
-func (c *customersContext) iRegisterANewCustomerAsAndNumber(name, number string) {
+func (c *customersContext) iRegisterANewCustomerAs(name string) {
 	resp, err := c.client.Customer.CreateCustomer(customer.NewCreateCustomerParams().WithBody(&models.CustomerspbRegisterCustomerRequest{
 		Name:      name,
-		SmsNumber: number,
+		SmsNumber: "555-555-1212",
 	}))
 	if err != nil {
 		c.lastErr = err

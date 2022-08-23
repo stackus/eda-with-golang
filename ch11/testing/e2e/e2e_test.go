@@ -1,4 +1,4 @@
-// go:build e2e
+//go:build e2e
 
 package e2e
 
@@ -23,11 +23,11 @@ func TestEndToEnd(t *testing.T) {
 
 	suite := newTestSuite(suiteConfig{
 		paths: []string{
-			"feature/baskets",
-			"feature/customers",
+			"features/baskets",
+			"features/customers",
 			"features/kiosk",
-			"feature/orders",
-			"feature/stores",
+			"features/orders",
+			"features/stores",
 		},
 		featureCtxs: []featureContext{
 			sc,
