@@ -16,11 +16,11 @@ import (
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/jetstream"
-	"eda-in-golang/internal/monolith"
 	pg "eda-in-golang/internal/postgres"
 	"eda-in-golang/internal/registry"
 	"eda-in-golang/internal/registry/serdes"
 	"eda-in-golang/internal/sec"
+	"eda-in-golang/internal/system"
 	"eda-in-golang/internal/tm"
 	"eda-in-golang/ordering/orderingpb"
 	"eda-in-golang/payments/paymentspb"
@@ -28,7 +28,11 @@ import (
 
 type Module struct{}
 
-func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
+func (Module) Startup(ctx context.Context, mono system.Service) (err error) {
+	return Root(ctx, mono)
+}
+
+func Root(ctx context.Context, svc system.Service) (err error) {
 	container := di.New()
 	// setup Driven adapters
 	container.AddSingleton("registry", func(c di.Container) (any, error) {
@@ -51,13 +55,13 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 		return reg, nil
 	})
 	container.AddSingleton("logger", func(c di.Container) (any, error) {
-		return mono.Logger(), nil
+		return svc.Logger(), nil
 	})
 	container.AddSingleton("stream", func(c di.Container) (any, error) {
-		return jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), c.Get("logger").(zerolog.Logger)), nil
+		return jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), c.Get("logger").(zerolog.Logger)), nil
 	})
 	container.AddSingleton("db", func(c di.Container) (any, error) {
-		return mono.DB(), nil
+		return svc.DB(), nil
 	})
 	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
 		return tm.NewOutboxProcessor(
@@ -114,7 +118,7 @@ func (Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
 				c.Get("sagaRepo").(sec.SagaRepository[*models.CreateOrderData]),
 				c.Get("commandStream").(am.CommandStream),
 			),
-			"CreateOrderSaga", mono.Logger(),
+			"CreateOrderSaga", svc.Logger(),
 		), nil
 	})
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {

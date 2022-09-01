@@ -18,15 +18,19 @@ import (
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/jetstream"
-	"eda-in-golang/internal/monolith"
 	pg "eda-in-golang/internal/postgres"
 	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/system"
 	"eda-in-golang/internal/tm"
 )
 
 type Module struct{}
 
-func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error) {
+func (m Module) Startup(ctx context.Context, mono system.Service) (err error) {
+	return Root(ctx, mono)
+}
+
+func Root(ctx context.Context, svc system.Service) (err error) {
 	container := di.New()
 	// setup Driven adapters
 	container.AddSingleton("registry", func(c di.Container) (any, error) {
@@ -37,16 +41,16 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 		return reg, nil
 	})
 	container.AddSingleton("logger", func(c di.Container) (any, error) {
-		return mono.Logger(), nil
+		return svc.Logger(), nil
 	})
 	container.AddSingleton("stream", func(c di.Container) (any, error) {
-		return jetstream.NewStream(mono.Config().Nats.Stream, mono.JS(), mono.Logger()), nil
+		return jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger()), nil
 	})
 	container.AddSingleton("domainDispatcher", func(c di.Container) (any, error) {
 		return ddd.NewEventDispatcher[ddd.AggregateEvent](), nil
 	})
 	container.AddSingleton("db", func(c di.Container) (any, error) {
-		return mono.DB(), nil
+		return svc.DB(), nil
 	})
 	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
 		return tm.NewOutboxProcessor(
@@ -106,13 +110,13 @@ func (m Module) Startup(ctx context.Context, mono monolith.Monolith) (err error)
 	})
 
 	// setup Driver adapters
-	if err = grpc.RegisterServerTx(container, mono.RPC()); err != nil {
+	if err = grpc.RegisterServerTx(container, svc.RPC()); err != nil {
 		return err
 	}
-	if err = rest.RegisterGateway(ctx, mono.Mux(), mono.Config().Rpc.Address()); err != nil {
+	if err = rest.RegisterGateway(ctx, svc.Mux(), svc.Config().Rpc.Address()); err != nil {
 		return err
 	}
-	if err = rest.RegisterSwagger(mono.Mux()); err != nil {
+	if err = rest.RegisterSwagger(svc.Mux()); err != nil {
 		return err
 	}
 	handlers.RegisterDomainEventHandlersTx(container)
