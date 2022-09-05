@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/nats-io/nats.go"
 	"github.com/pressly/goose/v3"
 	"github.com/rs/zerolog"
@@ -96,6 +97,8 @@ func (s *System) Logger() zerolog.Logger {
 
 func (s *System) InitMux() {
 	s.mux = chi.NewMux()
+
+	s.mux.Use(middleware.Heartbeat("/liveness"))
 }
 
 func (s *System) Mux() *chi.Mux {

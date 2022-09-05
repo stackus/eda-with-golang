@@ -1,0 +1,1 @@
+CREATE DATABASE commondb TEMPLATE template0;
