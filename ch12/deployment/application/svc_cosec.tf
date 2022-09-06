@@ -37,7 +37,7 @@ resource kubernetes_deployment_v1 cosec {
         hostname = "cosec"
         container {
           name              = "cosec"
-          image             = "${aws_ecr_repository.services["cosec"].repository_url}:latest"
+          image             = "${local.aws_ecr_url}/cosec:latest"
           image_pull_policy = "Always"
           env_from {
             config_map_ref {
@@ -69,6 +69,12 @@ resource kubernetes_deployment_v1 cosec {
       }
     }
   }
+
+  depends_on = [
+    kubernetes_namespace_v1.namespace,
+    kubernetes_config_map_v1.common,
+    kubernetes_secret_v1.cosec
+  ]
 }
 
 #// https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_v1

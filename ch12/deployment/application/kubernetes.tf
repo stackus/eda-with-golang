@@ -1,5 +1,5 @@
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace
-resource kubernetes_namespace mallbots {
+resource kubernetes_namespace_v1 namespace {
   metadata {
     name = local.project
   }
@@ -19,6 +19,10 @@ resource kubernetes_config_map_v1 common {
     NATS_URL     = "nats:4222"
     RPC_SERVICES = "STORES=stores:9000,CUSTOMERS=customers:9000"
   }
+
+  depends_on = [
+    kubernetes_namespace_v1.namespace
+  ]
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress_v1

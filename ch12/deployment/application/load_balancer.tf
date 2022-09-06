@@ -1,5 +1,5 @@
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1
-resource kubernetes_namespace_v1 lb {
+resource kubernetes_namespace_v1 nginx_lb {
   metadata {
     name   = "ingress-nginx"
     labels = {
@@ -10,7 +10,7 @@ resource kubernetes_namespace_v1 lb {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_account_v1
-resource kubernetes_service_account_v1 lb {
+resource kubernetes_service_account_v1 nginx_lb {
   metadata {
     name      = "ingress-nginx"
     namespace = "ingress-nginx"
@@ -24,7 +24,7 @@ resource kubernetes_service_account_v1 lb {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_account_v1
-resource kubernetes_service_account_v1 lb_admission {
+resource kubernetes_service_account_v1 nginx_lb_admission {
   metadata {
     name      = "ingress-nginx-admission"
     namespace = "ingress-nginx"
@@ -37,7 +37,7 @@ resource kubernetes_service_account_v1 lb_admission {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/role_v1
-resource kubernetes_role_v1 lb {
+resource kubernetes_role_v1 nginx_lb {
   metadata {
     name      = "ingress-nginx"
     namespace = "ingress-nginx"
@@ -118,7 +118,7 @@ resource kubernetes_role_v1 lb {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/role_v1
-resource kubernetes_role_v1 lb_admission {
+resource kubernetes_role_v1 nginx_lb_admission {
   metadata {
     name      = "ingress-nginx-admission"
     namespace = "ingress-nginx"
@@ -137,7 +137,7 @@ resource kubernetes_role_v1 lb_admission {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/cluster_role_v1
-resource kubernetes_cluster_role_v1 lb {
+resource kubernetes_cluster_role_v1 nginx_lb {
   metadata {
     name   = "ingress-nginx"
     labels = {
@@ -196,7 +196,7 @@ resource kubernetes_cluster_role_v1 lb {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/cluster_role_v1
-resource kubernetes_cluster_role_v1 lb_admission {
+resource kubernetes_cluster_role_v1 nginx_lb_admission {
   metadata {
     name   = "ingress-nginx-admission"
     labels = {
@@ -214,7 +214,7 @@ resource kubernetes_cluster_role_v1 lb_admission {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/role_binding_v1
-resource kubernetes_role_binding_v1 lb {
+resource kubernetes_role_binding_v1 nginx_lb {
   metadata {
     name      = "ingress-nginx"
     namespace = "ingress-nginx"
@@ -238,7 +238,7 @@ resource kubernetes_role_binding_v1 lb {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/role_binding_v1
-resource kubernetes_role_binding_v1 lb_admission {
+resource kubernetes_role_binding_v1 nginx_lb_admission {
   metadata {
     name      = "ingress-nginx-admission"
     namespace = "ingress-nginx"
@@ -262,7 +262,7 @@ resource kubernetes_role_binding_v1 lb_admission {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/cluster_role_binding_v1
-resource kubernetes_cluster_role_binding_v1 lb {
+resource kubernetes_cluster_role_binding_v1 nginx_lb {
   metadata {
     name   = "ingress-nginx"
     labels = {
@@ -284,7 +284,7 @@ resource kubernetes_cluster_role_binding_v1 lb {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/cluster_role_binding_v1
-resource kubernetes_cluster_role_binding_v1 lb_admission {
+resource kubernetes_cluster_role_binding_v1 nginx_lb_admission {
   metadata {
     name   = "ingress-nginx-admission"
     labels = {
@@ -307,7 +307,7 @@ resource kubernetes_cluster_role_binding_v1 lb_admission {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/config_map_v1
-resource kubernetes_config_map_v1 lb {
+resource kubernetes_config_map_v1 nginx_lb {
   metadata {
     name      = "ingress-nginx-controller"
     namespace = "ingress-nginx"
@@ -323,7 +323,7 @@ resource kubernetes_config_map_v1 lb {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_v1
-resource kubernetes_service_v1 lb_controller {
+resource kubernetes_service_v1 nginx_lb_controller {
   metadata {
     name      = "ingress-nginx-controller"
     namespace = "ingress-nginx"
@@ -363,7 +363,7 @@ resource kubernetes_service_v1 lb_controller {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_v1
-resource kubernetes_service_v1 lb_controller_admission {
+resource kubernetes_service_v1 nginx_lb_controller_admission {
   metadata {
     name      = "ingress-nginx-controller-admission"
     namespace = "ingress-nginx"
@@ -390,7 +390,7 @@ resource kubernetes_service_v1 lb_controller_admission {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/deployment_v1
-resource kubernetes_deployment_v1 lb_controller {
+resource kubernetes_deployment_v1 nginx_lb_controller {
   metadata {
     name      = "ingress-nginx-controller"
     namespace = "ingress-nginx"
@@ -538,7 +538,7 @@ resource kubernetes_deployment_v1 lb_controller {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/job_v1
-resource kubernetes_job_v1 lb_admission_create {
+resource kubernetes_job_v1 nginx_lb_admission_create {
   metadata {
     name      = "ingress-nginx-admission-create"
     namespace = "ingress-nginx"
@@ -595,7 +595,7 @@ resource kubernetes_job_v1 lb_admission_create {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/job_v1
-resource kubernetes_job_v1 lb_admission_patch {
+resource kubernetes_job_v1 nginx_lb_admission_patch {
   metadata {
     name      = "ingress-nginx-admission-patch"
     namespace = "ingress-nginx"
@@ -657,7 +657,7 @@ resource kubernetes_job_v1 lb_admission_patch {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress_class_v1
-resource kubernetes_ingress_class_v1 lb_ingress {
+resource kubernetes_ingress_class_v1 nginx_lb_ingress {
   metadata {
     name   = "nginx"
     labels = {
@@ -672,7 +672,7 @@ resource kubernetes_ingress_class_v1 lb_ingress {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/validating_webhook_configuration_v1
-resource kubernetes_validating_webhook_configuration_v1 lb_admission {
+resource kubernetes_validating_webhook_configuration_v1 nginx_lb_admission {
   metadata {
     name   = "ingress-nginx-admission"
     labels = {
@@ -691,7 +691,7 @@ resource kubernetes_validating_webhook_configuration_v1 lb_admission {
     }
     side_effects              = "None"
     admission_review_versions = ["v1"]
-    failure_policy            = "Ignore"
+    failure_policy            = "Fail"
     client_config {
       service {
         name      = "ingress-nginx-controller-admission"

@@ -4,6 +4,12 @@ variable region {
   default     = "us-east-1"
 }
 
+variable services {
+  description = "List of MallBots microservices"
+  type        = list(string)
+  default     = ["baskets", "cosec", "customers", "depot", "ordering", "notifications", "payments", "search", "stores"]
+}
+
 variable project {
   description = "Project name"
   type        = string
