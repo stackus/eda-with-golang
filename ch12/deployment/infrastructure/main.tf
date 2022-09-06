@@ -33,3 +33,7 @@ output project {
   description = "Project name"
   value = var.project
 }
+
+output allowed_cidr_block {
+  value = var.allowed_cidr_block
+}

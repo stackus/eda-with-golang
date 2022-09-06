@@ -1,0 +1,2 @@
+CREATE SCHEMA cosec;
+GRANT CREATE, USAGE ON SCHEMA cosec TO cosec_user;

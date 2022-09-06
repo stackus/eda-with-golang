@@ -30,6 +30,17 @@ data terraform_remote_state infra {
   }
 }
 
+// https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+provider aws {
+  region = local.region
+
+  default_tags {
+    tags = {
+      Application = "MallBots"
+    }
+  }
+}
+
 // https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs
 provider docker {
   registry_auth {

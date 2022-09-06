@@ -1,70 +1,52 @@
-#// https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/config_map_v1
-#resource kubernetes_config_map_v1 baskets {
-#  metadata {
-#    name      = "baskets-config-map"
-#    namespace = local.project
-#  }
-#
-#  data = {
-#    WEB_PORT = ":80"
-#    RPC_PORT = ":9000"
-#  }
-#}
-
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1
-resource kubernetes_secret_v1 baskets {
+resource kubernetes_secret_v1 ordering {
   metadata {
-    name      = "baskets-secrets"
+    name      = "ordering-secrets"
     namespace = local.project
   }
 
   data = {
-    PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=baskets user=baskets_user password=baskets_pass search_path=baskets,public"
+    PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=ordering user=ordering_user password=ordering_pass search_path=ordering,public"
   }
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/deployment_v1
-resource kubernetes_deployment_v1 baskets {
+resource kubernetes_deployment_v1 ordering {
   metadata {
-    name      = "baskets"
+    name      = "ordering"
     namespace = local.project
     labels    = {
-      app = "baskets"
+      app = "ordering"
     }
   }
   spec {
     replicas = 1
     selector {
       match_labels = {
-        "app.kubernetes.io/name" = "baskets"
+        "app.kubernetes.io/name" = "ordering"
       }
     }
     template {
       metadata {
-        name   = "baskets"
+        name   = "ordering"
         labels = {
-          "app.kubernetes.io/name" = "baskets"
+          "app.kubernetes.io/name" = "ordering"
         }
       }
       spec {
-        hostname = "baskets"
+        hostname = "ordering"
         container {
-          name              = "baskets"
-          image             = "${aws_ecr_repository.services["baskets"].repository_url}:latest"
+          name              = "ordering"
+          image             = "${aws_ecr_repository.services["ordering"].repository_url}:latest"
           image_pull_policy = "Always"
           env_from {
             config_map_ref {
               name = "common-config-map"
             }
           }
-#          env_from {
-#            config_map_ref {
-#              name = "baskets-config-map"
-#            }
-#          }
           env_from {
             secret_ref {
-              name = "baskets-secrets"
+              name = "ordering-secrets"
             }
           }
           port {
@@ -90,17 +72,17 @@ resource kubernetes_deployment_v1 baskets {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_v1
-resource kubernetes_service_v1 baskets {
+resource kubernetes_service_v1 ordering {
   metadata {
-    name      = "baskets"
+    name      = "ordering"
     namespace = local.project
     labels    = {
-      app = "baskets"
+      app = "ordering"
     }
   }
   spec {
     selector = {
-      "app.kubernetes.io/name" = "baskets"
+      "app.kubernetes.io/name" = "ordering"
     }
     session_affinity = "ClientIP"
     port {
@@ -120,21 +102,36 @@ resource kubernetes_service_v1 baskets {
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress_v1
-resource kubernetes_ingress_v1 baskets {
+resource kubernetes_ingress_v1 ordering {
   metadata {
-    name = "baskets-ingress"
+    name = "ordering-ingress"
     namespace = local.project
+    annotations = {
+      "nginx.ingress.kubernetes.io/whitelist-source-range" = local.allowed_cidr_block
+    }
   }
 
   spec {
     rule {
       http {
         path {
-          path = "/api/baskets/"
+          path = "/api/ordering"
           path_type = "Prefix"
           backend {
             service {
-              name = "baskets"
+              name = "ordering"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+        path {
+          path = "/ordering-spec/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "ordering"
               port {
                 number = 80
               }

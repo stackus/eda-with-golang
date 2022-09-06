@@ -1,3 +1,5 @@
+//go:build contract
+
 package rest
 
 import (
@@ -5,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -21,6 +24,25 @@ import (
 	"eda-in-golang/internal/rpc"
 	"eda-in-golang/internal/web"
 )
+
+var pactBrokerURL string
+var pactUser string
+var pactPass string
+var pactToken string
+
+func init() {
+	getEnv := func(key, fallback string) string {
+		if value, ok := os.LookupEnv(key); ok {
+			return value
+		}
+		return fallback
+	}
+
+	pactBrokerURL = getEnv("PACT_URL", "http://127.0.0.1:9292")
+	pactUser = getEnv("PACT_USER", "pactuser")
+	pactPass = getEnv("PACT_PASS", "pactpass")
+	pactToken = getEnv("PACT_TOKEN", "")
+}
 
 func TestProvider(t *testing.T) {
 	var err error
@@ -104,9 +126,10 @@ func TestProvider(t *testing.T) {
 		Provider:                   "baskets-api",
 		ProviderBaseURL:            fmt.Sprintf("http://%s", webConfig.Address()),
 		ProviderVersion:            "1.0.0",
-		BrokerURL:                  "http://127.0.0.1:9292",
-		BrokerUsername:             "pactuser",
-		BrokerPassword:             "pactpass",
+		BrokerURL:                  pactBrokerURL,
+		BrokerToken:                pactToken,
+		BrokerUsername:             pactUser,
+		BrokerPassword:             pactPass,
 		PublishVerificationResults: true,
 		AfterEach: func() error {
 			baskets.Reset()

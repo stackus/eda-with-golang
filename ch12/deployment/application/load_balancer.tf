@@ -698,18 +698,6 @@ resource kubernetes_validating_webhook_configuration_v1 lb_admission {
         namespace = "ingress-nginx"
         path      = "/extensions/v1/ingresses"
       }
-      ca_bundle = <<EOF
------BEGIN CERTIFICATE-----
-MIIBdDCCARugAwIBAgIQZAo33gBADQ0uQqCR4vFUljAKBggqhkjOPQQDAjAPMQ0w
-CwYDVQQKEwRuaWwxMCAXDTIyMDkwNTA2Mzg1MVoYDzIxMjIwODEyMDYzODUxWjAP
-MQ0wCwYDVQQKEwRuaWwxMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE565nmZLZ
-CO8yZD1fxBZrR2gDj3XLK7az3L+g8/MUe+8U+8a+VgrCB1NgjjrPY23RGPQaFXsS
-hekeMWWS2495cKNXMFUwDgYDVR0PAQH/BAQDAgIEMBMGA1UdJQQMMAoGCCsGAQUF
-BwMBMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMxaSreFGm62s3S8ukuatyu/
-d/U1MAoGCCqGSM49BAMCA0cAMEQCICQXxNlEUzGJ8i8Qrzlh1cd3ZtQxY5X5k+bN
-or6i3bBeAiAWFdCGdwKSn0UFcgeBDz0kT//cpWmGPF++r3b6j2scIg==
------END CERTIFICATE-----
-EOF
     }
   }
 }

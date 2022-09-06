@@ -8,7 +8,6 @@ resource aws_ecr_repository services {
   force_delete = true
 }
 
-
 // https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/registry_image
 resource docker_registry_image services {
   for_each = toset(var.services)
@@ -22,4 +21,8 @@ resource docker_registry_image services {
       service = each.key
     }
   }
+}
+
+output ecr_url {
+  value = local.aws_ecr_url
 }

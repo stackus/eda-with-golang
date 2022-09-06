@@ -21,3 +21,33 @@ resource kubernetes_config_map_v1 common {
   }
 }
 
+// https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress_v1
+resource kubernetes_ingress_v1 swagger {
+  metadata {
+    name = "swagger-ingress"
+    namespace = local.project
+    annotations = {
+      "nginx.ingress.kubernetes.io/whitelist-source-range" = local.allowed_cidr_block
+    }
+  }
+
+  spec {
+    rule {
+      http {
+        path {
+          path = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "baskets" # pick a service; any service
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
+    ingress_class_name = "nginx"
+  }
+}

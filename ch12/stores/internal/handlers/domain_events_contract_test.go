@@ -1,8 +1,11 @@
+//go:build contract
+
 package handlers
 
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/pact-foundation/pact-go/v2/message"
@@ -18,6 +21,25 @@ import (
 	"eda-in-golang/stores/internal/domain"
 	"eda-in-golang/stores/storespb"
 )
+
+var pactBrokerURL string
+var pactUser string
+var pactPass string
+var pactToken string
+
+func init() {
+	getEnv := func(key, fallback string) string {
+		if value, ok := os.LookupEnv(key); ok {
+			return value
+		}
+		return fallback
+	}
+
+	pactBrokerURL = getEnv("PACT_URL", "http://127.0.0.1:9292")
+	pactUser = getEnv("PACT_USER", "pactuser")
+	pactPass = getEnv("PACT_PASS", "pactpass")
+	pactToken = getEnv("PACT_TOKEN", "")
+}
 
 func TestStoresProducer(t *testing.T) {
 	var err error
@@ -43,9 +65,10 @@ func TestStoresProducer(t *testing.T) {
 		VerifyRequest: provider.VerifyRequest{
 			Provider:                   "stores-pub",
 			ProviderVersion:            "1.0.0",
-			BrokerURL:                  "http://127.0.0.1:9292",
-			BrokerUsername:             "pactuser",
-			BrokerPassword:             "pactpass",
+			BrokerURL:                  pactBrokerURL,
+			BrokerUsername:             pactUser,
+			BrokerPassword:             pactPass,
+			BrokerToken:                pactToken,
 			PublishVerificationResults: true,
 			AfterEach: func() error {
 				stores.Reset()

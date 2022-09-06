@@ -3,13 +3,16 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
 	"os"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 
 	"eda-in-golang/cosec"
+	"eda-in-golang/cosec/migrations"
 	"eda-in-golang/internal/config"
 	"eda-in-golang/internal/system"
+	"eda-in-golang/internal/web"
 )
 
 func main() {
@@ -36,21 +39,21 @@ func run() (err error) {
 			return
 		}
 	}(s.DB())
-	// err = s.MigrateDB(migrations.FS)
-	// if err != nil {
-	// 	return err
-	// }
+	err = s.MigrateDB(migrations.FS)
+	if err != nil {
+		return err
+	}
 	err = s.InitJS()
 	if err != nil {
 		return err
 	}
 	s.InitLogger()
-	// s.InitMux()
+	s.InitMux()
 	// s.InitRpc()
 	s.InitWaiter()
 
-	// // Mount general web resources
-	// s.Mux().Mount("/", http.FileServer(http.FS(web.WebUI)))
+	// Mount general web resources
+	s.Mux().Mount("/", http.FileServer(http.FS(web.WebUI)))
 
 	err = cosec.Root(s.Waiter().Context(), s)
 	if err != nil {
@@ -61,7 +64,7 @@ func run() (err error) {
 	defer fmt.Println("stopped cosec service")
 
 	s.Waiter().Add(
-		// s.WaitForWeb,
+		s.WaitForWeb,
 		// s.WaitForRPC,
 		s.WaitForStream,
 	)
