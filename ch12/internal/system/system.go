@@ -28,21 +28,36 @@ type System struct {
 	db     *sql.DB
 	nc     *nats.Conn
 	js     nats.JetStreamContext
-	logger zerolog.Logger
 	mux    *chi.Mux
 	rpc    *grpc.Server
 	waiter waiter.Waiter
+	logger zerolog.Logger
 }
 
-func NewSystem(cfg config.AppConfig) *System {
-	return &System{cfg: cfg}
+func NewSystem(cfg config.AppConfig) (*System, error) {
+	s := &System{cfg: cfg}
+
+	if err := s.initDB(); err != nil {
+		return nil, err
+	}
+
+	if err := s.initJS(); err != nil {
+		return nil, err
+	}
+
+	s.initMux()
+	s.initRpc()
+	s.initWaiter()
+	s.initLogger()
+
+	return s, nil
 }
 
 func (s *System) Config() config.AppConfig {
 	return s.cfg
 }
 
-func (s *System) InitDB() (err error) {
+func (s *System) initDB() (err error) {
 	s.db, err = sql.Open("pgx", s.cfg.PG.Conn)
 	return err
 }
@@ -62,7 +77,7 @@ func (s *System) DB() *sql.DB {
 	return s.db
 }
 
-func (s *System) InitJS() (err error) {
+func (s *System) initJS() (err error) {
 	s.nc, err = nats.Connect(s.cfg.Nats.URL)
 	if err != nil {
 		return err
@@ -84,7 +99,7 @@ func (s *System) JS() nats.JetStreamContext {
 	return s.js
 }
 
-func (s *System) InitLogger() {
+func (s *System) initLogger() {
 	s.logger = logger.New(logger.LogConfig{
 		Environment: s.cfg.Environment,
 		LogLevel:    logger.Level(s.cfg.LogLevel),
@@ -95,7 +110,7 @@ func (s *System) Logger() zerolog.Logger {
 	return s.logger
 }
 
-func (s *System) InitMux() {
+func (s *System) initMux() {
 	s.mux = chi.NewMux()
 
 	s.mux.Use(middleware.Heartbeat("/liveness"))
@@ -105,7 +120,7 @@ func (s *System) Mux() *chi.Mux {
 	return s.mux
 }
 
-func (s *System) InitRpc() {
+func (s *System) initRpc() {
 	s.rpc = grpc.NewServer()
 	reflection.Register(s.rpc)
 }
@@ -114,7 +129,7 @@ func (s *System) RPC() *grpc.Server {
 	return s.rpc
 }
 
-func (s *System) InitWaiter() {
+func (s *System) initWaiter() {
 	s.waiter = waiter.New(waiter.CatchSignals())
 }
 

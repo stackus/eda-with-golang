@@ -20,6 +20,7 @@ require (
 	github.com/nats-io/nats.go v1.16.0
 	github.com/pact-foundation/pact-go/v2 v2.0.0-beta.14
 	github.com/pressly/goose/v3 v3.7.0
+	github.com/rdumont/assistdog v0.0.0-20201106100018-168b06230d14
 	github.com/rs/zerolog v1.28.0
 	github.com/stackus/dotenv v0.0.0-20220408232627-ce2f07a165d5
 	github.com/stackus/errors v0.1.5

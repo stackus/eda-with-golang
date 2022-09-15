@@ -17,10 +17,10 @@ type Service interface {
 	Config() config.AppConfig
 	DB() *sql.DB
 	JS() nats.JetStreamContext
-	Logger() zerolog.Logger
 	Mux() *chi.Mux
 	RPC() *grpc.Server
 	Waiter() waiter.Waiter
+	Logger() zerolog.Logger
 }
 
 type Module interface {

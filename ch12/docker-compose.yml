@@ -1,6 +1,9 @@
 version: "3.8"
 
 services:
+  #
+  # docker compose--profile monolith up
+  #
   monolith:
     container_name: monolith
     hostname: monolith
@@ -17,9 +20,11 @@ services:
       - nats
       - postgres
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/monolith" ]
-    profiles:
-      - monolith
+    profiles: [ monolith ]
 
+  #
+  # docker compose--profile microservices up
+  #
   baskets:
     container_name: baskets
     hostname: baskets
@@ -29,23 +34,18 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: baskets
-    ports:
-      - '8081:8081'
     expose:
-      - '9001'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8081'
-      RPC_PORT: ':9001'
-      RPC_SERVICES: 'STORES=stores:9009,CUSTOMERS=customers:9003'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=baskets user=baskets_user password=baskets_pass search_path=baskets,public
       NATS_URL: nats:4222
     depends_on:
       - nats
       - postgres
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
-    profiles:
-      - microservices
+    profiles: [ microservices ]
   cosec:
     container_name: cosec
     hostname: cosec
@@ -55,14 +55,11 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: cosec
-    ports:
-      - '8082:8082'
     expose:
-      - '9002'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8082'
-      RPC_PORT: ':9002'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=cosec user=cosec_user password=cosec_pass search_path=cosec,public
       NATS_URL: nats:4222
     depends_on:
@@ -80,15 +77,11 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: customers
-    ports:
-      - '8083:8083'
     expose:
-      - '9003'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8083'
-      RPC_PORT: ':9003'
-      RPC_SERVICES: 'STORES=stores:9009,CUSTOMERS=customers:9003'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=customers user=customers_user password=customers_pass search_path=customers,public
       NATS_URL: nats:4222
     depends_on:
@@ -106,15 +99,11 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: depot
-    ports:
-      - '8084:8084'
     expose:
-      - '9004'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8084'
-      RPC_PORT: ':9004'
-      RPC_SERVICES: 'STORES=stores:9009,CUSTOMERS=customers:9003'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=depot user=depot_user password=depot_pass search_path=depot,public
       NATS_URL: nats:4222
     depends_on:
@@ -132,15 +121,11 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: notifications
-    ports:
-      - '8085:8085'
     expose:
-      - '9005'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8085'
-      RPC_PORT: ':9005'
-      RPC_SERVICES: 'STORES=stores:9009,CUSTOMERS=customers:9003'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=notifications user=notifications_user password=notifications_pass search_path=notifications,public
       NATS_URL: nats:4222
     depends_on:
@@ -158,15 +143,11 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: ordering
-    ports:
-      - '8086:8086'
     expose:
-      - '9006'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8086'
-      RPC_PORT: ':9006'
-      RPC_SERVICES: 'STORES=stores:9009,CUSTOMERS=customers:9003'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=ordering user=ordering_user password=ordering_pass search_path=ordering,public
       NATS_URL: nats:4222
     depends_on:
@@ -184,15 +165,11 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: payments
-    ports:
-      - '8087:8087'
     expose:
-      - '9007'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8087'
-      RPC_PORT: ':9007'
-      RPC_SERVICES: 'STORES=stores:9009,CUSTOMERS=customers:9003'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=payments user=payments_user password=payments_pass search_path=payments,public
       NATS_URL: nats:4222
     depends_on:
@@ -210,15 +187,11 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: search
-    ports:
-      - '8088:8088'
     expose:
-      - '9008'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8088'
-      RPC_PORT: ':9008'
-      RPC_SERVICES: 'STORES=stores:9009,CUSTOMERS=customers:9003'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=search user=search_user password=search_pass search_path=search,public
       NATS_URL: nats:4222
     depends_on:
@@ -236,15 +209,11 @@ services:
       dockerfile: docker/Dockerfile.microservices
       args:
         service: stores
-    ports:
-      - '8089:8089'
     expose:
-      - '9009'
+      - '9000'
     environment:
       ENVIRONMENT: development
-      WEB_PORT: ':8089'
-      RPC_PORT: ':9009'
-      RPC_SERVICES: 'STORES=stores:9009,CUSTOMERS=customers:9003'
+      RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=stores user=stores_user password=stores_pass search_path=stores,public
       NATS_URL: nats:4222
     depends_on:
@@ -254,6 +223,16 @@ services:
     profiles:
       - microservices
 
+  reverse-proxy:
+    container_name: proxy
+    hostname: proxy
+    image: nginx:alpine
+    ports:
+      - '8080:8080'
+    volumes:
+      - './docker/nginx.conf:/etc/nginx/nginx.conf'
+    profiles:
+      - microservices
   postgres:
     container_name: postgres
     hostname: postgres

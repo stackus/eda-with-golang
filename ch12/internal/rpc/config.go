@@ -9,7 +9,7 @@ type Services map[string]string
 
 type RpcConfig struct {
 	Host     string `default:"0.0.0.0"`
-	Port     string `default:":8085"`
+	Port     string `default:":9000"`
 	Services Services
 }
 

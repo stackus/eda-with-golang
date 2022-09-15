@@ -28,35 +28,21 @@ func run() (err error) {
 	if err != nil {
 		return err
 	}
-	s := system.NewSystem(cfg)
-	err = s.InitDB()
+	s, err := system.NewSystem(cfg)
 	if err != nil {
 		return err
 	}
 	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
+		if err = db.Close(); err != nil {
 			return
 		}
 	}(s.DB())
-	err = s.MigrateDB(migrations.FS)
-	if err != nil {
+	if err = s.MigrateDB(migrations.FS); err != nil {
 		return err
 	}
-	err = s.InitJS()
-	if err != nil {
-		return err
-	}
-	s.InitLogger()
-	s.InitMux()
-	s.InitRpc()
-	s.InitWaiter()
-
-	// Mount general web resources
 	s.Mux().Mount("/", http.FileServer(http.FS(web.WebUI)))
-
-	err = notifications.Root(s.Waiter().Context(), s)
-	if err != nil {
+	// call the module composition root
+	if err = notifications.Root(s.Waiter().Context(), s); err != nil {
 		return err
 	}
 

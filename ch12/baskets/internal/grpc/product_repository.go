@@ -5,6 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 
 	"eda-in-golang/stores/storespb"
 
@@ -26,6 +27,9 @@ func (r ProductRepository) Find(ctx context.Context, productID string) (*domain.
 		Id: productID,
 	})
 	if err != nil {
+		if errors.GRPCCode(err) == codes.NotFound {
+			return nil, errors.ErrNotFound.Msg("product was not located")
+		}
 		return nil, errors.Wrap(err, "requesting product")
 	}
 

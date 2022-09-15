@@ -26,7 +26,7 @@ func NewCatalogRepository(tableName string, db postgres.DB) CatalogRepository {
 }
 
 func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, name, description, sku string, price float64) error {
-	const query = `INSERT INTO %s (id, store_id, name, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)`
+	const query = `INSERT INTO %s (id, store_id, NAME, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)`
 
 	_, err := r.db.ExecContext(ctx, r.table(query), productID, storeID, name, description, sku, price)
 
@@ -34,7 +34,7 @@ func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, n
 }
 
 func (r CatalogRepository) Rebrand(ctx context.Context, productID, name, description string) error {
-	const query = `UPDATE %s SET name = $2, description = $3 WHERE id = $1`
+	const query = `UPDATE %s SET NAME = $2, description = $3 WHERE id = $1`
 
 	_, err := r.db.ExecContext(ctx, r.table(query), productID, name, description)
 
@@ -66,6 +66,9 @@ func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.
 
 	err := r.db.QueryRowContext(ctx, r.table(query), productID).Scan(&product.StoreID, &product.Name, &product.Description, &product.SKU, &product.Price)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.ErrNotFound.Msg("product with that ID does not exist")
+		}
 		return nil, errors.Wrap(err, "scanning product")
 	}
 

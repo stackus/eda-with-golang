@@ -41,8 +41,12 @@ func run() (err error) {
 	if err != nil {
 		return err
 	}
+	s, err := system.NewSystem(cfg)
+	if err != nil {
+		return err
+	}
 	m := monolith{
-		System: system.NewSystem(cfg),
+		System: s,
 		modules: []system.Module{
 			&baskets.Module{},
 			&customers.Module{},
@@ -55,10 +59,6 @@ func run() (err error) {
 			&search.Module{},
 		},
 	}
-	err = m.InitDB()
-	if err != nil {
-		return err
-	}
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
@@ -69,14 +69,6 @@ func run() (err error) {
 	if err != nil {
 		return err
 	}
-	err = m.InitJS()
-	if err != nil {
-		return err
-	}
-	m.InitLogger()
-	m.InitMux()
-	m.InitRpc()
-	m.InitWaiter()
 
 	if err = m.startupModules(); err != nil {
 		return err
@@ -108,7 +100,8 @@ func run() (err error) {
 
 func (m *monolith) startupModules() error {
 	for _, module := range m.modules {
-		if err := module.Startup(m.Waiter().Context(), m); err != nil {
+		ctx := m.Waiter().Context()
+		if err := module.Startup(ctx, m); err != nil {
 			return err
 		}
 	}

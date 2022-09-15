@@ -14,7 +14,8 @@ RUN go mod download
 COPY .. ./
 
 # Build the binary.
-RUN go build -ldflags="-s -w" -v -o service ./${service}/cmd/service
+RUN go build -ldflags="-s -w" -v -o service \
+    ./${service}/cmd/service
 
 FROM alpine:latest AS runtime
 

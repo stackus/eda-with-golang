@@ -28,35 +28,21 @@ func run() (err error) {
 	if err != nil {
 		return err
 	}
-	s := system.NewSystem(cfg)
-	err = s.InitDB()
+	s, err := system.NewSystem(cfg)
 	if err != nil {
 		return err
 	}
 	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
+		if err = db.Close(); err != nil {
 			return
 		}
 	}(s.DB())
-	err = s.MigrateDB(migrations.FS)
-	if err != nil {
+	if err = s.MigrateDB(migrations.FS); err != nil {
 		return err
 	}
-	err = s.InitJS()
-	if err != nil {
-		return err
-	}
-	s.InitLogger()
-	s.InitMux()
-	s.InitRpc()
-	s.InitWaiter()
-
-	// Mount general web resources
 	s.Mux().Mount("/", http.FileServer(http.FS(web.WebUI)))
-
-	err = baskets.Root(s.Waiter().Context(), s)
-	if err != nil {
+	// call the module composition root
+	if err = baskets.Root(s.Waiter().Context(), s); err != nil {
 		return err
 	}
 
@@ -68,15 +54,6 @@ func run() (err error) {
 		s.WaitForRPC,
 		s.WaitForStream,
 	)
-
-	// go func() {
-	// 	for {
-	// 		var mem runtime.MemStats
-	// 		runtime.ReadMemStats(&mem)
-	// 		m.logger.Debug().Msgf("Alloc = %v  TotalAlloc = %v  Sys = %v  NumGC = %v", mem.Alloc/1024, mem.TotalAlloc/1024, mem.Sys/1024, mem.NumGC)
-	// 		time.Sleep(10 * time.Second)
-	// 	}
-	// }()
 
 	return s.Waiter().Wait()
 }
