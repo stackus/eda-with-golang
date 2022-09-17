@@ -1,2 +1,0 @@
-CREATE SCHEMA depot;
-GRANT CREATE, USAGE ON SCHEMA depot TO depot_user;

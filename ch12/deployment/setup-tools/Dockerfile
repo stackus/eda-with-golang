@@ -55,7 +55,6 @@ COPY --from=k8s-installer /usr/bin/k9s /usr/local/bin
 COPY --from=k8s-installer /usr/local/bin/kubectl /usr/local/bin
 
 RUN apk update; \
-    apk add postgresql-client make
+    apk add postgresql-client make git docker openrc
 
 CMD "sh"
-

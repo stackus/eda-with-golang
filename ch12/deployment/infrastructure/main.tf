@@ -42,3 +42,7 @@ output project {
 output allowed_cidr_block {
   value = var.allowed_cidr_block
 }
+
+output services {
+  value = var.services
+}

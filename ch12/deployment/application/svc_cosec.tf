@@ -1,3 +1,25 @@
+// https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password
+resource random_password cosec {
+  length = 16
+}
+
+// https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+// https://www.terraform.io/language/resources/provisioners/local-exec
+resource null_resource init_cosec_db {
+  provisioner "local-exec" {
+    command     = "psql --file sql/init_service_db.psql -v db=$DB -v user=$USER -v pass=$PASS ${local.db_conn}/postgres"
+    environment = {
+      DB   = "cosec"
+      USER = "cosec_user"
+      PASS = random_password.cosec.result
+    }
+  }
+  depends_on = [
+    null_resource.init_db,
+    random_password.cosec
+  ]
+}
+
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1
 resource kubernetes_secret_v1 cosec {
   metadata {
@@ -6,10 +28,11 @@ resource kubernetes_secret_v1 cosec {
   }
 
   data = {
-    PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=cosec user=cosec_user password=cosec_pass search_path=cosec,public"
+    PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=cosec user=cosec_user password=${random_password.cosec.result} search_path=cosec,public"
   }
   depends_on = [
     kubernetes_namespace_v1.namespace,
+    null_resource.init_cosec_db
   ]
 }
 

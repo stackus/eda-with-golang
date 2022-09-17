@@ -1,3 +1,25 @@
+// https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password
+resource random_password baskets {
+  length = 16
+}
+
+// https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+// https://www.terraform.io/language/resources/provisioners/local-exec
+resource null_resource init_baskets_db {
+  provisioner "local-exec" {
+    command     = "psql --file sql/init_service_db.psql -v db=$DB -v user=$USER -v pass=$PASS ${local.db_conn}/postgres"
+    environment = {
+      DB   = "baskets"
+      USER = "baskets_user"
+      PASS = random_password.baskets.result
+    }
+  }
+  depends_on = [
+    null_resource.init_db,
+    random_password.baskets
+  ]
+}
+
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1
 resource kubernetes_secret_v1 baskets {
   metadata {
@@ -6,10 +28,11 @@ resource kubernetes_secret_v1 baskets {
   }
 
   data = {
-    PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=baskets user=baskets_user password=baskets_pass search_path=baskets,public"
+    PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=baskets user=baskets_user password=${random_password.baskets.result} search_path=baskets,public"
   }
   depends_on = [
     kubernetes_namespace_v1.namespace,
+    null_resource.init_baskets_db
   ]
 }
 
@@ -77,7 +100,7 @@ resource kubernetes_deployment_v1 baskets {
     kubernetes_namespace_v1.namespace,
     kubernetes_config_map_v1.common,
     kubernetes_secret_v1.cosec,
-    kubernetes_service_v1.nats
+    kubernetes_service_v1.nats,
   ]
 }
 

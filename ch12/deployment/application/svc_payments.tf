@@ -1,3 +1,25 @@
+// https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password
+resource random_password payments {
+  length = 16
+}
+
+// https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+// https://www.terraform.io/language/resources/provisioners/local-exec
+resource null_resource init_payments_db {
+  provisioner "local-exec" {
+    command     = "psql --file sql/init_service_db.psql -v db=$DB -v user=$USER -v pass=$PASS ${local.db_conn}/postgres"
+    environment = {
+      DB   = "payments"
+      USER = "payments_user"
+      PASS = random_password.payments.result
+    }
+  }
+  depends_on = [
+    null_resource.init_db,
+    random_password.payments
+  ]
+}
+
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1
 resource kubernetes_secret_v1 payments {
   metadata {
@@ -6,10 +28,11 @@ resource kubernetes_secret_v1 payments {
   }
 
   data = {
-    PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=payments user=payments_user password=payments_pass search_path=payments,public"
+    PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=payments user=payments_user password=${random_password.payments.result} search_path=payments,public"
   }
   depends_on = [
     kubernetes_namespace_v1.namespace,
+    null_resource.init_payments_db
   ]
 }
 

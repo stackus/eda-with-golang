@@ -1,6 +1,8 @@
+ready: init validate
+
 # Use this command to easily run all of the infrastructure deployment steps
 # There are costs associated with this demo; Remember to tear everything down!
-deploy: init validate plan apply
+deploy: plan apply
 
 init:
 	terraform init -upgrade
