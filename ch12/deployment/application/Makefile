@@ -22,4 +22,4 @@ apply:
 	@echo !!!
 
 destroy:
-	terraform destroy
+	terraform destroy -auto-approve

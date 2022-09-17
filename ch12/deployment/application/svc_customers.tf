@@ -8,6 +8,9 @@ resource kubernetes_secret_v1 customers {
   data = {
     PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=customers user=customers_user password=customers_pass search_path=customers,public"
   }
+  depends_on = [
+    kubernetes_namespace_v1.namespace,
+  ]
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/deployment_v1
@@ -73,7 +76,8 @@ resource kubernetes_deployment_v1 customers {
   depends_on = [
     kubernetes_namespace_v1.namespace,
     kubernetes_config_map_v1.common,
-    kubernetes_secret_v1.customers
+    kubernetes_secret_v1.cosec,
+    kubernetes_service_v1.nats
   ]
 }
 
@@ -105,15 +109,21 @@ resource kubernetes_service_v1 customers {
     }
     type = "NodePort"
   }
+  depends_on = [
+    kubernetes_namespace_v1.namespace,
+  ]
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress_v1
 resource kubernetes_ingress_v1 customers {
   metadata {
-    name = "customers-ingress"
-    namespace = local.project
+    name        = "customers-ingress"
+    namespace   = local.project
     annotations = {
-      "nginx.ingress.kubernetes.io/whitelist-source-range" = local.allowed_cidr_block
+      "alb.ingress.kubernetes.io/group.name"    = local.project
+      "alb.ingress.kubernetes.io/scheme"        = "internet-facing"
+      "alb.ingress.kubernetes.io/inbound-cidrs" = local.allowed_cidr_block
+      "alb.ingress.kubernetes.io/target-type"   = "instance"
     }
   }
 
@@ -121,7 +131,7 @@ resource kubernetes_ingress_v1 customers {
     rule {
       http {
         path {
-          path = "/api/customers"
+          path      = "/api/customers"
           path_type = "Prefix"
           backend {
             service {
@@ -133,7 +143,7 @@ resource kubernetes_ingress_v1 customers {
           }
         }
         path {
-          path = "/customers-spec/"
+          path      = "/customers-spec/"
           path_type = "Prefix"
           backend {
             service {
@@ -146,6 +156,9 @@ resource kubernetes_ingress_v1 customers {
         }
       }
     }
-    ingress_class_name = "nginx"
+    ingress_class_name = "alb"
   }
+  depends_on = [
+    kubernetes_namespace_v1.namespace,
+  ]
 }

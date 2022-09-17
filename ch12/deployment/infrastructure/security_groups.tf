@@ -29,4 +29,8 @@ module security_group {
       cidr_blocks = "0.0.0.0/0"
     }
   ]
+
+  tags = {
+    "kubernetes.io/cluster/${var.project}": "shared"
+  }
 }

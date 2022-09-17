@@ -8,6 +8,9 @@ resource kubernetes_secret_v1 cosec {
   data = {
     PG_CONN = "host=${local.db_host} port=${local.db_port} dbname=cosec user=cosec_user password=cosec_pass search_path=cosec,public"
   }
+  depends_on = [
+    kubernetes_namespace_v1.namespace,
+  ]
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/deployment_v1
@@ -73,64 +76,7 @@ resource kubernetes_deployment_v1 cosec {
   depends_on = [
     kubernetes_namespace_v1.namespace,
     kubernetes_config_map_v1.common,
-    kubernetes_secret_v1.cosec
+    kubernetes_secret_v1.cosec,
+    kubernetes_service_v1.nats
   ]
 }
-
-#// https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_v1
-#resource kubernetes_service_v1 cosec {
-#  metadata {
-#    name      = "cosec"
-#    namespace = local.project
-#    labels    = {
-#      app = "cosec"
-#    }
-#  }
-#  spec {
-#    selector = {
-#      "app.kubernetes.io/name" = "cosec"
-#    }
-#    session_affinity = "ClientIP"
-#    port {
-#      name        = "http"
-#      protocol    = "TCP"
-#      port        = 80
-#      target_port = 80
-#    }
-#    port {
-#      name        = "grpc"
-#      protocol    = "TCP"
-#      port        = 9000
-#      target_port = 9000
-#    }
-#    type = "NodePort"
-#  }
-#}
-#
-#// https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress_v1
-#resource kubernetes_ingress_v1 cosec {
-#  metadata {
-#    name = "cosec-ingress"
-#    namespace = local.project
-#  }
-#
-#  spec {
-#    rule {
-#      http {
-#        path {
-#          path = "/api/cosec/"
-#          path_type = "Prefix"
-#          backend {
-#            service {
-#              name = "cosec"
-#              port {
-#                number = 80
-#              }
-#            }
-#          }
-#        }
-#      }
-#    }
-#    ingress_class_name = "nginx"
-#  }
-#}

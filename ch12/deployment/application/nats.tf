@@ -54,6 +54,9 @@ resource kubernetes_deployment_v1 nats {
       }
     }
   }
+  depends_on = [
+    kubernetes_namespace_v1.namespace,
+  ]
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_v1
@@ -76,6 +79,10 @@ resource kubernetes_service_v1 nats {
     }
     type = "ClusterIP"
   }
+  depends_on = [
+    kubernetes_namespace_v1.namespace,
+    kubernetes_deployment_v1.nats
+  ]
 }
 
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/persistent_volume_claim_v1
@@ -92,4 +99,7 @@ resource kubernetes_persistent_volume_claim_v1 nats {
       }
     }
   }
+  depends_on = [
+    kubernetes_namespace_v1.namespace
+  ]
 }

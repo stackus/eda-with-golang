@@ -28,10 +28,14 @@ resource kubernetes_config_map_v1 common {
 // https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress_v1
 resource kubernetes_ingress_v1 swagger {
   metadata {
-    name = "swagger-ingress"
-    namespace = local.project
+    name        = "swagger-ingress"
+    namespace   = local.project
     annotations = {
-      "nginx.ingress.kubernetes.io/whitelist-source-range" = local.allowed_cidr_block
+      "alb.ingress.kubernetes.io/group.name"         = local.project
+      "alb.ingress.kubernetes.io/scheme"             = "internet-facing"
+      "alb.ingress.kubernetes.io/load-balancer-name" = local.project
+      "alb.ingress.kubernetes.io/inbound-cidrs"      = local.allowed_cidr_block
+      "alb.ingress.kubernetes.io/target-type"        = "instance"
     }
   }
 
@@ -39,7 +43,7 @@ resource kubernetes_ingress_v1 swagger {
     rule {
       http {
         path {
-          path = "/"
+          path      = "/"
           path_type = "Prefix"
           backend {
             service {
@@ -52,6 +56,10 @@ resource kubernetes_ingress_v1 swagger {
         }
       }
     }
-    ingress_class_name = "nginx"
+    ingress_class_name = "alb"
   }
+}
+
+output swagger_url {
+  value = "http://${kubernetes_ingress_v1.swagger.status[0].load_balancer[0].ingress[0].hostname}"
 }
