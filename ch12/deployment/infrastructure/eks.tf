@@ -25,7 +25,7 @@ module "eks" {
       resolve_conflicts = "OVERWRITE"
     }
     kube-proxy = {}
-    vpc-cni = {
+    vpc-cni    = {
       resolve_conflicts = "OVERWRITE"
     }
   }

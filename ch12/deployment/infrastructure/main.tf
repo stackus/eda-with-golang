@@ -31,12 +31,12 @@ resource random_string suffix {
 
 output region {
   description = "AWS Region"
-  value = var.region
+  value       = var.region
 }
 
 output project {
   description = "Project name"
-  value = var.project
+  value       = var.project
 }
 
 output allowed_cidr_block {

@@ -1,11 +1,11 @@
-variable lb_image_repository_host {
+variable lb_image_repository {
   description = "AWS Load Balancer image host See: https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html"
   type        = string
   default     = "602401143452.dkr.ecr.us-east-1.amazonaws.com"
 }
 
 variable lb_service_account_name {
-  type = string
+  type    = string
   default = "aws-load-balancer-controller"
 }
 
@@ -54,7 +54,7 @@ resource helm_release lb {
   // See: https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html
   set {
     name  = "image.repository"
-    value = "${var.lb_image_repository_host}/amazon/aws-load-balancer-controller"
+    value = "${var.lb_image_repository}/amazon/aws-load-balancer-controller"
   }
 
   set {

@@ -11,6 +11,11 @@ terraform {
       version = "~> 4.31.0"
     }
 
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "2.21.0"
+    }
+
     random = {
       source  = "hashicorp/random"
       version = "~> 3.1.0"
@@ -31,6 +36,14 @@ provider aws {
     tags = {
       Application = "MallBots"
     }
+  }
+}
+
+provider "docker" {
+  registry_auth {
+    address  = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com"
+    username = data.aws_ecr_authorization_token.token.user_name
+    password = data.aws_ecr_authorization_token.token.password
   }
 }
 

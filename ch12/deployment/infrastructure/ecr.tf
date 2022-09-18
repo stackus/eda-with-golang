@@ -8,22 +8,20 @@ resource aws_ecr_repository services {
   force_delete = true
 }
 
-# Use 'make push-services' instead.
-#
-#// https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/registry_image
-#resource docker_registry_image services {
-#  for_each = toset(var.services)
-#  name     = "${aws_ecr_repository.services[each.key].repository_url}:latest"
-#
-#  build {
-#    context    = "../.."
-#    dockerfile = "docker/Dockerfile.microservices"
-#
-#    build_args = {
-#      service = each.key
-#    }
-#  }
-#}
+// https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/registry_image
+resource docker_registry_image services {
+  for_each = toset(var.services)
+  name     = "${aws_ecr_repository.services[each.key].repository_url}:latest"
+
+  build {
+    context    = "../.."
+    dockerfile = "docker/Dockerfile.microservices"
+
+    build_args = {
+      service = each.key
+    }
+  }
+}
 
 output ecr_url {
   value = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com"
