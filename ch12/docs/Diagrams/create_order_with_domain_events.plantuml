@@ -14,17 +14,17 @@ control NotifyCustomer as nc
 == Event Handler Subscriptions ==
 nc -> ed : Subscribe to OrderCreated
 == Order Creation ==
-u -> app : Create a new Order
+u -> app : Create a new order
 activate app
-app -> co : Create Order
+app -> co : Create order
 activate co
-co -> o : Create new Order
+co -> o : Create new order
 o -> o : Add OrderCreated
-co -> db : Save Order
+co -> db : Save order
 co -> o : Publish
-o -> ed : Raise Events
+o -> ed : Raise events
 activate ed
-ed -> nc : Send Event
+ed -> nc : Send event
 activate nc
 nc -> ed : Success
 deactivate nc
