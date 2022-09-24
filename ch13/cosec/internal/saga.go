@@ -6,7 +6,6 @@ import (
 	"eda-in-golang/cosec/internal/models"
 	"eda-in-golang/customers/customerspb"
 	"eda-in-golang/depot/depotpb"
-	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/sec"
 	"eda-in-golang/ordering/orderingpb"
@@ -54,15 +53,15 @@ func NewCreateOrderSaga() sec.Saga[*models.CreateOrderData] {
 	return saga
 }
 
-func (s createOrderSaga) rejectOrder(ctx context.Context, data *models.CreateOrderData) am.Command {
-	return am.NewCommand(orderingpb.RejectOrderCommand, orderingpb.CommandChannel, &orderingpb.RejectOrder{Id: data.OrderID})
+func (s createOrderSaga) rejectOrder(ctx context.Context, data *models.CreateOrderData) (string, ddd.Command, error) {
+	return orderingpb.CommandChannel, ddd.NewCommand(orderingpb.RejectOrderCommand, &orderingpb.RejectOrder{Id: data.OrderID}), nil
 }
 
-func (s createOrderSaga) authorizeCustomer(ctx context.Context, data *models.CreateOrderData) am.Command {
-	return am.NewCommand(customerspb.AuthorizeCustomerCommand, customerspb.CommandChannel, &customerspb.AuthorizeCustomer{Id: data.CustomerID})
+func (s createOrderSaga) authorizeCustomer(ctx context.Context, data *models.CreateOrderData) (string, ddd.Command, error) {
+	return customerspb.CommandChannel, ddd.NewCommand(customerspb.AuthorizeCustomerCommand, &customerspb.AuthorizeCustomer{Id: data.CustomerID}), nil
 }
 
-func (s createOrderSaga) createShoppingList(ctx context.Context, data *models.CreateOrderData) am.Command {
+func (s createOrderSaga) createShoppingList(ctx context.Context, data *models.CreateOrderData) (string, ddd.Command, error) {
 	items := make([]*depotpb.CreateShoppingList_Item, len(data.Items))
 	for i, item := range data.Items {
 		items[i] = &depotpb.CreateShoppingList_Item{
@@ -72,10 +71,10 @@ func (s createOrderSaga) createShoppingList(ctx context.Context, data *models.Cr
 		}
 	}
 
-	return am.NewCommand(depotpb.CreateShoppingListCommand, depotpb.CommandChannel, &depotpb.CreateShoppingList{
+	return depotpb.CommandChannel, ddd.NewCommand(depotpb.CreateShoppingListCommand, &depotpb.CreateShoppingList{
 		OrderId: data.OrderID,
 		Items:   items,
-	})
+	}), nil
 }
 
 func (s createOrderSaga) onCreatedShoppingListReply(ctx context.Context, data *models.CreateOrderData, reply ddd.Reply) error {
@@ -86,24 +85,24 @@ func (s createOrderSaga) onCreatedShoppingListReply(ctx context.Context, data *m
 	return nil
 }
 
-func (s createOrderSaga) cancelShoppingList(ctx context.Context, data *models.CreateOrderData) am.Command {
-	return am.NewCommand(depotpb.CancelShoppingListCommand, depotpb.CommandChannel, &depotpb.CancelShoppingList{Id: data.ShoppingID})
+func (s createOrderSaga) cancelShoppingList(ctx context.Context, data *models.CreateOrderData) (string, ddd.Command, error) {
+	return depotpb.CommandChannel, ddd.NewCommand(depotpb.CancelShoppingListCommand, &depotpb.CancelShoppingList{Id: data.ShoppingID}), nil
 }
 
-func (s createOrderSaga) confirmPayment(ctx context.Context, data *models.CreateOrderData) am.Command {
-	return am.NewCommand(paymentspb.ConfirmPaymentCommand, paymentspb.CommandChannel, &paymentspb.ConfirmPayment{
+func (s createOrderSaga) confirmPayment(ctx context.Context, data *models.CreateOrderData) (string, ddd.Command, error) {
+	return paymentspb.CommandChannel, ddd.NewCommand(paymentspb.ConfirmPaymentCommand, &paymentspb.ConfirmPayment{
 		Id:     data.PaymentID,
 		Amount: data.Total,
-	})
+	}), nil
 }
 
-func (s createOrderSaga) initiateShopping(ctx context.Context, data *models.CreateOrderData) am.Command {
-	return am.NewCommand(depotpb.InitiateShoppingCommand, depotpb.CommandChannel, &depotpb.InitiateShopping{Id: data.ShoppingID})
+func (s createOrderSaga) initiateShopping(ctx context.Context, data *models.CreateOrderData) (string, ddd.Command, error) {
+	return depotpb.CommandChannel, ddd.NewCommand(depotpb.InitiateShoppingCommand, &depotpb.InitiateShopping{Id: data.ShoppingID}), nil
 }
 
-func (s createOrderSaga) approveOrder(ctx context.Context, data *models.CreateOrderData) am.Command {
-	return am.NewCommand(orderingpb.ApproveOrderCommand, orderingpb.CommandChannel, &orderingpb.ApproveOrder{
+func (s createOrderSaga) approveOrder(ctx context.Context, data *models.CreateOrderData) (string, ddd.Command, error) {
+	return orderingpb.CommandChannel, ddd.NewCommand(orderingpb.ApproveOrderCommand, &orderingpb.ApproveOrder{
 		Id:         data.OrderID,
 		ShoppingId: data.ShoppingID,
-	})
+	}), nil
 }

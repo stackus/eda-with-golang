@@ -1,7 +1,8 @@
 -- +goose Up
 CREATE SCHEMA cosec;
 
-SET SEARCH_PATH TO cosec, public;
+SET
+SEARCH_PATH TO cosec, PUBLIC;
 
 CREATE TABLE sagas (
   id           text        NOT NULL,
@@ -17,14 +18,15 @@ CREATE TABLE sagas (
 CREATE TRIGGER updated_at_co_sagas_trgr
   BEFORE UPDATE
   ON sagas
-  FOR EACH ROW
-EXECUTE PROCEDURE updated_at_trigger();
+  FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 CREATE TABLE inbox (
   id          text        NOT NULL,
   name        text        NOT NULL,
   subject     text        NOT NULL,
   data        bytea       NOT NULL,
+  metadata    bytea       NOT NULL,
+  sent_at     timestamptx NOT NULL,
   received_at timestamptz NOT NULL,
   PRIMARY KEY (id)
 );

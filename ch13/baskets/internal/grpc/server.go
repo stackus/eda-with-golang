@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 
 	"eda-in-golang/baskets/basketspb"
@@ -24,7 +26,15 @@ func RegisterServer(app application.App, registrar grpc.ServiceRegistrar) error 
 }
 
 func (s server) StartBasket(ctx context.Context, request *basketspb.StartBasketRequest) (*basketspb.StartBasketResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
 	basketID := uuid.New().String()
+
+	span.SetAttributes(
+		attribute.String("BasketID", basketID),
+		attribute.String("CustomerID", request.GetCustomerId()),
+	)
+
 	err := s.app.StartBasket(ctx, application.StartBasket{
 		ID:         basketID,
 		CustomerID: request.GetCustomerId(),
@@ -34,6 +44,12 @@ func (s server) StartBasket(ctx context.Context, request *basketspb.StartBasketR
 }
 
 func (s server) CancelBasket(ctx context.Context, request *basketspb.CancelBasketRequest) (*basketspb.CancelBasketResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.String("BasketID", request.GetId()),
+	)
+
 	err := s.app.CancelBasket(ctx, application.CancelBasket{
 		ID: request.GetId(),
 	})
@@ -42,6 +58,13 @@ func (s server) CancelBasket(ctx context.Context, request *basketspb.CancelBaske
 }
 
 func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutBasketRequest) (*basketspb.CheckoutBasketResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.String("BasketID", request.GetId()),
+		attribute.String("PaymentID", request.GetPaymentId()),
+	)
+
 	err := s.app.CheckoutBasket(ctx, application.CheckoutBasket{
 		ID:        request.GetId(),
 		PaymentID: request.GetPaymentId(),
@@ -51,6 +74,13 @@ func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutB
 }
 
 func (s server) AddItem(ctx context.Context, request *basketspb.AddItemRequest) (*basketspb.AddItemResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.String("BasketID", request.GetId()),
+		attribute.String("ProductID", request.GetProductId()),
+	)
+
 	err := s.app.AddItem(ctx, application.AddItem{
 		ID:        request.GetId(),
 		ProductID: request.GetProductId(),
@@ -61,6 +91,13 @@ func (s server) AddItem(ctx context.Context, request *basketspb.AddItemRequest) 
 }
 
 func (s server) RemoveItem(ctx context.Context, request *basketspb.RemoveItemRequest) (*basketspb.RemoveItemResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.String("BasketID", request.GetId()),
+		attribute.String("ProductID", request.GetProductId()),
+	)
+
 	err := s.app.RemoveItem(ctx, application.RemoveItem{
 		ID:        request.GetId(),
 		ProductID: request.GetProductId(),
@@ -71,6 +108,12 @@ func (s server) RemoveItem(ctx context.Context, request *basketspb.RemoveItemReq
 }
 
 func (s server) GetBasket(ctx context.Context, request *basketspb.GetBasketRequest) (*basketspb.GetBasketResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.String("BasketID", request.GetId()),
+	)
+
 	basket, err := s.app.GetBasket(ctx, application.GetBasket{
 		ID: request.GetId(),
 	})

@@ -13,7 +13,7 @@ import (
 )
 
 func RegisterReplyHandlersTx(container di.Container) error {
-	replyMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.IncomingRawMessage) (err error) {
+	replyMsgHandler := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
 		ctx = container.Scoped(ctx)
 		defer func(tx *sql.Tx) {
 			if p := recover(); p != nil {
@@ -26,18 +26,18 @@ func RegisterReplyHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		replyHandlers := am.RawMessageHandlerWithMiddleware(
-			am.NewReplyMessageHandler(
+		replyHandlers := am.MessageHandlerWithMiddleware(
+			am.NewReplyHandler(
 				di.Get(ctx, "registry").(registry.Registry),
 				di.Get(ctx, "orchestrator").(sec.Orchestrator[*models.CreateOrderData]),
 			),
-			di.Get(ctx, "inboxMiddleware").(am.RawMessageHandlerMiddleware),
+			di.Get(ctx, "inboxMiddleware").(am.MessageHandlerMiddleware),
 		)
 
 		return replyHandlers.HandleMessage(ctx, msg)
 	})
 
-	subscriber := container.Get("stream").(am.RawMessageStream)
+	subscriber := container.Get("stream").(am.MessageStream)
 
 	_, err := subscriber.Subscribe(internal.CreateOrderReplyChannel, replyMsgHandler, am.GroupName("cosec-replies"))
 	return err

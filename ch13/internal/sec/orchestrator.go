@@ -150,7 +150,7 @@ func (o orchestrator[T]) publishCommand(ctx context.Context, result stepResult[T
 	cmd.Metadata().Set(SagaCommandIDHdr, result.ctx.ID)
 	cmd.Metadata().Set(SagaCommandNameHdr, o.saga.Name())
 
-	return o.publisher.Publish(ctx, cmd.Destination(), cmd)
+	return o.publisher.Publish(ctx, result.destination, cmd)
 }
 
 func (o orchestrator[T]) getSagaInfoFromReply(reply ddd.Reply) (string, string) {

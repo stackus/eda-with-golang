@@ -1,7 +1,8 @@
 -- +goose Up
 CREATE SCHEMA stores;
 
-SET SEARCH_PATH TO stores, public;
+SET
+SEARCH_PATH TO stores, PUBLIC;
 
 CREATE TABLE stores (
   id            text        NOT NULL,
@@ -18,13 +19,11 @@ CREATE INDEX participating_stores_idx ON stores (participating) WHERE participat
 CREATE TRIGGER created_at_stores_trgr
   BEFORE UPDATE
   ON stores
-  FOR EACH ROW
-EXECUTE PROCEDURE created_at_trigger();
+  FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_stores_trgr
   BEFORE UPDATE
   ON stores
-  FOR EACH ROW
-EXECUTE PROCEDURE updated_at_trigger();
+  FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 CREATE TABLE products (
   id          text          NOT NULL,
@@ -43,13 +42,11 @@ CREATE INDEX store_products_idx ON products (store_id);
 CREATE TRIGGER created_at_products_trgr
   BEFORE UPDATE
   ON products
-  FOR EACH ROW
-EXECUTE PROCEDURE created_at_trigger();
+  FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_products_trgr
   BEFORE UPDATE
   ON products
-  FOR EACH ROW
-EXECUTE PROCEDURE updated_at_trigger();
+  FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 CREATE TABLE events (
   stream_id      text        NOT NULL,
@@ -75,14 +72,15 @@ CREATE TABLE snapshots (
 CREATE TRIGGER updated_at_snapshots_trgr
   BEFORE UPDATE
   ON snapshots
-  FOR EACH ROW
-EXECUTE PROCEDURE updated_at_trigger();
+  FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 CREATE TABLE inbox (
   id          text        NOT NULL,
   name        text        NOT NULL,
   subject     text        NOT NULL,
   data        bytea       NOT NULL,
+  metadata    bytea       NOT NULL,
+  sent_at     timestamptx NOT NULL,
   received_at timestamptz NOT NULL,
   PRIMARY KEY (id)
 );

@@ -23,14 +23,15 @@ CREATE TABLE snapshots (
 CREATE TRIGGER updated_at_snapshots_trgr
   BEFORE UPDATE
   ON snapshots
-  FOR EACH ROW
-EXECUTE PROCEDURE updated_at_trigger();
+  FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 CREATE TABLE inbox (
   id          text        NOT NULL,
   name        text        NOT NULL,
   subject     text        NOT NULL,
   data        bytea       NOT NULL,
+  metadata    bytea       NOT NULL,
+  sent_at     timestamptx NOT NULL,
   received_at timestamptz NOT NULL,
   PRIMARY KEY (id)
 );
@@ -60,8 +61,7 @@ CREATE TABLE sagas (
 CREATE TRIGGER updated_at_sagas_trgr
   BEFORE UPDATE
   ON sagas
-  FOR EACH ROW
-EXECUTE PROCEDURE updated_at_trigger();
+  FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 -- +goose Down
 DROP TABLE IF EXISTS sagas;

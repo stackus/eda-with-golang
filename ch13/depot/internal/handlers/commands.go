@@ -22,7 +22,7 @@ func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 	}
 }
 
-func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
+func RegisterCommandHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) error {
 	_, err := subscriber.Subscribe(depotpb.CommandChannel, handlers, am.MessageFilter{
 		depotpb.CreateShoppingListCommand,
 		depotpb.CancelShoppingListCommand,

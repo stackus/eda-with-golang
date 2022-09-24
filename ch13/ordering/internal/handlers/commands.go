@@ -20,7 +20,7 @@ func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 	}
 }
 
-func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
+func RegisterCommandHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) error {
 	_, err := subscriber.Subscribe(orderingpb.CommandChannel, handlers, am.MessageFilter{
 		orderingpb.RejectOrderCommand,
 		orderingpb.ApproveOrderCommand,

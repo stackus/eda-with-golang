@@ -3,7 +3,9 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
@@ -11,6 +13,7 @@ import (
 	"github.com/stackus/errors"
 
 	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/tm"
 )
 
@@ -20,14 +23,16 @@ type OutboxStore struct {
 }
 
 type outboxMessage struct {
-	id      string
-	name    string
-	subject string
-	data    []byte
+	id       string
+	name     string
+	subject  string
+	data     []byte
+	metadata ddd.Metadata
+	sentAt   time.Time
 }
 
 var _ tm.OutboxStore = (*OutboxStore)(nil)
-var _ am.RawMessage = (*outboxMessage)(nil)
+var _ am.Message = (*outboxMessage)(nil)
 
 func NewOutboxStore(tableName string, db DB) OutboxStore {
 	return OutboxStore{
@@ -36,10 +41,15 @@ func NewOutboxStore(tableName string, db DB) OutboxStore {
 	}
 }
 
-func (s OutboxStore) Save(ctx context.Context, msg am.RawMessage) error {
-	const query = "INSERT INTO %s (id, name, subject, data) VALUES ($1, $2, $3, $4)"
+func (s OutboxStore) Save(ctx context.Context, msg am.Message) error {
+	const query = "INSERT INTO %s (id, NAME, subject, DATA, metadata, sent_at) VALUES ($1, $2, $3, $4, $5, $6)"
 
-	_, err := s.db.ExecContext(ctx, s.table(query), msg.ID(), msg.MessageName(), msg.Subject(), msg.Data())
+	metadata, err := json.Marshal(msg.Metadata())
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.ExecContext(ctx, s.table(query), msg.ID(), msg.MessageName(), msg.Subject(), msg.Data(), metadata, msg.SentAt())
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -52,8 +62,8 @@ func (s OutboxStore) Save(ctx context.Context, msg am.RawMessage) error {
 	return err
 }
 
-func (s OutboxStore) FindUnpublished(ctx context.Context, limit int) ([]am.RawMessage, error) {
-	const query = "SELECT id, name, subject, data FROM %s WHERE published_at IS NULL LIMIT %d"
+func (s OutboxStore) FindUnpublished(ctx context.Context, limit int) ([]am.Message, error) {
+	const query = "SELECT id, name, subject, data, metadata, sent_at FROM %s WHERE published_at IS NULL LIMIT %d"
 
 	rows, err := s.db.QueryContext(ctx, s.table(query, limit))
 	if err != nil {
@@ -66,14 +76,17 @@ func (s OutboxStore) FindUnpublished(ctx context.Context, limit int) ([]am.RawMe
 		}
 	}(rows)
 
-	var msgs []am.RawMessage
+	var msgs []am.Message
 
 	for rows.Next() {
+		var metadata []byte
 		msg := outboxMessage{}
-		err = rows.Scan(&msg.id, &msg.name, &msg.subject, &msg.data)
+		err = rows.Scan(&msg.id, &msg.name, &msg.subject, &msg.data, &metadata, &msg.sentAt)
 		if err != nil {
 			return msgs, err
 		}
+
+		err = json.Unmarshal(metadata, &msg.metadata)
 
 		msgs = append(msgs, msg)
 	}
@@ -101,18 +114,9 @@ func (s OutboxStore) table(query string, args ...any) string {
 	return fmt.Sprintf(query, params...)
 }
 
-func (m outboxMessage) ID() string {
-	return m.id
-}
-
-func (m outboxMessage) Subject() string {
-	return m.subject
-}
-
-func (m outboxMessage) MessageName() string {
-	return m.name
-}
-
-func (m outboxMessage) Data() []byte {
-	return m.data
-}
+func (m outboxMessage) ID() string             { return m.id }
+func (m outboxMessage) Subject() string        { return m.subject }
+func (m outboxMessage) MessageName() string    { return m.name }
+func (m outboxMessage) Data() []byte           { return m.data }
+func (m outboxMessage) Metadata() ddd.Metadata { return m.metadata }
+func (m outboxMessage) SentAt() time.Time      { return m.sentAt }

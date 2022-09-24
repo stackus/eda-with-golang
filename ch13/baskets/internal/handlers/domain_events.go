@@ -10,12 +10,12 @@ import (
 )
 
 type domainHandlers[T ddd.Event] struct {
-	publisher am.MessagePublisher[ddd.Event]
+	publisher am.EventPublisher
 }
 
 var _ ddd.EventHandler[ddd.Event] = (*domainHandlers[ddd.Event])(nil)
 
-func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) ddd.EventHandler[ddd.Event] {
+func NewDomainEventHandlers(publisher am.EventPublisher) ddd.EventHandler[ddd.Event] {
 	return &domainHandlers[ddd.Event]{
 		publisher: publisher,
 	}
@@ -42,6 +42,9 @@ func (h domainHandlers[T]) HandleEvent(ctx context.Context, event T) error {
 }
 
 func (h domainHandlers[T]) onBasketStarted(ctx context.Context, event ddd.Event) error {
+	ctx, span := tracer.Start(ctx, "onBasketStarted")
+	defer span.End()
+
 	basket := event.Payload().(*domain.Basket)
 	return h.publisher.Publish(ctx, basketspb.BasketAggregateChannel,
 		ddd.NewEvent(basketspb.BasketStartedEvent, &basketspb.BasketStarted{
@@ -52,6 +55,9 @@ func (h domainHandlers[T]) onBasketStarted(ctx context.Context, event ddd.Event)
 }
 
 func (h domainHandlers[T]) onBasketCanceled(ctx context.Context, event ddd.Event) error {
+	ctx, span := tracer.Start(ctx, "onBasketCanceled")
+	defer span.End()
+
 	basket := event.Payload().(*domain.Basket)
 	return h.publisher.Publish(ctx, basketspb.BasketAggregateChannel,
 		ddd.NewEvent(basketspb.BasketCanceledEvent, &basketspb.BasketCanceled{
@@ -61,6 +67,9 @@ func (h domainHandlers[T]) onBasketCanceled(ctx context.Context, event ddd.Event
 }
 
 func (h domainHandlers[T]) onBasketCheckedOut(ctx context.Context, event ddd.Event) error {
+	ctx, span := tracer.Start(ctx, "onBasketCheckedOut")
+	defer span.End()
+
 	basket := event.Payload().(*domain.Basket)
 	items := make([]*basketspb.BasketCheckedOut_Item, 0, len(basket.Items))
 	for _, item := range basket.Items {

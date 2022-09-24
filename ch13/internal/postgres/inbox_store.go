@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/jackc/pgconn"
@@ -26,10 +27,15 @@ func NewInboxStore(tableName string, db DB) InboxStore {
 	}
 }
 
-func (s InboxStore) Save(ctx context.Context, msg am.RawMessage) error {
-	const query = "INSERT INTO %s (id, name, subject, data, received_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)"
+func (s InboxStore) Save(ctx context.Context, msg am.IncomingMessage) error {
+	const query = "INSERT INTO %s (id, name, subject, data, metadata, sent_at, received_at) VALUES ($1, $2, $3, $4, $%, $6, $7)"
 
-	_, err := s.db.ExecContext(ctx, s.table(query), msg.ID(), msg.MessageName(), msg.Subject(), msg.Data())
+	metadata, err := json.Marshal(msg.Metadata())
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.ExecContext(ctx, s.table(query), msg.ID(), msg.MessageName(), msg.Subject(), msg.Data(), metadata, msg.SentAt(), msg.ReceivedAt())
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {

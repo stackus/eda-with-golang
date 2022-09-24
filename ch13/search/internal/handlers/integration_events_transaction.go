@@ -14,7 +14,7 @@ import (
 )
 
 func RegisterIntegrationEventHandlersTx(container di.Container) (err error) {
-	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.IncomingRawMessage) (err error) {
+	evtMsgHandler := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
 		ctx = container.Scoped(ctx)
 		defer func(tx *sql.Tx) {
 			if p := recover(); p != nil {
@@ -27,18 +27,18 @@ func RegisterIntegrationEventHandlersTx(container di.Container) (err error) {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		evtHandlers := am.RawMessageHandlerWithMiddleware(
-			am.NewEventMessageHandler(
+		evtHandlers := am.MessageHandlerWithMiddleware(
+			am.NewEventHandler(
 				di.Get(ctx, "registry").(registry.Registry),
 				di.Get(ctx, "integrationEventHandlers").(ddd.EventHandler[ddd.Event]),
 			),
-			di.Get(ctx, "inboxMiddleware").(am.RawMessageHandlerMiddleware),
+			di.Get(ctx, "inboxMiddleware").(am.MessageHandlerMiddleware),
 		)
 
 		return evtHandlers.HandleMessage(ctx, msg)
 	})
 
-	subscriber := container.Get("stream").(am.RawMessageStream)
+	subscriber := container.Get("stream").(am.MessageStream)
 
 	if _, err = subscriber.Subscribe(customerspb.CustomerAggregateChannel, evtMsgHandler, am.MessageFilter{
 		customerspb.CustomerRegisteredEvent,

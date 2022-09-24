@@ -10,12 +10,12 @@ import (
 )
 
 type domainHandlers[T ddd.AggregateEvent] struct {
-	publisher am.MessagePublisher[ddd.Event]
+	publisher am.EventPublisher
 }
 
 var _ ddd.EventHandler[ddd.AggregateEvent] = (*domainHandlers[ddd.AggregateEvent])(nil)
 
-func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) ddd.EventHandler[ddd.AggregateEvent] {
+func NewDomainEventHandlers(publisher am.EventPublisher) ddd.EventHandler[ddd.AggregateEvent] {
 	return &domainHandlers[ddd.AggregateEvent]{
 		publisher: publisher,
 	}

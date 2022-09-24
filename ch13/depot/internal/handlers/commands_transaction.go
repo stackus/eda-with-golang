@@ -11,7 +11,7 @@ import (
 )
 
 func RegisterCommandHandlersTx(container di.Container) error {
-	cmdMsgHandlers := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.IncomingRawMessage) (err error) {
+	cmdMsgHandlers := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
 		ctx = container.Scoped(ctx)
 		defer func(tx *sql.Tx) {
 			if p := recover(); p != nil {
@@ -24,19 +24,19 @@ func RegisterCommandHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		cmdMsgHandlers := am.RawMessageHandlerWithMiddleware(
-			am.NewCommandMessageHandler(
+		cmdMsgHandlers := am.MessageHandlerWithMiddleware(
+			am.NewCommandHandler(
 				di.Get(ctx, "registry").(registry.Registry),
 				di.Get(ctx, "replyStream").(am.ReplyStream),
 				di.Get(ctx, "commandHandlers").(ddd.CommandHandler[ddd.Command]),
-			).(am.RawMessageHandler),
-			di.Get(ctx, "inboxMiddleware").(am.RawMessageHandlerMiddleware),
+			).(am.MessageHandler),
+			di.Get(ctx, "inboxMiddleware").(am.MessageHandlerMiddleware),
 		)
 
 		return cmdMsgHandlers.HandleMessage(ctx, msg)
 	})
 
-	subscriber := container.Get("stream").(am.RawMessageStream)
+	subscriber := container.Get("stream").(am.MessageStream)
 
 	return RegisterCommandHandlers(subscriber, cmdMsgHandlers)
 }

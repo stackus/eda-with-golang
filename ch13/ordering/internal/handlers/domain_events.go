@@ -10,10 +10,10 @@ import (
 )
 
 type domainHandlers[T ddd.Event] struct {
-	publisher am.MessagePublisher[ddd.Event]
+	publisher am.EventPublisher
 }
 
-func NewDomainEventHandlers(publisher am.MessagePublisher[ddd.Event]) ddd.EventHandler[ddd.Event] {
+func NewDomainEventHandlers(publisher am.EventPublisher) ddd.EventHandler[ddd.Event] {
 	return domainHandlers[ddd.Event]{publisher: publisher}
 }
 

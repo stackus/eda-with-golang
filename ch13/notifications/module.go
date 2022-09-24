@@ -32,7 +32,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	if err = orderingpb.Registrations(reg); err != nil {
 		return err
 	}
-	eventStream := am.NewEventStream(reg, jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger()))
+	eventStream := am.NewEventPublisher(reg, jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger()))
 	conn, err := grpc.Dial(ctx, svc.Config().Rpc.Service("CUSTOMERS"))
 	if err != nil {
 		return err

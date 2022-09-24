@@ -81,7 +81,7 @@ func TestStoresProducer(t *testing.T) {
 				// Assign
 				dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 				app := application.New(stores, products, catalog, mall, dispatcher)
-				publisher := am.NewFakeMessagePublisher[ddd.Event]()
+				publisher := am.NewFakeEventPublisher()
 				handler := NewDomainEventHandlers(publisher)
 				RegisterDomainEventHandlers(dispatcher, handler)
 
@@ -111,7 +111,7 @@ func TestStoresProducer(t *testing.T) {
 			"a StoreRebranded message": func(states []models.ProviderState) (message.Body, message.Metadata, error) {
 				dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 				app := application.New(stores, products, catalog, mall, dispatcher)
-				publisher := am.NewFakeMessagePublisher[ddd.Event]()
+				publisher := am.NewFakeEventPublisher()
 				handler := NewDomainEventHandlers(publisher)
 				RegisterDomainEventHandlers(dispatcher, handler)
 

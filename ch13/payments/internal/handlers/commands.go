@@ -19,7 +19,7 @@ func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
 	}
 }
 
-func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
+func RegisterCommandHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) error {
 	_, err := subscriber.Subscribe(paymentspb.CommandChannel, handlers, am.MessageFilter{
 		paymentspb.ConfirmPaymentCommand,
 	}, am.GroupName("payment-commands"))

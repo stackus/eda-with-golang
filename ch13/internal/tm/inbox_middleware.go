@@ -12,27 +12,27 @@ import (
 type ErrDuplicateMessage string
 
 type InboxStore interface {
-	Save(ctx context.Context, msg am.RawMessage) error
+	Save(ctx context.Context, msg am.IncomingMessage) error
 }
 
 type inbox struct {
-	handler am.RawMessageHandler
+	handler am.MessageHandler
 	store   InboxStore
 }
 
-var _ am.RawMessageHandler = (*inbox)(nil)
+var _ am.MessageHandler = (*inbox)(nil)
 
-func NewInboxHandlerMiddleware(store InboxStore) am.RawMessageHandlerMiddleware {
+func NewInboxHandlerMiddleware(store InboxStore) am.MessageHandlerMiddleware {
 	i := inbox{store: store}
 
-	return func(handler am.RawMessageHandler) am.RawMessageHandler {
+	return func(handler am.MessageHandler) am.MessageHandler {
 		i.handler = handler
 
 		return i
 	}
 }
 
-func (i inbox) HandleMessage(ctx context.Context, msg am.IncomingRawMessage) error {
+func (i inbox) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
 	// try to insert the message
 	err := i.store.Save(ctx, msg)
 	if err != nil {

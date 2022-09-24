@@ -6,17 +6,14 @@ import "google/protobuf/struct.proto";
 message EventMessageData {
   bytes payload = 1;
   google.protobuf.Timestamp occurred_at = 2;
-  google.protobuf.Struct metadata = 3;
 }
 
 message ReplyMessageData {
   bytes payload = 1;
   google.protobuf.Timestamp occurred_at = 2;
-  google.protobuf.Struct metadata = 3;
 }
 
 message CommandMessageData {
   bytes payload = 1;
   google.protobuf.Timestamp occurred_at = 2;
-  google.protobuf.Struct metadata = 3;
 }

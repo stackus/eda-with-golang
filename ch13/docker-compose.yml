@@ -19,6 +19,7 @@ services:
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/monolith" ]
     profiles: [ monolith ]
 
@@ -41,9 +42,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=baskets user=baskets_user password=baskets_pass search_path=baskets,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: baskets
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles: [ microservices ]
   cosec:
@@ -62,9 +66,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=cosec user=cosec_user password=cosec_pass search_path=cosec,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: cosec
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles:
       - microservices
@@ -84,9 +91,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=customers user=customers_user password=customers_pass search_path=customers,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: customers
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles:
       - microservices
@@ -106,9 +116,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=depot user=depot_user password=depot_pass search_path=depot,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: depot
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles:
       - microservices
@@ -128,9 +141,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=notifications user=notifications_user password=notifications_pass search_path=notifications,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: notifications
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles:
       - microservices
@@ -150,9 +166,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=ordering user=ordering_user password=ordering_pass search_path=ordering,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: ordering
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles:
       - microservices
@@ -172,9 +191,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=payments user=payments_user password=payments_pass search_path=payments,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: payments
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles:
       - microservices
@@ -194,9 +216,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=search user=search_user password=search_pass search_path=search,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: search
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles:
       - microservices
@@ -216,9 +241,12 @@ services:
       RPC_SERVICES: 'STORES=stores:9000,CUSTOMERS=customers:9000'
       PG_CONN: host=postgres dbname=stores user=stores_user password=stores_pass search_path=stores,public
       NATS_URL: nats:4222
+      OTEL_SERVICE_NAME: stores
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
     depends_on:
       - nats
       - postgres
+      - collector
     command: [ "./wait-for", "postgres:5432", "--", "/mallbots/service" ]
     profiles:
       - microservices
@@ -272,6 +300,56 @@ services:
       PACT_BROKER_ALLOW_PUBLIC_READ: 'true'
       PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES: 5
       PACT_BROKER_BASE_URL: 'http://localhost:9292 http://pact-broker:9292'
+  collector:
+    container_name: collector
+    hostname: collector
+    image: otel/opentelemetry-collector-contrib:0.60.0
+    command: [
+      "--config=/etc/otel-config.yml",
+    ]
+    volumes:
+      - ./docker/otel/otel-config.yml:/etc/otel-config.yml
+    ports:
+      - "1888:1888"   # pprof extension
+      - "8888:8888"   # Prometheus metrics exposed by the collector
+      - "8889:8889"   # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP http receiver
+      - "55679:55679" # zpages extension
+  jaeger:
+    container_name: jaeger
+    hostname: jaeger
+    image: jaegertracing/all-in-one:1
+    ports:
+      - "8081:16686"
+      - "14250"
+  prometheus:
+    container_name: prometheus
+    hostname: prometheus
+    image: prom/prometheus:v2.37.1
+    command: [
+      #      - --web.console.templates=/etc/prometheus/consoles
+      #      - --web.console.libraries=/etc/prometheus/console_libraries
+      #      - --storage.tsdb.retention.time=1h
+      "--config.file=/etc/prometheus/prometheus-config.yml",
+      #      - --storage.tsdb.path=/prometheus
+      #      - --web.enable-lifecycle
+      #      - --web.route-prefix=/
+    ]
+    volumes:
+      - ./docker/prometheus/prometheus-config.yml:/etc/prometheus/prometheus-config.yml
+    ports:
+      - "9090:9090"
+  grafana:
+    container_name: grafana
+    hostname: grafana
+    image: grafana/grafana:9.0.9
+    volumes:
+      - ./docker/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./docker/grafana/provisioning/:/etc/grafana/provisioning/
+    ports:
+      - "3000:3000"
 volumes:
   pgdata:
   jsdata:

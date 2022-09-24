@@ -7,23 +7,35 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"eda-in-golang/stores/storespb"
-
 	"eda-in-golang/baskets/internal/domain"
+	"eda-in-golang/internal/rpc"
+	"eda-in-golang/stores/storespb"
 )
 
 type ProductRepository struct {
-	client storespb.StoresServiceClient
+	endpoint string
 }
 
 var _ domain.ProductRepository = (*ProductRepository)(nil)
 
-func NewProductRepository(conn *grpc.ClientConn) ProductRepository {
-	return ProductRepository{client: storespb.NewStoresServiceClient(conn)}
+func NewProductRepository(endpoint string) ProductRepository {
+	return ProductRepository{
+		endpoint: endpoint,
+	}
 }
 
-func (r ProductRepository) Find(ctx context.Context, productID string) (*domain.Product, error) {
-	resp, err := r.client.GetProduct(ctx, &storespb.GetProductRequest{
+func (r ProductRepository) Find(ctx context.Context, productID string) (product *domain.Product, err error) {
+	var conn *grpc.ClientConn
+	conn, err = r.dial(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(conn *grpc.ClientConn) {
+		err = conn.Close()
+	}(conn)
+
+	resp, err := storespb.NewStoresServiceClient(conn).GetProduct(ctx, &storespb.GetProductRequest{
 		Id: productID,
 	})
 	if err != nil {
@@ -43,4 +55,8 @@ func (r ProductRepository) productToDomain(product *storespb.Product) *domain.Pr
 		Name:    product.GetName(),
 		Price:   product.GetPrice(),
 	}
+}
+
+func (r ProductRepository) dial(ctx context.Context) (*grpc.ClientConn, error) {
+	return rpc.Dial(ctx, r.endpoint)
 }

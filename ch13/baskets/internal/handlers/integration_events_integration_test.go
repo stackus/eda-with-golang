@@ -26,12 +26,13 @@ import (
 const streamName = "mallbots"
 
 type integrationEventsTestSuite struct {
-	container testcontainers.Container
-	natsConn  *nats.Conn
-	reg       registry.Registry
-	js        nats.JetStreamContext
-	stream    am.EventStream
-	mocks     struct {
+	container  testcontainers.Container
+	natsConn   *nats.Conn
+	reg        registry.Registry
+	js         nats.JetStreamContext
+	publisher  am.EventPublisher
+	subscriber am.MessageStream
+	mocks      struct {
 		products *domain.MockProductCacheRepository
 		stores   *domain.MockStoreCacheRepository
 	}
@@ -118,19 +119,21 @@ func (s *integrationEventsTestSuite) SetupTest() {
 		With().
 		Logger()
 
-	s.stream = am.NewEventStream(s.reg, jetstream.NewStream(streamName, s.js, logger))
-	handler := integrationHandlers[ddd.Event]{
+	stream := jetstream.NewStream(streamName, s.js, logger)
+	s.publisher = am.NewEventPublisher(s.reg, stream)
+	s.subscriber = stream
+	handler := am.NewEventHandler(s.reg, integrationHandlers[ddd.Event]{
 		products: s.mocks.products,
 		stores:   s.mocks.stores,
-	}
+	})
 
-	if err := RegisterIntegrationEventHandlers(s.stream, handler); err != nil {
+	if err := RegisterIntegrationEventHandlers(s.subscriber, handler); err != nil {
 		s.T().Fatal(err)
 	}
 }
 
 func (s *integrationEventsTestSuite) TearDownTest() {
-	if err := s.stream.Unsubscribe(); err != nil {
+	if err := s.subscriber.Unsubscribe(); err != nil {
 		s.T().Fatal(err)
 	}
 }
@@ -141,7 +144,7 @@ func (s *integrationEventsTestSuite) TestStoreAggregateChannel_StoreCreated() {
 			close(done)
 		})
 
-		_ = s.stream.Publish(context.Background(), storespb.StoreAggregateChannel,
+		_ = s.publisher.Publish(context.Background(), storespb.StoreAggregateChannel,
 			ddd.NewEvent(storespb.StoreCreatedEvent, &storespb.StoreCreated{
 				Id:       "store-id",
 				Name:     "store-name",
@@ -157,7 +160,7 @@ func (s *integrationEventsTestSuite) TestStoreAggregateChannel_StoreRebranded() 
 			close(done)
 		})
 
-		s.NoError(s.stream.Publish(context.Background(), storespb.StoreAggregateChannel,
+		s.NoError(s.publisher.Publish(context.Background(), storespb.StoreAggregateChannel,
 			ddd.NewEvent(storespb.StoreRebrandedEvent, &storespb.StoreRebranded{
 				Id:   "store-id",
 				Name: "store-name",
@@ -172,7 +175,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductAdded() 
 			close(done)
 		})
 
-		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.publisher.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductAddedEvent, &storespb.ProductAdded{
 				Id:      "product-id",
 				StoreId: "store-id",
@@ -189,7 +192,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductRebrande
 			close(done)
 		})
 
-		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.publisher.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductRebrandedEvent, &storespb.ProductRebranded{
 				Id:   "product-id",
 				Name: "product-name",
@@ -204,7 +207,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductPriceInc
 			close(done)
 		})
 
-		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.publisher.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductPriceIncreasedEvent, &storespb.ProductPriceChanged{
 				Id:    "product-id",
 				Delta: 1.00,
@@ -219,7 +222,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductPriceDec
 			close(done)
 		})
 
-		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.publisher.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductPriceDecreasedEvent, &storespb.ProductPriceChanged{
 				Id:    "product-id",
 				Delta: -1.00,
@@ -234,7 +237,7 @@ func (s *integrationEventsTestSuite) TestProductAggregateChannel_ProductRemoved(
 			close(done)
 		})
 
-		s.NoError(s.stream.Publish(context.Background(), storespb.ProductAggregateChannel,
+		s.NoError(s.publisher.Publish(context.Background(), storespb.ProductAggregateChannel,
 			ddd.NewEvent(storespb.ProductRemovedEvent, &storespb.ProductRemoved{
 				Id: "product-id",
 			}),

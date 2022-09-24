@@ -15,11 +15,11 @@ type OutboxProcessor interface {
 }
 
 type outboxProcessor struct {
-	publisher am.RawMessagePublisher
+	publisher am.MessagePublisher
 	store     OutboxStore
 }
 
-func NewOutboxProcessor(publisher am.RawMessagePublisher, store OutboxStore) OutboxProcessor {
+func NewOutboxProcessor(publisher am.MessagePublisher, store OutboxStore) OutboxProcessor {
 	return outboxProcessor{
 		publisher: publisher,
 		store:     store,

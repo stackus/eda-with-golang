@@ -54,7 +54,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
 		return tm.NewOutboxProcessor(
-			c.Get("stream").(am.RawMessageStream),
+			c.Get("stream").(am.MessageStream),
 			pg.NewOutboxStore("customers.outbox", c.Get("db").(*sql.DB)),
 		), nil
 	})
@@ -68,17 +68,17 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	container.AddScoped("txStream", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("customers.outbox", tx)
-		return am.RawMessageStreamWithMiddleware(
-			c.Get("stream").(am.RawMessageStream),
+		return am.MessageStreamWithMiddleware(
+			c.Get("stream").(am.MessageStream),
 			tm.NewOutboxStreamMiddleware(outboxStore),
 		), nil
 	})
 
 	container.AddScoped("eventStream", func(c di.Container) (any, error) {
-		return am.NewEventStream(c.Get("registry").(registry.Registry), c.Get("txStream").(am.RawMessageStream)), nil
+		return am.NewEventPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
 	})
 	container.AddScoped("replyStream", func(c di.Container) (any, error) {
-		return am.NewReplyStream(c.Get("registry").(registry.Registry), c.Get("txStream").(am.RawMessageStream)), nil
+		return am.NewReplyPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
 	})
 	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
