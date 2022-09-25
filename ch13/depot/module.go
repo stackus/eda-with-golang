@@ -68,7 +68,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
-		outboxStore := pg.NewOutboxStore("baskets.outbox", tx)
+		outboxStore := pg.NewOutboxStore("depot.outbox", tx)
 		return am.NewMessagePublisher(
 			c.Get("stream").(am.MessageStream),
 			am.OtelMessageContextInjector(),
@@ -101,7 +101,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	container.AddScoped("inboxStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
-		return pg.NewInboxStore("baskets.inbox", tx), nil
+		return pg.NewInboxStore("depot.inbox", tx), nil
 	})
 	container.AddScoped("shoppingLists", func(c di.Container) (any, error) {
 		return postgres.NewShoppingListRepository("depot.shopping_lists", c.Get("tx").(*sql.Tx)), nil

@@ -67,6 +67,9 @@ func New(invoices InvoiceRepository, payments PaymentRepository, publisher ddd.E
 }
 
 func (a Application) AuthorizePayment(ctx context.Context, authorize AuthorizePayment) error {
+	ctx, span := tracer.Start(ctx, "AuthorizePayment")
+	defer span.End()
+
 	return a.payments.Save(ctx, &models.Payment{
 		ID:         authorize.ID,
 		CustomerID: authorize.CustomerID,
@@ -75,6 +78,9 @@ func (a Application) AuthorizePayment(ctx context.Context, authorize AuthorizePa
 }
 
 func (a Application) ConfirmPayment(ctx context.Context, confirm ConfirmPayment) error {
+	ctx, span := tracer.Start(ctx, "ConfirmPayment")
+	defer span.End()
+
 	if payment, err := a.payments.Find(ctx, confirm.ID); err != nil || payment == nil {
 		return errors.Wrap(errors.ErrNotFound, "payment cannot be confirmed")
 	}
@@ -83,6 +89,9 @@ func (a Application) ConfirmPayment(ctx context.Context, confirm ConfirmPayment)
 }
 
 func (a Application) CreateInvoice(ctx context.Context, create CreateInvoice) error {
+	ctx, span := tracer.Start(ctx, "CreateInvoice")
+	defer span.End()
+
 	return a.invoices.Save(ctx, &models.Invoice{
 		ID:      create.ID,
 		OrderID: create.OrderID,
@@ -92,6 +101,9 @@ func (a Application) CreateInvoice(ctx context.Context, create CreateInvoice) er
 }
 
 func (a Application) AdjustInvoice(ctx context.Context, adjust AdjustInvoice) error {
+	ctx, span := tracer.Start(ctx, "AdjustInvoice")
+	defer span.End()
+
 	invoice, err := a.invoices.Find(ctx, adjust.ID)
 	if err != nil {
 		return err
@@ -103,6 +115,9 @@ func (a Application) AdjustInvoice(ctx context.Context, adjust AdjustInvoice) er
 }
 
 func (a Application) PayInvoice(ctx context.Context, pay PayInvoice) error {
+	ctx, span := tracer.Start(ctx, "PayInvoice")
+	defer span.End()
+
 	invoice, err := a.invoices.Find(ctx, pay.ID)
 	if err != nil {
 		return err
@@ -127,6 +142,9 @@ func (a Application) PayInvoice(ctx context.Context, pay PayInvoice) error {
 }
 
 func (a Application) CancelInvoice(ctx context.Context, cancel CancelInvoice) error {
+	ctx, span := tracer.Start(ctx, "CancelInvoice")
+	defer span.End()
+
 	invoice, err := a.invoices.Find(ctx, cancel.ID)
 	if err != nil {
 		return err

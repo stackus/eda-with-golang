@@ -19,5 +19,8 @@ func NewGetCatalogHandler(catalog domain.CatalogRepository) GetCatalogHandler {
 }
 
 func (h GetCatalogHandler) GetCatalog(ctx context.Context, query GetCatalog) ([]*domain.CatalogProduct, error) {
+	ctx, span := tracer.Start(ctx, "GetCatalog")
+	defer span.End()
+
 	return h.catalog.GetCatalog(ctx, query.StoreID)
 }

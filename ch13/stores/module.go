@@ -20,7 +20,6 @@ import (
 	"eda-in-golang/stores/internal/domain"
 	"eda-in-golang/stores/internal/grpc"
 	"eda-in-golang/stores/internal/handlers"
-	"eda-in-golang/stores/internal/logging"
 	"eda-in-golang/stores/internal/postgres"
 	"eda-in-golang/stores/internal/rest"
 	"eda-in-golang/stores/storespb"
@@ -68,16 +67,30 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		db := c.Get("db").(*sql.DB)
 		return db.Begin()
 	})
-	container.AddScoped("txStream", func(c di.Container) (any, error) {
+	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("stores.outbox", tx)
-		return am.MessageStreamWithMiddleware(
+		return am.NewMessagePublisher(
 			c.Get("stream").(am.MessageStream),
-			tm.NewOutboxStreamMiddleware(outboxStore),
+			am.OtelMessageContextInjector(),
+			tm.OutboxPublisher(outboxStore),
 		), nil
 	})
-	container.AddScoped("eventStream", func(c di.Container) (any, error) {
-		return am.NewEventPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
+	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
+		return am.NewMessageSubscriber(
+			c.Get("stream").(am.MessageStream),
+			am.OtelMessageContextExtractor(),
+		), nil
+	})
+	container.AddScoped("eventPublisher", func(c di.Container) (any, error) {
+		return am.NewEventPublisher(
+			c.Get("registry").(registry.Registry),
+			c.Get("messagePublisher").(am.MessagePublisher),
+		), nil
+	})
+	container.AddScoped("inboxStore", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(*sql.Tx)
+		return pg.NewInboxStore("stores.inbox", tx), nil
 	})
 	container.AddScoped("aggregateStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
@@ -110,34 +123,22 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 
 	// setup application
 	container.AddScoped("app", func(c di.Container) (any, error) {
-		return logging.LogApplicationAccess(
-			application.New(
-				c.Get("stores").(domain.StoreRepository),
-				c.Get("products").(domain.ProductRepository),
-				c.Get("catalog").(domain.CatalogRepository),
-				c.Get("mall").(domain.MallRepository),
-				c.Get("domainDispatcher").(ddd.EventPublisher[ddd.Event]),
-			),
-			c.Get("logger").(zerolog.Logger),
+		return application.New(
+			c.Get("stores").(domain.StoreRepository),
+			c.Get("products").(domain.ProductRepository),
+			c.Get("catalog").(domain.CatalogRepository),
+			c.Get("mall").(domain.MallRepository),
+			c.Get("domainDispatcher").(ddd.EventPublisher[ddd.Event]),
 		), nil
 	})
 	container.AddScoped("catalogHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.Event](
-			handlers.NewCatalogHandlers(c.Get("catalog").(domain.CatalogRepository)),
-			"Catalog", c.Get("logger").(zerolog.Logger),
-		), nil
+		return handlers.NewCatalogHandlers(c.Get("catalog").(domain.CatalogRepository)), nil
 	})
 	container.AddScoped("mallHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.Event](
-			handlers.NewMallHandlers(c.Get("mall").(domain.MallRepository)),
-			"Mall", c.Get("logger").(zerolog.Logger),
-		), nil
+		return handlers.NewMallHandlers(c.Get("mall").(domain.MallRepository)), nil
 	})
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.Event](
-			handlers.NewDomainEventHandlers(c.Get("eventStream").(am.EventStream)),
-			"DomainEvents", c.Get("logger").(zerolog.Logger),
-		), nil
+		return handlers.NewDomainEventHandlers(c.Get("eventPublisher").(am.EventPublisher)), nil
 	})
 
 	// setup Driver adapters

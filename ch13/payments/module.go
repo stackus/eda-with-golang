@@ -18,7 +18,6 @@ import (
 	"eda-in-golang/payments/internal/application"
 	"eda-in-golang/payments/internal/grpc"
 	"eda-in-golang/payments/internal/handlers"
-	"eda-in-golang/payments/internal/logging"
 	"eda-in-golang/payments/internal/postgres"
 	"eda-in-golang/payments/internal/rest"
 	"eda-in-golang/payments/paymentspb"
@@ -65,24 +64,36 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		db := c.Get("db").(*sql.DB)
 		return db.Begin()
 	})
-	container.AddScoped("txStream", func(c di.Container) (any, error) {
+	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("payments.outbox", tx)
-		return am.MessageStreamWithMiddleware(
+		return am.NewMessagePublisher(
 			c.Get("stream").(am.MessageStream),
-			tm.NewOutboxStreamMiddleware(outboxStore),
+			am.OtelMessageContextInjector(),
+			tm.OutboxPublisher(outboxStore),
 		), nil
 	})
-	container.AddScoped("eventStream", func(c di.Container) (any, error) {
-		return am.NewEventPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
+	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
+		return am.NewMessageSubscriber(
+			c.Get("stream").(am.MessageStream),
+			am.OtelMessageContextExtractor(),
+		), nil
 	})
-	container.AddScoped("replyStream", func(c di.Container) (any, error) {
-		return am.NewReplyPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
+	container.AddScoped("eventPublisher", func(c di.Container) (any, error) {
+		return am.NewEventPublisher(
+			c.Get("registry").(registry.Registry),
+			c.Get("messagePublisher").(am.MessagePublisher),
+		), nil
 	})
-	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+	container.AddScoped("replyPublisher", func(c di.Container) (any, error) {
+		return am.NewReplyPublisher(
+			c.Get("registry").(registry.Registry),
+			c.Get("messagePublisher").(am.MessagePublisher),
+		), nil
+	})
+	container.AddScoped("inboxStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
-		inboxStore := pg.NewInboxStore("payments.inbox", tx)
-		return tm.NewInboxHandlerMiddleware(inboxStore), nil
+		return pg.NewInboxStore("payments.inbox", tx), nil
 	})
 	container.AddScoped("invoices", func(c di.Container) (any, error) {
 		return postgres.NewInvoiceRepository("payments.invoices", c.Get("tx").(*sql.Tx)), nil
@@ -93,34 +104,22 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 
 	// setup application
 	container.AddScoped("app", func(c di.Container) (any, error) {
-		return logging.LogApplicationAccess(
-			application.New(
-				c.Get("invoices").(application.InvoiceRepository),
-				c.Get("payments").(application.PaymentRepository),
-				c.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]),
-			),
-			c.Get("logger").(zerolog.Logger),
+		return application.New(
+			c.Get("invoices").(application.InvoiceRepository),
+			c.Get("payments").(application.PaymentRepository),
+			c.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]),
 		), nil
 	})
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.Event](
-			handlers.NewDomainEventHandlers(c.Get("eventStream").(am.EventStream)),
-			"DomainEvents", c.Get("logger").(zerolog.Logger),
-		), nil
+		return handlers.NewDomainEventHandlers(c.Get("eventPublisher").(am.EventPublisher)), nil
 	})
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.Event](
-			handlers.NewIntegrationHandlers(
-				c.Get("app").(application.App),
-			),
-			"IntegrationEvents", c.Get("logger").(zerolog.Logger),
+		return handlers.NewIntegrationHandlers(
+			c.Get("app").(application.App),
 		), nil
 	})
 	container.AddScoped("commandHandlers", func(c di.Container) (any, error) {
-		return logging.LogCommandHandlerAccess[ddd.Command](
-			handlers.NewCommandHandlers(c.Get("app").(application.App)),
-			"Commands", c.Get("logger").(zerolog.Logger),
-		), nil
+		return handlers.NewCommandHandlers(c.Get("app").(application.App)), nil
 	})
 
 	// setup Driver adapters

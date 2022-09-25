@@ -24,6 +24,9 @@ func NewDisableParticipationHandler(stores domain.StoreRepository, publisher ddd
 }
 
 func (h DisableParticipationHandler) DisableParticipation(ctx context.Context, cmd DisableParticipation) error {
+	ctx, span := tracer.Start(ctx, "DisableParticipation")
+	defer span.End()
+
 	store, err := h.stores.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

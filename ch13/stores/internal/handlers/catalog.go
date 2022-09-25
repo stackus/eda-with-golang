@@ -43,6 +43,9 @@ func RegisterCatalogHandlersTx(container di.Container) {
 }
 
 func (h catalogHandlers[T]) HandleEvent(ctx context.Context, event T) error {
+	ctx, span := tracer.Start(ctx, event.EventName())
+	defer span.End()
+
 	switch event.EventName() {
 	case domain.ProductAddedEvent:
 		return h.onProductAdded(ctx, event)

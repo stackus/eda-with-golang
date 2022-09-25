@@ -8,10 +8,11 @@ import (
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/tm"
 )
 
 func RegisterCommandHandlersTx(container di.Container) error {
-	cmdMsgHandlers := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
+	rawMsgHandler := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
 		ctx = container.Scoped(ctx)
 		defer func(tx *sql.Tx) {
 			if p := recover(); p != nil {
@@ -24,19 +25,15 @@ func RegisterCommandHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		cmdMsgHandlers := am.MessageHandlerWithMiddleware(
-			am.NewCommandHandler(
-				di.Get(ctx, "registry").(registry.Registry),
-				di.Get(ctx, "replyStream").(am.ReplyStream),
-				di.Get(ctx, "commandHandlers").(ddd.CommandHandler[ddd.Command]),
-			).(am.MessageHandler),
-			di.Get(ctx, "inboxMiddleware").(am.MessageHandlerMiddleware),
-		)
-
-		return cmdMsgHandlers.HandleMessage(ctx, msg)
+		return am.NewCommandHandler(
+			di.Get(ctx, "registry").(registry.Registry),
+			di.Get(ctx, "replyPublisher").(am.ReplyPublisher),
+			di.Get(ctx, "commandHandlers").(ddd.CommandHandler[ddd.Command]),
+			tm.InboxHandler(di.Get(ctx, "inboxStore").(tm.InboxStore)),
+		).HandleMessage(ctx, msg)
 	})
 
-	subscriber := container.Get("stream").(am.MessageStream)
+	subscriber := container.Get("messageSubscriber").(am.MessageSubscriber)
 
-	return RegisterCommandHandlers(subscriber, cmdMsgHandlers)
+	return RegisterCommandHandlers(subscriber, rawMsgHandler)
 }

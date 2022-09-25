@@ -42,6 +42,9 @@ func RegisterMallHandlersTx(container di.Container) {
 }
 
 func (h mallHandlers[T]) HandleEvent(ctx context.Context, event T) error {
+	ctx, span := tracer.Start(ctx, event.EventName())
+	defer span.End()
+
 	switch event.EventName() {
 	case domain.StoreCreatedEvent:
 		return h.onStoreCreated(ctx, event)

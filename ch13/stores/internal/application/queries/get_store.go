@@ -19,5 +19,8 @@ func NewGetStoreHandler(mall domain.MallRepository) GetStoreHandler {
 }
 
 func (h GetStoreHandler) GetStore(ctx context.Context, query GetStore) (*domain.MallStore, error) {
+	ctx, span := tracer.Start(ctx, "GetStore")
+	defer span.End()
+
 	return h.mall.Find(ctx, query.ID)
 }

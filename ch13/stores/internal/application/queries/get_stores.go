@@ -17,5 +17,8 @@ func NewGetStoresHandler(mall domain.MallRepository) GetStoresHandler {
 }
 
 func (h GetStoresHandler) GetStores(ctx context.Context, _ GetStores) ([]*domain.MallStore, error) {
+	ctx, span := tracer.Start(ctx, "GetStores")
+	defer span.End()
+
 	return h.mall.All(ctx)
 }

@@ -33,6 +33,9 @@ func RegisterCommandHandlers(subscriber am.MessageSubscriber, handlers am.Messag
 }
 
 func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {
+	ctx, span := tracer.Start(ctx, cmd.CommandName())
+	defer span.End()
+
 	switch cmd.CommandName() {
 	case depotpb.CreateShoppingListCommand:
 		return h.doCreateShoppingList(ctx, cmd)

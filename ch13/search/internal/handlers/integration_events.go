@@ -31,18 +31,14 @@ func NewIntegrationEventHandlers(orders application.OrderRepository, customers a
 	}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers ddd.EventHandler[ddd.Event]) (err error) {
-	evtMsgHandler := am.MessageHandlerFunc[am.IncomingEventMessage](func(ctx context.Context, eventMsg am.IncomingEventMessage) error {
-		return handlers.HandleEvent(ctx, eventMsg)
-	})
-
-	if _, err = subscriber.Subscribe(customerspb.CustomerAggregateChannel, evtMsgHandler, am.MessageFilter{
+func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) (err error) {
+	if _, err = subscriber.Subscribe(customerspb.CustomerAggregateChannel, handlers, am.MessageFilter{
 		customerspb.CustomerRegisteredEvent,
 	}, am.GroupName("search-customers")); err != nil {
 		return
 	}
 
-	if _, err = subscriber.Subscribe(orderingpb.OrderAggregateChannel, evtMsgHandler, am.MessageFilter{
+	if _, err = subscriber.Subscribe(orderingpb.OrderAggregateChannel, handlers, am.MessageFilter{
 		orderingpb.OrderCreatedEvent,
 		orderingpb.OrderReadiedEvent,
 		orderingpb.OrderCanceledEvent,
@@ -51,7 +47,7 @@ func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers dd
 		return
 	}
 
-	if _, err = subscriber.Subscribe(storespb.ProductAggregateChannel, evtMsgHandler, am.MessageFilter{
+	if _, err = subscriber.Subscribe(storespb.ProductAggregateChannel, handlers, am.MessageFilter{
 		storespb.ProductAddedEvent,
 		storespb.ProductRebrandedEvent,
 		storespb.ProductRemovedEvent,
@@ -59,7 +55,7 @@ func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers dd
 		return
 	}
 
-	if _, err = subscriber.Subscribe(storespb.StoreAggregateChannel, evtMsgHandler, am.MessageFilter{
+	if _, err = subscriber.Subscribe(storespb.StoreAggregateChannel, handlers, am.MessageFilter{
 		storespb.StoreCreatedEvent,
 		storespb.StoreRebrandedEvent,
 	}, am.GroupName("search-stores")); err != nil {

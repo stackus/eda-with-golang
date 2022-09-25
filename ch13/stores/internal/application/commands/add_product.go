@@ -31,6 +31,9 @@ func NewAddProductHandler(products domain.ProductRepository, publisher ddd.Event
 }
 
 func (h AddProductHandler) AddProduct(ctx context.Context, cmd AddProduct) error {
+	ctx, span := tracer.Start(ctx, "AddProduct")
+	defer span.End()
+
 	product, err := h.products.Load(ctx, cmd.ID)
 	if err != nil {
 		return errors.Wrap(err, "error adding product")

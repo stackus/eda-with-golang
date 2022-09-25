@@ -25,6 +25,9 @@ func NewDecreaseProductPriceHandler(products domain.ProductRepository, publisher
 }
 
 func (h DecreaseProductPriceHandler) DecreaseProductPrice(ctx context.Context, cmd DecreaseProductPrice) error {
+	ctx, span := tracer.Start(ctx, "DecreaseProductPrice")
+	defer span.End()
+
 	product, err := h.products.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

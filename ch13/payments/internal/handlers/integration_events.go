@@ -21,18 +21,17 @@ func NewIntegrationHandlers(app application.App) ddd.EventHandler[ddd.Event] {
 	}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers ddd.EventHandler[ddd.Event]) error {
-	evtMsgHandler := am.MessageHandlerFunc[am.IncomingEventMessage](func(ctx context.Context, eventMsg am.IncomingEventMessage) error {
-		return handlers.HandleEvent(ctx, eventMsg)
-	})
-
-	_, err := subscriber.Subscribe(orderingpb.OrderAggregateChannel, evtMsgHandler, am.MessageFilter{
+func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) error {
+	_, err := subscriber.Subscribe(orderingpb.OrderAggregateChannel, handlers, am.MessageFilter{
 		orderingpb.OrderReadiedEvent,
 	}, am.GroupName("payment-orders"))
 	return err
 }
 
 func (h integrationHandlers[T]) HandleEvent(ctx context.Context, event T) error {
+	ctx, span := tracer.Start(ctx, event.EventName())
+	defer span.End()
+
 	switch event.EventName() {
 	case orderingpb.OrderReadiedEvent:
 		return h.onOrderReadied(ctx, event)

@@ -19,5 +19,8 @@ func NewGetProductHandler(catalog domain.CatalogRepository) GetProductHandler {
 }
 
 func (h GetProductHandler) GetProduct(ctx context.Context, query GetProduct) (*domain.CatalogProduct, error) {
+	ctx, span := tracer.Start(ctx, "GetProduct")
+	defer span.End()
+
 	return h.catalog.Find(ctx, query.ID)
 }

@@ -35,6 +35,9 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 	)
 }
 func (h domainHandlers[T]) HandleEvent(ctx context.Context, event T) error {
+	ctx, span := tracer.Start(ctx, event.EventName())
+	defer span.End()
+
 	switch event.EventName() {
 	case domain.StoreCreatedEvent:
 		return h.onStoreCreated(ctx, event)

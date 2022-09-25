@@ -93,7 +93,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	container.AddScoped("inboxStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
-		return pg.NewInboxStore("baskets.inbox", tx), nil
+		return pg.NewInboxStore("customers.inbox", tx), nil
 	})
 
 	// setup application

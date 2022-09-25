@@ -17,5 +17,8 @@ func NewGetParticipatingStoresHandler(mall domain.MallRepository) GetParticipati
 }
 
 func (h GetParticipatingStoresHandler) GetParticipatingStores(ctx context.Context, _ GetParticipatingStores) ([]*domain.MallStore, error) {
+	ctx, span := tracer.Start(ctx, "GetParticipatingStores")
+	defer span.End()
+
 	return h.mall.AllParticipating(ctx)
 }
