@@ -24,6 +24,9 @@ func NewReadyOrderHandler(orders domain.OrderRepository, publisher ddd.EventPubl
 }
 
 func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error {
+	ctx, span := tracer.Start(ctx, "ReadyOrder")
+	defer span.End()
+
 	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

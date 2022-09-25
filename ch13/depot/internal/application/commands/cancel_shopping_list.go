@@ -25,6 +25,9 @@ func NewCancelShoppingListHandler(shoppingLists domain.ShoppingListRepository, d
 }
 
 func (h CancelShoppingListHandler) CancelShoppingList(ctx context.Context, cmd CancelShoppingList) error {
+	ctx, span := tracer.Start(ctx, "CancelShoppingList")
+	defer span.End()
+
 	list, err := h.shoppingLists.Find(ctx, cmd.ID)
 	if err != nil {
 		return err

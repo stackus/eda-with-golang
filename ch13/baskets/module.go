@@ -77,10 +77,6 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 			am.OtelMessageContextInjector(),
 			tm.OutboxPublisher(outboxStore),
 		), nil
-		// return am.MessageStreamWithMiddleware(
-		// 	am.NewMessagePublisher(c.Get("stream").(am.MessageStream), am.OtelMessageContextInjector()),
-		// 	tm.NewOutboxStreamMiddleware(outboxStore),
-		// ), nil
 	})
 	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
 		return am.NewMessageSubscriber(
@@ -94,10 +90,9 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 			c.Get("messagePublisher").(am.MessagePublisher),
 		), nil
 	})
-	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+	container.AddScoped("inboxStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
-		inboxStore := pg.NewInboxStore("baskets.inbox", tx)
-		return tm.NewInboxHandlerMiddleware(inboxStore), nil
+		return pg.NewInboxStore("baskets.inbox", tx), nil
 	})
 	container.AddScoped("baskets", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
@@ -134,35 +129,15 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 			c.Get("products").(domain.ProductCacheRepository),
 			c.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]),
 		), nil
-		// return logging.LogApplicationAccess(
-		// 	application.New(
-		// 		c.Get("baskets").(domain.BasketRepository),
-		// 		c.Get("stores").(domain.StoreCacheRepository),
-		// 		c.Get("products").(domain.ProductCacheRepository),
-		// 		c.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]),
-		// 	),
-		// 	c.Get("logger").(zerolog.Logger),
-		// ), nil
 	})
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
 		return handlers.NewDomainEventHandlers(c.Get("eventPublisher").(am.EventPublisher)), nil
-		// return logging.LogEventHandlerAccess[ddd.Event](
-		// 	handlers.NewDomainEventHandlers(c.Get("eventStream").(am.EventStream)),
-		// 	"DomainEvents", c.Get("logger").(zerolog.Logger),
-		// ), nil
 	})
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
 		return handlers.NewIntegrationEventHandlers(
 			c.Get("stores").(domain.StoreCacheRepository),
 			c.Get("products").(domain.ProductCacheRepository),
 		), nil
-		// return logging.LogEventHandlerAccess[ddd.Event](
-		// 	handlers.NewIntegrationEventHandlers(
-		// 		c.Get("stores").(domain.StoreCacheRepository),
-		// 		c.Get("products").(domain.ProductCacheRepository),
-		// 	),
-		// 	"IntegrationEvents", c.Get("logger").(zerolog.Logger),
-		// ), nil
 	})
 
 	// setup Driver adapters

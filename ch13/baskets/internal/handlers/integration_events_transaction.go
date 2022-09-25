@@ -8,6 +8,7 @@ import (
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/tm"
 )
 
 func RegisterIntegrationEventHandlersTx(container di.Container) error {
@@ -27,7 +28,7 @@ func RegisterIntegrationEventHandlersTx(container di.Container) error {
 		return am.NewEventHandler(
 			di.Get(ctx, "registry").(registry.Registry),
 			di.Get(ctx, "integrationEventHandlers").(ddd.EventHandler[ddd.Event]),
-			di.Get(ctx, "inboxMiddleware").(am.MessageHandlerMiddleware),
+			tm.InboxHandler(di.Get(ctx, "inboxStore").(tm.InboxStore)),
 		).HandleMessage(ctx, msg)
 	})
 

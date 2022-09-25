@@ -29,6 +29,9 @@ func NewCreateOrderHandler(orders domain.OrderRepository, publisher ddd.EventPub
 }
 
 func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) error {
+	ctx, span := tracer.Start(ctx, "CreateOrder")
+	defer span.End()
+
 	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

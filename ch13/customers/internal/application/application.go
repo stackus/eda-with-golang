@@ -54,6 +54,9 @@ func New(customers domain.CustomerRepository, domainPublisher ddd.EventPublisher
 }
 
 func (a Application) RegisterCustomer(ctx context.Context, register RegisterCustomer) error {
+	ctx, span := tracer.Start(ctx, "RegisterCustomer")
+	defer span.End()
+
 	customer, err := domain.RegisterCustomer(register.ID, register.Name, register.SmsNumber)
 	if err != nil {
 		return err
@@ -72,6 +75,9 @@ func (a Application) RegisterCustomer(ctx context.Context, register RegisterCust
 }
 
 func (a Application) AuthorizeCustomer(ctx context.Context, authorize AuthorizeCustomer) error {
+	ctx, span := tracer.Start(ctx, "AuthorizeCustomer")
+	defer span.End()
+
 	customer, err := a.customers.Find(ctx, authorize.ID)
 	if err != nil {
 		return err
@@ -90,6 +96,9 @@ func (a Application) AuthorizeCustomer(ctx context.Context, authorize AuthorizeC
 }
 
 func (a Application) EnableCustomer(ctx context.Context, enable EnableCustomer) error {
+	ctx, span := tracer.Start(ctx, "EnableCustomer")
+	defer span.End()
+
 	customer, err := a.customers.Find(ctx, enable.ID)
 	if err != nil {
 		return err
@@ -112,6 +121,9 @@ func (a Application) EnableCustomer(ctx context.Context, enable EnableCustomer) 
 }
 
 func (a Application) DisableCustomer(ctx context.Context, disable DisableCustomer) error {
+	ctx, span := tracer.Start(ctx, "DisableCustomer")
+	defer span.End()
+
 	customer, err := a.customers.Find(ctx, disable.ID)
 	if err != nil {
 		return err

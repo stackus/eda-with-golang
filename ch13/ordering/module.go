@@ -22,7 +22,6 @@ import (
 	"eda-in-golang/ordering/internal/domain"
 	"eda-in-golang/ordering/internal/grpc"
 	"eda-in-golang/ordering/internal/handlers"
-	"eda-in-golang/ordering/internal/logging"
 	"eda-in-golang/ordering/internal/rest"
 	"eda-in-golang/ordering/orderingpb"
 )
@@ -74,24 +73,36 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		db := c.Get("db").(*sql.DB)
 		return db.Begin()
 	})
-	container.AddScoped("txStream", func(c di.Container) (any, error) {
+	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
-		outboxStore := pg.NewOutboxStore("ordering.outbox", tx)
-		return am.MessageStreamWithMiddleware(
+		outboxStore := pg.NewOutboxStore("baskets.outbox", tx)
+		return am.NewMessagePublisher(
 			c.Get("stream").(am.MessageStream),
-			tm.NewOutboxStreamMiddleware(outboxStore),
+			am.OtelMessageContextInjector(),
+			tm.OutboxPublisher(outboxStore),
 		), nil
 	})
-	container.AddScoped("eventStream", func(c di.Container) (any, error) {
-		return am.NewEventPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
+	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
+		return am.NewMessageSubscriber(
+			c.Get("stream").(am.MessageStream),
+			am.OtelMessageContextExtractor(),
+		), nil
 	})
-	container.AddScoped("replyStream", func(c di.Container) (any, error) {
-		return am.NewReplyPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
+	container.AddScoped("eventPublisher", func(c di.Container) (any, error) {
+		return am.NewEventPublisher(
+			c.Get("registry").(registry.Registry),
+			c.Get("messagePublisher").(am.MessagePublisher),
+		), nil
 	})
-	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+	container.AddScoped("replyPublisher", func(c di.Container) (any, error) {
+		return am.NewReplyPublisher(
+			c.Get("registry").(registry.Registry),
+			c.Get("messagePublisher").(am.MessagePublisher),
+		), nil
+	})
+	container.AddScoped("inboxStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
-		inboxStore := pg.NewInboxStore("ordering.inbox", tx)
-		return tm.NewInboxHandlerMiddleware(inboxStore), nil
+		return pg.NewInboxStore("baskets.inbox", tx), nil
 	})
 	container.AddScoped("aggregateStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
@@ -111,33 +122,21 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 
 	// setup application
 	container.AddScoped("app", func(c di.Container) (any, error) {
-		return logging.LogApplicationAccess(
-			application.New(
-				c.Get("orders").(domain.OrderRepository),
-				c.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]),
-			),
-			c.Get("logger").(zerolog.Logger),
+		return application.New(
+			c.Get("orders").(domain.OrderRepository),
+			c.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]),
 		), nil
 	})
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.Event](
-			handlers.NewDomainEventHandlers(c.Get("eventStream").(am.EventStream)),
-			"DomainEvents", c.Get("logger").(zerolog.Logger),
-		), nil
+		return handlers.NewDomainEventHandlers(c.Get("eventPublisher").(am.EventPublisher)), nil
 	})
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.Event](
-			handlers.NewIntegrationEventHandlers(
-				c.Get("app").(application.App),
-			),
-			"IntegrationEvents", c.Get("logger").(zerolog.Logger),
+		return handlers.NewIntegrationEventHandlers(
+			c.Get("app").(application.App),
 		), nil
 	})
 	container.AddScoped("commandHandlers", func(c di.Container) (any, error) {
-		return logging.LogCommandHandlerAccess[ddd.Command](
-			handlers.NewCommandHandlers(c.Get("app").(application.App)),
-			"Commands", c.Get("logger").(zerolog.Logger),
-		), nil
+		return handlers.NewCommandHandlers(c.Get("app").(application.App)), nil
 	})
 
 	// setup Driver adapters

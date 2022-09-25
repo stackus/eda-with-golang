@@ -8,12 +8,10 @@ import (
 
 	"eda-in-golang/cosec/internal"
 	"eda-in-golang/cosec/internal/handlers"
-	"eda-in-golang/cosec/internal/logging"
 	"eda-in-golang/cosec/internal/models"
 	"eda-in-golang/customers/customerspb"
 	"eda-in-golang/depot/depotpb"
 	"eda-in-golang/internal/am"
-	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/jetstream"
 	pg "eda-in-golang/internal/postgres"
@@ -73,27 +71,42 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		db := c.Get("db").(*sql.DB)
 		return db.Begin()
 	})
-	container.AddScoped("txStream", func(c di.Container) (any, error) {
+	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("cosec.outbox", tx)
-		return am.MessageStreamWithMiddleware(
+		return am.NewMessagePublisher(
 			c.Get("stream").(am.MessageStream),
-			tm.NewOutboxStreamMiddleware(outboxStore),
+			am.OtelMessageContextInjector(),
+			tm.OutboxPublisher(outboxStore),
 		), nil
 	})
-	container.AddScoped("eventStream", func(c di.Container) (any, error) {
-		return am.NewEventPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
+	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
+		return am.NewMessageSubscriber(
+			c.Get("stream").(am.MessageStream),
+			am.OtelMessageContextExtractor(),
+		), nil
 	})
-	container.AddScoped("commandStream", func(c di.Container) (any, error) {
-		return am.NewCommandPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
+	container.AddScoped("eventPublisher", func(c di.Container) (any, error) {
+		return am.NewEventPublisher(
+			c.Get("registry").(registry.Registry),
+			c.Get("messagePublisher").(am.MessagePublisher),
+		), nil
 	})
-	container.AddScoped("replyStream", func(c di.Container) (any, error) {
-		return am.NewReplyPublisher(c.Get("registry").(registry.Registry), c.Get("txStream").(am.MessageStream)), nil
+	container.AddScoped("commandPublisher", func(c di.Container) (any, error) {
+		return am.NewCommandPublisher(
+			c.Get("registry").(registry.Registry),
+			c.Get("messagePublisher").(am.MessagePublisher),
+		), nil
 	})
-	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+	container.AddScoped("replyPublisher", func(c di.Container) (any, error) {
+		return am.NewReplyPublisher(
+			c.Get("registry").(registry.Registry),
+			c.Get("messagePublisher").(am.MessagePublisher),
+		), nil
+	})
+	container.AddScoped("inboxStore", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
-		inboxStore := pg.NewInboxStore("cosec.inbox", tx)
-		return tm.NewInboxHandlerMiddleware(inboxStore), nil
+		return pg.NewInboxStore("baskets.inbox", tx), nil
 	})
 	container.AddScoped("sagaRepo", func(c di.Container) (any, error) {
 		reg := c.Get("registry").(registry.Registry)
@@ -112,21 +125,15 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 
 	// setup application
 	container.AddScoped("orchestrator", func(c di.Container) (any, error) {
-		return logging.LogReplyHandlerAccess[*models.CreateOrderData](
-			sec.NewOrchestrator[*models.CreateOrderData](
-				c.Get("saga").(sec.Saga[*models.CreateOrderData]),
-				c.Get("sagaRepo").(sec.SagaRepository[*models.CreateOrderData]),
-				c.Get("commandStream").(am.CommandStream),
-			),
-			"CreateOrderSaga", svc.Logger(),
+		return sec.NewOrchestrator[*models.CreateOrderData](
+			c.Get("saga").(sec.Saga[*models.CreateOrderData]),
+			c.Get("sagaRepo").(sec.SagaRepository[*models.CreateOrderData]),
+			c.Get("commandPublisher").(am.CommandPublisher),
 		), nil
 	})
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
-		return logging.LogEventHandlerAccess[ddd.Event](
-			handlers.NewIntegrationEventHandlers(
-				c.Get("orchestrator").(sec.Orchestrator[*models.CreateOrderData]),
-			),
-			"IntegrationEvents", c.Get("logger").(zerolog.Logger),
+		return handlers.NewIntegrationEventHandlers(
+			c.Get("orchestrator").(sec.Orchestrator[*models.CreateOrderData]),
 		), nil
 	})
 

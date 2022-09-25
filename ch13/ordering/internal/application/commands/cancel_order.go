@@ -24,6 +24,9 @@ func NewCancelOrderHandler(orders domain.OrderRepository, publisher ddd.EventPub
 }
 
 func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) error {
+	ctx, span := tracer.Start(ctx, "CancelOrder")
+	defer span.End()
+
 	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

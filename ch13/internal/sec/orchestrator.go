@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/stackus/errors"
+	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
@@ -58,11 +59,19 @@ func (o orchestrator[T]) ReplyTopic() string {
 }
 
 func (o orchestrator[T]) HandleReply(ctx context.Context, reply ddd.Reply) error {
+	ctx, span := tracer.Start(ctx, reply.ReplyName())
+	defer span.End()
+
 	sagaID, sagaName := o.getSagaInfoFromReply(reply)
 	if sagaID == "" || sagaName == "" || sagaName != o.saga.Name() {
 		// returning nil to drop bad replies
 		return nil
 	}
+
+	span.SetAttributes(
+		attribute.String("SagaID", sagaID),
+		attribute.String("SagaName", sagaName),
+	)
 
 	sagaCtx, err := o.repo.Load(ctx, o.saga.Name(), sagaID)
 	if err != nil {

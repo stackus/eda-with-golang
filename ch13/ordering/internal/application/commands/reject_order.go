@@ -24,6 +24,9 @@ func NewRejectOrderHandler(orders domain.OrderRepository, publisher ddd.EventPub
 }
 
 func (h RejectOrderHandler) RejectOrder(ctx context.Context, cmd RejectOrder) error {
+	ctx, span := tracer.Start(ctx, "RejectOrder")
+	defer span.End()
+
 	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

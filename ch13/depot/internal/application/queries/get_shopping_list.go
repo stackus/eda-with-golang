@@ -21,5 +21,8 @@ func NewGetShoppingListHandler(shoppingLists domain.ShoppingListRepository) GetS
 func (h GetShoppingListHandler) GetShoppingList(ctx context.Context, query GetShoppingList) (*domain.ShoppingList,
 	error,
 ) {
+	ctx, span := tracer.Start(ctx, "GetShoppingList")
+	defer span.End()
+
 	return h.shoppingLists.Find(ctx, query.ID)
 }

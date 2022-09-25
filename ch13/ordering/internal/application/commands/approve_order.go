@@ -25,6 +25,9 @@ func NewApproveOrderHandler(orders domain.OrderRepository, publisher ddd.EventPu
 }
 
 func (h ApproveOrderHandler) ApproveOrder(ctx context.Context, cmd ApproveOrder) error {
+	ctx, span := tracer.Start(ctx, "ApproveOrder")
+	defer span.End()
+
 	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

@@ -4,16 +4,16 @@ import (
 	"context"
 	"database/sql"
 
-	"eda-in-golang/cosec/internal"
 	"eda-in-golang/cosec/internal/models"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/registry"
 	"eda-in-golang/internal/sec"
+	"eda-in-golang/internal/tm"
 )
 
 func RegisterReplyHandlersTx(container di.Container) error {
-	replyMsgHandler := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
+	rawMsgHandler := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
 		ctx = container.Scoped(ctx)
 		defer func(tx *sql.Tx) {
 			if p := recover(); p != nil {
@@ -26,19 +26,14 @@ func RegisterReplyHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		replyHandlers := am.MessageHandlerWithMiddleware(
-			am.NewReplyHandler(
-				di.Get(ctx, "registry").(registry.Registry),
-				di.Get(ctx, "orchestrator").(sec.Orchestrator[*models.CreateOrderData]),
-			),
-			di.Get(ctx, "inboxMiddleware").(am.MessageHandlerMiddleware),
-		)
-
-		return replyHandlers.HandleMessage(ctx, msg)
+		return am.NewReplyHandler(
+			di.Get(ctx, "registry").(registry.Registry),
+			di.Get(ctx, "orchestrator").(sec.Orchestrator[*models.CreateOrderData]),
+			tm.InboxHandler(di.Get(ctx, "inboxStore").(tm.InboxStore)),
+		).HandleMessage(ctx, msg)
 	})
 
-	subscriber := container.Get("stream").(am.MessageStream)
+	subscriber := container.Get("messageSubscriber").(am.MessageSubscriber)
 
-	_, err := subscriber.Subscribe(internal.CreateOrderReplyChannel, replyMsgHandler, am.GroupName("cosec-replies"))
-	return err
+	return RegisterReplyHandlers(subscriber, rawMsgHandler)
 }

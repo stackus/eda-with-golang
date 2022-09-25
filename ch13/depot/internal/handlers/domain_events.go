@@ -26,6 +26,9 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.AggregateEve
 }
 
 func (h domainHandlers[T]) HandleEvent(ctx context.Context, event T) error {
+	ctx, span := tracer.Start(ctx, event.EventName())
+	defer span.End()
+
 	switch event.EventName() {
 	case domain.ShoppingListCompletedEvent:
 		return h.onShoppingListCompleted(ctx, event)

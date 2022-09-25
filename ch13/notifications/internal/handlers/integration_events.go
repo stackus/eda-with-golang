@@ -24,12 +24,8 @@ func NewIntegrationEventHandlers(app application.App, customers application.Cust
 	}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers ddd.EventHandler[ddd.Event]) (err error) {
-	evtMsgHandler := am.MessageHandlerFunc[am.IncomingEventMessage](func(ctx context.Context, eventMsg am.IncomingEventMessage) error {
-		return handlers.HandleEvent(ctx, eventMsg)
-	})
-
-	_, err = subscriber.Subscribe(customerspb.CustomerAggregateChannel, evtMsgHandler, am.MessageFilter{
+func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) (err error) {
+	_, err = subscriber.Subscribe(customerspb.CustomerAggregateChannel, handlers, am.MessageFilter{
 		customerspb.CustomerRegisteredEvent,
 		customerspb.CustomerSmsChangedEvent,
 	}, am.GroupName("notification-customers"))
@@ -37,7 +33,7 @@ func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers dd
 		return err
 	}
 
-	_, err = subscriber.Subscribe(orderingpb.OrderAggregateChannel, evtMsgHandler, am.MessageFilter{
+	_, err = subscriber.Subscribe(orderingpb.OrderAggregateChannel, handlers, am.MessageFilter{
 		orderingpb.OrderCreatedEvent,
 		orderingpb.OrderReadiedEvent,
 		orderingpb.OrderCanceledEvent,

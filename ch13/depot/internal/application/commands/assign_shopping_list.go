@@ -26,6 +26,9 @@ func NewAssignShoppingListHandler(shoppingList domain.ShoppingListRepository, do
 }
 
 func (h AssignShoppingListHandler) AssignShoppingList(ctx context.Context, cmd AssignShoppingList) error {
+	ctx, span := tracer.Start(ctx, "AssignShoppingList")
+	defer span.End()
+
 	list, err := h.shoppingLists.Find(ctx, cmd.ID)
 	if err != nil {
 		return err

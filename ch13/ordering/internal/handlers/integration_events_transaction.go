@@ -4,16 +4,15 @@ import (
 	"context"
 	"database/sql"
 
-	"eda-in-golang/baskets/basketspb"
-	"eda-in-golang/depot/depotpb"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/registry"
+	"eda-in-golang/internal/tm"
 )
 
 func RegisterIntegrationEventHandlersTx(container di.Container) error {
-	evtMsgHandler := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
+	rawMsgHandler := am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
 		ctx = container.Scoped(ctx)
 		defer func(tx *sql.Tx) {
 			if p := recover(); p != nil {
@@ -26,29 +25,14 @@ func RegisterIntegrationEventHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		evtHandlers := am.MessageHandlerWithMiddleware(
-			am.NewEventHandler(
-				di.Get(ctx, "registry").(registry.Registry),
-				di.Get(ctx, "integrationEventHandlers").(ddd.EventHandler[ddd.Event]),
-			),
-			di.Get(ctx, "inboxMiddleware").(am.MessageHandlerMiddleware),
-		)
-
-		return evtHandlers.HandleMessage(ctx, msg)
+		return am.NewEventHandler(
+			di.Get(ctx, "registry").(registry.Registry),
+			di.Get(ctx, "integrationEventHandlers").(ddd.EventHandler[ddd.Event]),
+			tm.InboxHandler(di.Get(ctx, "inboxStore").(tm.InboxStore)),
+		).HandleMessage(ctx, msg)
 	})
 
-	subscriber := container.Get("stream").(am.MessageStream)
+	subscriber := container.Get("messageSubscriber").(am.MessageSubscriber)
 
-	_, err := subscriber.Subscribe(basketspb.BasketAggregateChannel, evtMsgHandler, am.MessageFilter{
-		basketspb.BasketCheckedOutEvent,
-	}, am.GroupName("ordering-baskets"))
-	if err != nil {
-		return err
-	}
-
-	_, err = subscriber.Subscribe(depotpb.ShoppingListAggregateChannel, evtMsgHandler, am.MessageFilter{
-		depotpb.ShoppingListCompletedEvent,
-	}, am.GroupName("ordering-depot"))
-
-	return err
+	return RegisterIntegrationEventHandlers(subscriber, rawMsgHandler)
 }

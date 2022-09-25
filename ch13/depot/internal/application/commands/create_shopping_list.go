@@ -34,6 +34,9 @@ func NewCreateShoppingListHandler(shoppingLists domain.ShoppingListRepository, s
 }
 
 func (h CreateShoppingListHandler) CreateShoppingList(ctx context.Context, cmd CreateShoppingList) error {
+	ctx, span := tracer.Start(ctx, "CreateShoppingList")
+	defer span.End()
+
 	list := domain.CreateShoppingList(cmd.ID, cmd.OrderID)
 
 	for _, item := range cmd.Items {

@@ -25,6 +25,9 @@ func NewCompleteShoppingListHandler(shoppingLists domain.ShoppingListRepository,
 }
 
 func (h CompleteShoppingListHandler) CompleteShoppingList(ctx context.Context, cmd CompleteShoppingList) error {
+	ctx, span := tracer.Start(ctx, "CompleteShoppingList")
+	defer span.End()
+
 	list, err := h.shoppingLists.Find(ctx, cmd.ID)
 	if err != nil {
 		return err

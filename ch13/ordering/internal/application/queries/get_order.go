@@ -21,6 +21,9 @@ func NewGetOrderHandler(repo domain.OrderRepository) GetOrderHandler {
 }
 
 func (h GetOrderHandler) GetOrder(ctx context.Context, query GetOrder) (*domain.Order, error) {
+	ctx, span := tracer.Start(ctx, "GetOrder")
+	defer span.End()
+
 	order, err := h.repo.Load(ctx, query.ID)
 
 	return order, errors.Wrap(err, "get order query")
