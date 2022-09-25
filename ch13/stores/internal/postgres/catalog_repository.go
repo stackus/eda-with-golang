@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/stackus/errors"
+	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/internal/postgres"
 	"eda-in-golang/stores/internal/domain"
@@ -28,7 +29,15 @@ func NewCatalogRepository(tableName string, db postgres.DB) CatalogRepository {
 func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, name, description, sku string, price float64) error {
 	const query = `INSERT INTO %s (id, store_id, NAME, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, storeID, name, description, sku, price)
+	ctx, span := tracer.Start(ctx, "AddProduct")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, productID, storeID, name, description, sku, price)
 
 	return err
 }
@@ -36,7 +45,15 @@ func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, n
 func (r CatalogRepository) Rebrand(ctx context.Context, productID, name, description string) error {
 	const query = `UPDATE %s SET NAME = $2, description = $3 WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, name, description)
+	ctx, span := tracer.Start(ctx, "Rebrand")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, productID, name, description)
 
 	return err
 }
@@ -44,7 +61,15 @@ func (r CatalogRepository) Rebrand(ctx context.Context, productID, name, descrip
 func (r CatalogRepository) UpdatePrice(ctx context.Context, productID string, delta float64) error {
 	const query = `UPDATE %s SET price = price + $2 WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, delta)
+	ctx, span := tracer.Start(ctx, "UpdatePrice")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, productID, delta)
 
 	return err
 }
@@ -52,7 +77,15 @@ func (r CatalogRepository) UpdatePrice(ctx context.Context, productID string, de
 func (r CatalogRepository) RemoveProduct(ctx context.Context, productID string) error {
 	const query = `DELETE FROM %s WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID)
+	ctx, span := tracer.Start(ctx, "RemoveProduct")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, productID)
 
 	return err
 }
@@ -60,11 +93,19 @@ func (r CatalogRepository) RemoveProduct(ctx context.Context, productID string) 
 func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.CatalogProduct, error) {
 	const query = `SELECT store_id, name, description, sku, price FROM %s WHERE id = $1 LIMIT 1`
 
+	ctx, span := tracer.Start(ctx, "Find")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Query", tableQuery),
+	)
+
 	product := &domain.CatalogProduct{
 		ID: productID,
 	}
 
-	err := r.db.QueryRowContext(ctx, r.table(query), productID).Scan(&product.StoreID, &product.Name, &product.Description, &product.SKU, &product.Price)
+	err := r.db.QueryRowContext(ctx, tableQuery, productID).Scan(&product.StoreID, &product.Name, &product.Description, &product.SKU, &product.Price)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.ErrNotFound.Msg("product with that ID does not exist")
@@ -78,8 +119,16 @@ func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.
 func (r CatalogRepository) GetCatalog(ctx context.Context, storeID string) (products []*domain.CatalogProduct, err error) {
 	const query = `SELECT id, name, description, sku, price FROM %s WHERE store_id = $1`
 
+	ctx, span := tracer.Start(ctx, "GetCatalog")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Query", tableQuery),
+	)
+
 	var rows *sql.Rows
-	rows, err = r.db.QueryContext(ctx, r.table(query), storeID)
+	rows, err = r.db.QueryContext(ctx, tableQuery, storeID)
 	if err != nil {
 		return nil, errors.Wrap(err, "querying products")
 	}

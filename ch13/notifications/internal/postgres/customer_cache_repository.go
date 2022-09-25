@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
+	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/notifications/internal/application"
 	"eda-in-golang/notifications/internal/models"
@@ -30,9 +31,17 @@ func NewCustomerCacheRepository(tableName string, db *sql.DB, fallback applicati
 }
 
 func (r CustomerCacheRepository) Add(ctx context.Context, customerID, name, smsNumber string) error {
-	const query = "INSERT INTO %s (id, name, sms_number) VALUES ($1, $2, $3)"
+	const query = "INSERT INTO %s (id, NAME, sms_number) VALUES ($1, $2, $3)"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), customerID, name, smsNumber)
+	ctx, span := tracer.Start(ctx, "Add")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, customerID, name, smsNumber)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {

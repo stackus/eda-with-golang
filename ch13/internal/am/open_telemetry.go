@@ -25,7 +25,7 @@ func OtelMessageContextInjector() MessagePublisherMiddleware {
 	return func(next MessagePublisher) MessagePublisher {
 		return MessagePublisherFunc(func(ctx context.Context, topicName string, msg Message) error {
 			var span trace.Span
-			ctx, span = tracer.Start(ctx, msg.MessageName(), trace.WithSpanKind(trace.SpanKindProducer))
+			ctx, span = tracer.Start(ctx, fmt.Sprintf("Send(%s)", msg.MessageName()), trace.WithSpanKind(trace.SpanKindProducer))
 			propagator.Inject(ctx, MetadataCarrier(msg.Metadata()))
 			defer span.End()
 
@@ -44,7 +44,7 @@ func OtelMessageContextExtractor() MessageHandlerMiddleware {
 		return MessageHandlerFunc(func(ctx context.Context, msg IncomingMessage) error {
 			var span trace.Span
 			ctx = propagator.Extract(ctx, MetadataCarrier(msg.Metadata()))
-			ctx, span = tracer.Start(ctx, msg.MessageName(), trace.WithSpanKind(trace.SpanKindConsumer))
+			ctx, span = tracer.Start(ctx, fmt.Sprintf("Receive(%s)", msg.MessageName()), trace.WithSpanKind(trace.SpanKindConsumer))
 			defer span.End()
 
 			err := next.HandleMessage(ctx, msg)

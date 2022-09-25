@@ -261,6 +261,7 @@ func (s *System) WaitForStream(ctx context.Context) error {
 
 func serverErrorUnaryInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		resp, err = handler(ctx, req)
 		return resp, errors.SendGRPCError(err)
 	}
 }

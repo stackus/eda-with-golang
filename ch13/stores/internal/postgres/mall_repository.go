@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/stackus/errors"
+	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/internal/postgres"
 	"eda-in-golang/stores/internal/domain"
@@ -26,9 +27,17 @@ func NewMallRepository(tableName string, db postgres.DB) MallRepository {
 }
 
 func (r MallRepository) AddStore(ctx context.Context, storeID, name, location string) error {
-	const query = "INSERT INTO %s (id, name, location, participating) VALUES ($1, $2, $3, $4)"
+	const query = "INSERT INTO %s (id, NAME, location, participating) VALUES ($1, $2, $3, $4)"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), storeID, name, location, false)
+	ctx, span := tracer.Start(ctx, "AddStore")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, storeID, name, location, false)
 
 	return err
 }
@@ -36,15 +45,31 @@ func (r MallRepository) AddStore(ctx context.Context, storeID, name, location st
 func (r MallRepository) SetStoreParticipation(ctx context.Context, storeID string, participating bool) error {
 	const query = "UPDATE %s SET participating = $2 WHERE id = $1"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), storeID, participating)
+	ctx, span := tracer.Start(ctx, "SetStoreParticipation")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, storeID, participating)
 
 	return err
 }
 
 func (r MallRepository) RenameStore(ctx context.Context, storeID, name string) error {
-	const query = "UPDATE %s SET name = $2 WHERE id = $1"
+	const query = "UPDATE %s SET NAME = $2 WHERE id = $1"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), storeID, name)
+	ctx, span := tracer.Start(ctx, "RenameStore")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, storeID, name)
 
 	return err
 }
@@ -52,11 +77,19 @@ func (r MallRepository) RenameStore(ctx context.Context, storeID, name string) e
 func (r MallRepository) Find(ctx context.Context, storeID string) (*domain.MallStore, error) {
 	const query = "SELECT name, location, participating FROM %s WHERE id = $1 LIMIT 1"
 
+	ctx, span := tracer.Start(ctx, "Find")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Query", tableQuery),
+	)
+
 	store := &domain.MallStore{
 		ID: storeID,
 	}
 
-	err := r.db.QueryRowContext(ctx, r.table(query), storeID).Scan(&store.Name, &store.Location, &store.Participating)
+	err := r.db.QueryRowContext(ctx, tableQuery, storeID).Scan(&store.Name, &store.Location, &store.Participating)
 	if err != nil {
 		return nil, errors.Wrap(err, "scanning store")
 	}
@@ -67,8 +100,16 @@ func (r MallRepository) Find(ctx context.Context, storeID string) (*domain.MallS
 func (r MallRepository) All(ctx context.Context) (stores []*domain.MallStore, err error) {
 	const query = "SELECT id, name, location, participating FROM %s"
 
+	ctx, span := tracer.Start(ctx, "All")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Query", tableQuery),
+	)
+
 	var rows *sql.Rows
-	rows, err = r.db.QueryContext(ctx, r.table(query))
+	rows, err = r.db.QueryContext(ctx, tableQuery)
 	if err != nil {
 		return nil, errors.Wrap(err, "querying stores")
 	}
@@ -97,10 +138,18 @@ func (r MallRepository) All(ctx context.Context) (stores []*domain.MallStore, er
 }
 
 func (r MallRepository) AllParticipating(ctx context.Context) (stores []*domain.MallStore, err error) {
-	const query = "SELECT id, name, location, participating FROM %s WHERE participating is true"
+	const query = "SELECT id, name, location, participating FROM %s WHERE participating IS TRUE"
+
+	ctx, span := tracer.Start(ctx, "AllParticipating")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Query", tableQuery),
+	)
 
 	var rows *sql.Rows
-	rows, err = r.db.QueryContext(ctx, r.table(query))
+	rows, err = r.db.QueryContext(ctx, tableQuery)
 	if err != nil {
 		return nil, errors.Wrap(err, "querying participating stores")
 	}

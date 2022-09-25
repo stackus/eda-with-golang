@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/stackus/errors"
+	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/internal/postgres"
 	"eda-in-golang/search/internal/application"
@@ -38,6 +39,15 @@ $1, $2, $3,
 $4, $5, $6, $7
 $8
 )`
+
+	ctx, span := tracer.Start(ctx, "Add")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
 	items, err := json.Marshal(order.Items)
 	if err != nil {
 		return err
@@ -54,7 +64,7 @@ $8
 		storeIDs = append(storeIDs, storeID)
 	}
 
-	_, err = r.db.ExecContext(ctx, r.table(query),
+	_, err = r.db.ExecContext(ctx, tableQuery,
 		order.OrderID, order.CustomerID, order.CustomerName,
 		items, order.Status, productIDs, storeIDs,
 		order.CreatedAt,
@@ -65,7 +75,15 @@ $8
 func (r OrderRepository) UpdateStatus(ctx context.Context, orderID, status string) error {
 	const query = `UPDATE %s SET status = $2 WHERE order_id = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), orderID, status)
+	ctx, span := tracer.Start(ctx, "UpdateStatus")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, orderID, status)
 	return err
 }
 
@@ -77,12 +95,20 @@ func (r OrderRepository) Search(ctx context.Context, search application.SearchOr
 func (r OrderRepository) Get(ctx context.Context, orderID string) (*models.Order, error) {
 	const query = `SELECT customer_id, customer_name, items, status, created_at FROM %s WHERE order_id = $1`
 
+	ctx, span := tracer.Start(ctx, "Get")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Query", tableQuery),
+	)
+
 	order := &models.Order{
 		OrderID: orderID,
 	}
 
 	var itemData []byte
-	err := r.db.QueryRowContext(ctx, r.table(query)).Scan(&order.CustomerID, &order.CustomerName, &itemData, &order.Status, &order.CreatedAt)
+	err := r.db.QueryRowContext(ctx, tableQuery).Scan(&order.CustomerID, &order.CustomerName, &itemData, &order.Status, &order.CreatedAt)
 	if err != nil {
 		return nil, err
 	}

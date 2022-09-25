@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
+	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/baskets/internal/domain"
 	"eda-in-golang/internal/postgres"
@@ -30,9 +31,17 @@ func NewProductCacheRepository(tableName string, db postgres.DB, fallback domain
 }
 
 func (r ProductCacheRepository) Add(ctx context.Context, productID, storeID, name string, price float64) error {
-	const query = `INSERT INTO %s (id, store_id, name, price) VALUES ($1, $2, $3, $4)`
+	const query = `INSERT INTO %s (id, store_id, NAME, price) VALUES ($1, $2, $3, $4)`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, storeID, name, price)
+	ctx, span := tracer.Start(ctx, "Add")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, productID, storeID, name, price)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -46,9 +55,17 @@ func (r ProductCacheRepository) Add(ctx context.Context, productID, storeID, nam
 }
 
 func (r ProductCacheRepository) Rebrand(ctx context.Context, productID, name string) error {
-	const query = `UPDATE %s SET name = $2 WHERE id = $1`
+	const query = `UPDATE %s SET NAME = $2 WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, name)
+	ctx, span := tracer.Start(ctx, "Rebrand")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, productID, name)
 
 	return err
 }
@@ -56,7 +73,15 @@ func (r ProductCacheRepository) Rebrand(ctx context.Context, productID, name str
 func (r ProductCacheRepository) UpdatePrice(ctx context.Context, productID string, delta float64) error {
 	const query = `UPDATE %s SET price = price + $2 WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID, delta)
+	ctx, span := tracer.Start(ctx, "UpdatePrice")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, productID, delta)
 
 	return err
 }
@@ -64,7 +89,15 @@ func (r ProductCacheRepository) UpdatePrice(ctx context.Context, productID strin
 func (r ProductCacheRepository) Remove(ctx context.Context, productID string) error {
 	const query = `DELETE FROM %s WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), productID)
+	ctx, span := tracer.Start(ctx, "Remove")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, productID)
 
 	return err
 }
@@ -72,11 +105,19 @@ func (r ProductCacheRepository) Remove(ctx context.Context, productID string) er
 func (r ProductCacheRepository) Find(ctx context.Context, productID string) (*domain.Product, error) {
 	const query = `SELECT store_id, name, price FROM %s WHERE id = $1 LIMIT 1`
 
+	ctx, span := tracer.Start(ctx, "Find")
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Query", tableQuery),
+	)
+
 	product := &domain.Product{
 		ID: productID,
 	}
 
-	err := r.db.QueryRowContext(ctx, r.table(query), productID).Scan(&product.StoreID, &product.Name, &product.Price)
+	err := r.db.QueryRowContext(ctx, tableQuery, productID).Scan(&product.StoreID, &product.Name, &product.Price)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.Wrap(err, "scanning product")

@@ -48,9 +48,6 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	container.AddSingleton("domainDispatcher", func(c di.Container) (any, error) {
 		return ddd.NewEventDispatcher[ddd.AggregateEvent](), nil
 	})
-	container.AddSingleton("db", func(c di.Container) (any, error) {
-		return svc.DB(), nil
-	})
 	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
 		return tm.NewOutboxProcessor(
 			c.Get("stream").(am.MessageStream),
@@ -58,8 +55,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		), nil
 	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
-		db := c.Get("db").(*sql.DB)
-		return db.Begin()
+		return svc.DB().Begin()
 	})
 	container.AddScoped("customers", func(c di.Container) (any, error) {
 		return postgres.NewCustomerRepository("customers.customers", c.Get("tx").(*sql.Tx)), nil

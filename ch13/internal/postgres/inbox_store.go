@@ -28,7 +28,7 @@ func NewInboxStore(tableName string, db DB) InboxStore {
 }
 
 func (s InboxStore) Save(ctx context.Context, msg am.IncomingMessage) error {
-	const query = "INSERT INTO %s (id, name, subject, data, metadata, sent_at, received_at) VALUES ($1, $2, $3, $4, $%, $6, $7)"
+	const query = "INSERT INTO %s (id, NAME, subject, DATA, metadata, sent_at, received_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 
 	metadata, err := json.Marshal(msg.Metadata())
 	if err != nil {

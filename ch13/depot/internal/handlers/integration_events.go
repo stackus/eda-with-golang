@@ -42,6 +42,9 @@ func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers 
 }
 
 func (h integrationHandlers[T]) HandleEvent(ctx context.Context, event T) error {
+	ctx, span := tracer.Start(ctx, event.EventName())
+	defer span.End()
+
 	switch event.EventName() {
 	case storespb.StoreCreatedEvent:
 		return h.onStoreCreated(ctx, event)
