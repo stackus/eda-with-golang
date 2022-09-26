@@ -79,11 +79,12 @@ func (s commandPublisher) Publish(ctx context.Context, topicName string, command
 	}
 
 	return s.publisher.Publish(ctx, topicName, message{
-		id:      command.ID(),
-		name:    command.CommandName(),
-		subject: topicName,
-		data:    data,
-		sentAt:  time.Now(),
+		id:       command.ID(),
+		name:     command.CommandName(),
+		subject:  topicName,
+		data:     data,
+		metadata: command.Metadata(),
+		sentAt:   time.Now(),
 	})
 }
 

@@ -35,6 +35,7 @@ func (r CustomerCacheRepository) Add(ctx context.Context, customerID, name strin
 	const query = "INSERT INTO %s (id, NAME) VALUES ($1, $2)"
 
 	ctx, span := tracer.Start(ctx, "Add")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -59,6 +60,7 @@ func (r CustomerCacheRepository) Find(ctx context.Context, customerID string) (*
 	const query = `SELECT name FROM %s WHERE id = $1 LIMIT 1`
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

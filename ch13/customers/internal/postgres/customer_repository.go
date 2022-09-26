@@ -28,6 +28,7 @@ func (r CustomerRepository) Find(ctx context.Context, customerID string) (*domai
 	const query = "SELECT name, sms_number, enabled FROM %s WHERE id = $1 LIMIT 1"
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -43,9 +44,10 @@ func (r CustomerRepository) Find(ctx context.Context, customerID string) (*domai
 }
 
 func (r CustomerRepository) Save(ctx context.Context, customer *domain.Customer) error {
-	const query = "INSERT INTO %s (id, name, sms_number, enabled) VALUES ($1, $2, $3, $4)"
+	const query = "INSERT INTO %s (id, NAME, sms_number, enabled) VALUES ($1, $2, $3, $4)"
 
 	ctx, span := tracer.Start(ctx, "Save")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -59,9 +61,10 @@ func (r CustomerRepository) Save(ctx context.Context, customer *domain.Customer)
 }
 
 func (r CustomerRepository) Update(ctx context.Context, customer *domain.Customer) error {
-	const query = "UPDATE %s SET name = $2, sms_number = $3, enabled = $4 WHERE id = $1"
+	const query = "UPDATE %s SET NAME = $2, sms_number = $3, enabled = $4 WHERE id = $1"
 
 	ctx, span := tracer.Start(ctx, "Update")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

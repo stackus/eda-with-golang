@@ -41,6 +41,7 @@ $8
 )`
 
 	ctx, span := tracer.Start(ctx, "Add")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -76,6 +77,7 @@ func (r OrderRepository) UpdateStatus(ctx context.Context, orderID, status strin
 	const query = `UPDATE %s SET status = $2 WHERE order_id = $1`
 
 	ctx, span := tracer.Start(ctx, "UpdateStatus")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -96,6 +98,7 @@ func (r OrderRepository) Get(ctx context.Context, orderID string) (*models.Order
 	const query = `SELECT customer_id, customer_name, items, status, created_at FROM %s WHERE order_id = $1`
 
 	ctx, span := tracer.Start(ctx, "Get")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

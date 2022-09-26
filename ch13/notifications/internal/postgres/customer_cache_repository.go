@@ -34,6 +34,7 @@ func (r CustomerCacheRepository) Add(ctx context.Context, customerID, name, smsN
 	const query = "INSERT INTO %s (id, NAME, sms_number) VALUES ($1, $2, $3)"
 
 	ctx, span := tracer.Start(ctx, "Add")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -57,7 +58,16 @@ func (r CustomerCacheRepository) Add(ctx context.Context, customerID, name, smsN
 func (r CustomerCacheRepository) UpdateSmsNumber(ctx context.Context, customerID, smsNumber string) error {
 	const query = `UPDATE %s SET sms_number = $2 WHERE customerID = $1`
 
-	_, err := r.db.ExecContext(ctx, r.table(query), customerID, smsNumber)
+	ctx, span := tracer.Start(ctx, "UpdateSmsNumber")
+	defer span.End()
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Exec", tableQuery),
+	)
+
+	_, err := r.db.ExecContext(ctx, tableQuery, customerID, smsNumber)
 
 	return err
 }
@@ -65,11 +75,20 @@ func (r CustomerCacheRepository) UpdateSmsNumber(ctx context.Context, customerID
 func (r CustomerCacheRepository) Find(ctx context.Context, customerID string) (*models.Customer, error) {
 	const query = `SELECT name, sms_number FROM %s WHERE id = $1 LIMIT 1`
 
+	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
+
+	tableQuery := r.table(query)
+
+	span.SetAttributes(
+		attribute.String("Query", tableQuery),
+	)
+
 	customer := &models.Customer{
 		ID: customerID,
 	}
 
-	err := r.db.QueryRowContext(ctx, r.table(query), customerID).Scan(&customer.Name, &customer.SmsNumber)
+	err := r.db.QueryRowContext(ctx, tableQuery, customerID).Scan(&customer.Name, &customer.SmsNumber)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.Wrap(err, "scanning customer")

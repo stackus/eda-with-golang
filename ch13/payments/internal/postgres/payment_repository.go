@@ -29,6 +29,7 @@ func (r PaymentRepository) Save(ctx context.Context, payment *models.Payment) er
 	const query = "INSERT INTO %s (id, customer_id, amount) VALUES ($1, $2, $3)"
 
 	ctx, span := tracer.Start(ctx, "Save")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -45,6 +46,7 @@ func (r PaymentRepository) Find(ctx context.Context, paymentID string) (*models.
 	const query = "SELECT customer_id, amount FROM %s WHERE id = $1 LIMIT 1"
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

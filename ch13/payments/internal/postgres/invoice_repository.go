@@ -30,6 +30,7 @@ func (r InvoiceRepository) Find(ctx context.Context, invoiceID string) (*models.
 	const query = "SELECT order_id, amount, status FROM %s WHERE id = $1 LIMIT 1"
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -58,6 +59,7 @@ func (r InvoiceRepository) Save(ctx context.Context, invoice *models.Invoice) er
 	const query = "INSERT INTO %s (id, order_id, amount, status) VALUES ($1, $2, $3, $4)"
 
 	ctx, span := tracer.Start(ctx, "Save")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -74,6 +76,7 @@ func (r InvoiceRepository) Update(ctx context.Context, invoice *models.Invoice) 
 	const query = "UPDATE %s SET amount = $2, status = $3 WHERE id = $1"
 
 	ctx, span := tracer.Start(ctx, "Update")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

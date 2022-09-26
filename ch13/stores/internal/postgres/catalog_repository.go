@@ -30,6 +30,7 @@ func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, n
 	const query = `INSERT INTO %s (id, store_id, NAME, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)`
 
 	ctx, span := tracer.Start(ctx, "AddProduct")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -46,6 +47,7 @@ func (r CatalogRepository) Rebrand(ctx context.Context, productID, name, descrip
 	const query = `UPDATE %s SET NAME = $2, description = $3 WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "Rebrand")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -62,6 +64,7 @@ func (r CatalogRepository) UpdatePrice(ctx context.Context, productID string, de
 	const query = `UPDATE %s SET price = price + $2 WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "UpdatePrice")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -78,6 +81,7 @@ func (r CatalogRepository) RemoveProduct(ctx context.Context, productID string) 
 	const query = `DELETE FROM %s WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "RemoveProduct")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -94,6 +98,7 @@ func (r CatalogRepository) Find(ctx context.Context, productID string) (*domain.
 	const query = `SELECT store_id, name, description, sku, price FROM %s WHERE id = $1 LIMIT 1`
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -120,6 +125,7 @@ func (r CatalogRepository) GetCatalog(ctx context.Context, storeID string) (prod
 	const query = `SELECT id, name, description, sku, price FROM %s WHERE store_id = $1`
 
 	ctx, span := tracer.Start(ctx, "GetCatalog")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

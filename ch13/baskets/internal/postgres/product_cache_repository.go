@@ -34,6 +34,7 @@ func (r ProductCacheRepository) Add(ctx context.Context, productID, storeID, nam
 	const query = `INSERT INTO %s (id, store_id, NAME, price) VALUES ($1, $2, $3, $4)`
 
 	ctx, span := tracer.Start(ctx, "Add")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -58,6 +59,7 @@ func (r ProductCacheRepository) Rebrand(ctx context.Context, productID, name str
 	const query = `UPDATE %s SET NAME = $2 WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "Rebrand")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -74,6 +76,7 @@ func (r ProductCacheRepository) UpdatePrice(ctx context.Context, productID strin
 	const query = `UPDATE %s SET price = price + $2 WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "UpdatePrice")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -90,6 +93,7 @@ func (r ProductCacheRepository) Remove(ctx context.Context, productID string) er
 	const query = `DELETE FROM %s WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "Remove")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -106,6 +110,7 @@ func (r ProductCacheRepository) Find(ctx context.Context, productID string) (*do
 	const query = `SELECT store_id, name, price FROM %s WHERE id = $1 LIMIT 1`
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

@@ -31,9 +31,10 @@ func NewProductCacheRepository(tableName string, db postgres.DB, fallback domain
 }
 
 func (r ProductCacheRepository) Add(ctx context.Context, productID, storeID, name string) error {
-	const query = `INSERT INTO %s (id, store_id, name) VALUES ($1, $2, $3)`
+	const query = `INSERT INTO %s (id, store_id, NAME) VALUES ($1, $2, $3)`
 
 	ctx, span := tracer.Start(ctx, "Add")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -55,9 +56,10 @@ func (r ProductCacheRepository) Add(ctx context.Context, productID, storeID, nam
 }
 
 func (r ProductCacheRepository) Rebrand(ctx context.Context, productID, name string) error {
-	const query = `UPDATE %s SET name = $2 WHERE id = $1`
+	const query = `UPDATE %s SET NAME = $2 WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "Rebrand")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -74,6 +76,7 @@ func (r ProductCacheRepository) Remove(ctx context.Context, productID string) er
 	const query = `DELETE FROM %s WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "Remove")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -90,6 +93,7 @@ func (r ProductCacheRepository) Find(ctx context.Context, productID string) (*do
 	const query = `SELECT store_id, name FROM %s WHERE id = $1 LIMIT 1`
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

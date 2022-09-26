@@ -30,6 +30,7 @@ func (r ShoppingListRepository) Find(ctx context.Context, id string) (*domain.Sh
 	const query = "SELECT order_id, stops, assigned_bot_id, status FROM %s WHERE id = $1 LIMIT 1"
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -64,6 +65,7 @@ func (r ShoppingListRepository) Save(ctx context.Context, list *domain.ShoppingL
 	const query = "INSERT INTO %s (id, order_id, stops, assigned_bot_id, status) VALUES ($1, $2, $3, $4, $5)"
 
 	ctx, span := tracer.Start(ctx, "Save")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -85,6 +87,7 @@ func (r ShoppingListRepository) Update(ctx context.Context, list *domain.Shoppin
 	const query = "UPDATE %s SET stops = $2, assigned_bot_id = $3, status = $4 WHERE id = $1"
 
 	ctx, span := tracer.Start(ctx, "Update")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

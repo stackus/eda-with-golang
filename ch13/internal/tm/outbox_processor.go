@@ -8,7 +8,7 @@ import (
 )
 
 const messageLimit = 50
-const pollingInterval = 500 * time.Millisecond
+const pollingInterval = 333 * time.Millisecond
 
 type OutboxProcessor interface {
 	Start(ctx context.Context) error

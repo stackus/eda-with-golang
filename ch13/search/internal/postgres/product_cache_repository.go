@@ -35,6 +35,7 @@ func (r ProductCacheRepository) Add(ctx context.Context, productID, storeID, nam
 	const query = `INSERT INTO %s (id, store_id, NAME) VALUES ($1, $2, $3)`
 
 	ctx, span := tracer.Start(ctx, "Add")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -59,6 +60,7 @@ func (r ProductCacheRepository) Rebrand(ctx context.Context, productID, name str
 	const query = `UPDATE %s SET NAME = $2 WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "Rebrand")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -75,6 +77,7 @@ func (r ProductCacheRepository) Remove(ctx context.Context, productID string) er
 	const query = `DELETE FROM %s WHERE id = $1`
 
 	ctx, span := tracer.Start(ctx, "Remove")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -88,9 +91,10 @@ func (r ProductCacheRepository) Remove(ctx context.Context, productID string) er
 }
 
 func (r ProductCacheRepository) Find(ctx context.Context, productID string) (*models.Product, error) {
-	const query = `SELECT store_id, name, price FROM %s WHERE id = $1 LIMIT 1`
+	const query = `SELECT store_id, name FROM %s WHERE id = $1 LIMIT 1`
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -102,7 +106,7 @@ func (r ProductCacheRepository) Find(ctx context.Context, productID string) (*mo
 		ID: productID,
 	}
 
-	err := r.db.QueryRowContext(ctx, tableQuery, productID).Scan(&product.Name)
+	err := r.db.QueryRowContext(ctx, tableQuery, productID).Scan(&product.StoreID, &product.Name)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.Wrap(err, "scanning product")

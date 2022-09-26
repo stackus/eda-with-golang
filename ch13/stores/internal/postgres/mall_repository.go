@@ -30,6 +30,7 @@ func (r MallRepository) AddStore(ctx context.Context, storeID, name, location st
 	const query = "INSERT INTO %s (id, NAME, location, participating) VALUES ($1, $2, $3, $4)"
 
 	ctx, span := tracer.Start(ctx, "AddStore")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -46,6 +47,7 @@ func (r MallRepository) SetStoreParticipation(ctx context.Context, storeID strin
 	const query = "UPDATE %s SET participating = $2 WHERE id = $1"
 
 	ctx, span := tracer.Start(ctx, "SetStoreParticipation")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -62,6 +64,7 @@ func (r MallRepository) RenameStore(ctx context.Context, storeID, name string) e
 	const query = "UPDATE %s SET NAME = $2 WHERE id = $1"
 
 	ctx, span := tracer.Start(ctx, "RenameStore")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -78,6 +81,7 @@ func (r MallRepository) Find(ctx context.Context, storeID string) (*domain.MallS
 	const query = "SELECT name, location, participating FROM %s WHERE id = $1 LIMIT 1"
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -101,6 +105,7 @@ func (r MallRepository) All(ctx context.Context) (stores []*domain.MallStore, er
 	const query = "SELECT id, name, location, participating FROM %s"
 
 	ctx, span := tracer.Start(ctx, "All")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -141,6 +146,7 @@ func (r MallRepository) AllParticipating(ctx context.Context) (stores []*domain.
 	const query = "SELECT id, name, location, participating FROM %s WHERE participating IS TRUE"
 
 	ctx, span := tracer.Start(ctx, "AllParticipating")
+	defer span.End()
 
 	tableQuery := r.table(query)
 

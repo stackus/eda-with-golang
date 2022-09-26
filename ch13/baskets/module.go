@@ -59,7 +59,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
 		return tm.NewOutboxProcessor(
 			c.Get("stream").(am.MessageStream),
-			pg.NewOutboxStore("baskets.outbox", c.Get("db").(*sql.DB)),
+			pg.NewOutboxStore("baskets.outbox", svc.DB()),
 		), nil
 	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {

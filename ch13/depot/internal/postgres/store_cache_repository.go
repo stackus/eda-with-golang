@@ -31,9 +31,10 @@ func NewStoreCacheRepository(tableName string, db postgres.DB, fallback domain.S
 }
 
 func (r StoreCacheRepository) Add(ctx context.Context, storeID, name, location string) error {
-	const query = "INSERT INTO %s (id, name, location) VALUES ($1, $2, $3)"
+	const query = "INSERT INTO %s (id, NAME, location) VALUES ($1, $2, $3)"
 
 	ctx, span := tracer.Start(ctx, "Add")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -55,9 +56,10 @@ func (r StoreCacheRepository) Add(ctx context.Context, storeID, name, location s
 }
 
 func (r StoreCacheRepository) Rename(ctx context.Context, storeID, name string) error {
-	const query = "UPDATE %s SET name = $2 WHERE id = $1"
+	const query = "UPDATE %s SET NAME = $2 WHERE id = $1"
 
 	ctx, span := tracer.Start(ctx, "Rename")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
@@ -74,6 +76,7 @@ func (r StoreCacheRepository) Find(ctx context.Context, storeID string) (*domain
 	const query = "SELECT name, location FROM %s WHERE id = $1 LIMIT 1"
 
 	ctx, span := tracer.Start(ctx, "Find")
+	defer span.End()
 
 	tableQuery := r.table(query)
 
