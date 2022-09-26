@@ -31,7 +31,7 @@ func (r CustomerRepository) Find(ctx context.Context, customerID string) (custom
 	}
 
 	defer func(conn *grpc.ClientConn) {
-		err = conn.Close()
+		_ = conn.Close()
 	}(conn)
 
 	resp, err := customerspb.NewCustomersServiceClient(conn).GetCustomer(ctx, &customerspb.GetCustomerRequest{Id: customerID})

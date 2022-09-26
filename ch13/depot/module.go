@@ -14,6 +14,8 @@ import (
 	"eda-in-golang/depot/internal/postgres"
 	"eda-in-golang/depot/internal/rest"
 	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/amotel"
+	"eda-in-golang/internal/amprom"
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/jetstream"
@@ -62,19 +64,24 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		return svc.DB().Begin()
 	})
+	container.AddSingleton("sentCounter", func(c di.Container) (any, error) {
+		return amprom.SentMessagesCounter("depot"), nil
+	})
 	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("depot.outbox", tx)
 		return am.NewMessagePublisher(
 			c.Get("stream").(am.MessageStream),
-			am.OtelMessageContextInjector(),
+			amotel.OtelMessageContextInjector(),
+			c.Get("sentCounter").(am.MessagePublisherMiddleware),
 			tm.OutboxPublisher(outboxStore),
 		), nil
 	})
 	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
 		return am.NewMessageSubscriber(
 			c.Get("stream").(am.MessageStream),
-			am.OtelMessageContextExtractor(),
+			amotel.OtelMessageContextExtractor(),
+			amprom.ReceivedMessagesCounter("depot"),
 		), nil
 	})
 	container.AddScoped("eventPublisher", func(c di.Container) (any, error) {

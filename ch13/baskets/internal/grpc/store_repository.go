@@ -30,7 +30,7 @@ func (r StoreRepository) Find(ctx context.Context, storeID string) (store *domai
 	}
 
 	defer func(conn *grpc.ClientConn) {
-		err = conn.Close()
+		_ = conn.Close()
 	}(conn)
 
 	resp, err := storespb.NewStoresServiceClient(conn).GetStore(ctx, &storespb.GetStoreRequest{

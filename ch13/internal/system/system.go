@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/nats-io/nats.go"
 	"github.com/pressly/goose/v3"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/stackus/errors"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -144,6 +145,7 @@ func (s *System) Logger() zerolog.Logger {
 func (s *System) initMux() {
 	s.mux = chi.NewMux()
 	s.mux.Use(middleware.Heartbeat("/liveness"))
+	s.mux.Method("GET", "/metrics", promhttp.Handler())
 }
 
 func (s *System) Mux() *chi.Mux {

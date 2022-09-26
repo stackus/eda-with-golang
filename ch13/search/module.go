@@ -8,6 +8,8 @@ import (
 
 	"eda-in-golang/customers/customerspb"
 	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/amotel"
+	"eda-in-golang/internal/amprom"
 	"eda-in-golang/internal/di"
 	"eda-in-golang/internal/jetstream"
 	pg "eda-in-golang/internal/postgres"
@@ -56,7 +58,8 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
 		return am.NewMessageSubscriber(
 			c.Get("stream").(am.MessageStream),
-			am.OtelMessageContextExtractor(),
+			amotel.OtelMessageContextExtractor(),
+			amprom.ReceivedMessagesCounter("search"),
 		), nil
 	})
 	container.AddScoped("inboxStore", func(c di.Container) (any, error) {

@@ -1,15 +1,3 @@
-### Register Customer
-POST http://localhost:8080/api/customers
-Content-Type: application/json
-Accept: application/json
-
-{
-  "name": "Customer ABC",
-  "smsNumber": "555-555-1212"
-}
-
-> {% client.global.set("customerID", response.body.id); %}
-
 ### Create Store
 POST http://localhost:8080/api/stores
 Content-Type: application/json
@@ -35,6 +23,18 @@ Accept: application/json
 }
 
 > {% client.global.set("productID", response.body.id); %}
+
+### Register Customer
+POST http://localhost:8080/api/customers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Customer ABC",
+  "smsNumber": "555-555-1212"
+}
+
+> {% client.global.set("customerID", response.body.id); %}
 
 ### Start Basket
 POST http://localhost:8080/api/baskets
@@ -64,7 +64,7 @@ Accept: application/json
 
 {
   "customerId": "{{customerID}}",
-  "amount": 2000.0
+  "amount": 200.0
 }
 
 > {% client.global.set("paymentID", response.body.id); %}

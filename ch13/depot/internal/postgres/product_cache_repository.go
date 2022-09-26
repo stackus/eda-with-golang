@@ -31,7 +31,7 @@ func NewProductCacheRepository(tableName string, db postgres.DB, fallback domain
 }
 
 func (r ProductCacheRepository) Add(ctx context.Context, productID, storeID, name string) error {
-	const query = `INSERT INTO %s (id, store_id, NAME) VALUES ($1, $2, $3)`
+	const query = `INSERT INTO %s (id, store_id, name) VALUES ($1, $2, $3)`
 
 	ctx, span := tracer.Start(ctx, "Add")
 	defer span.End()

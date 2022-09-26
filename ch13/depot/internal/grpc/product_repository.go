@@ -30,7 +30,7 @@ func (r ProductRepository) Find(ctx context.Context, productID string) (product 
 	}
 
 	defer func(conn *grpc.ClientConn) {
-		err = conn.Close()
+		_ = conn.Close()
 	}(conn)
 
 	resp, err := storespb.NewStoresServiceClient(conn).GetProduct(ctx, &storespb.GetProductRequest{Id: productID})

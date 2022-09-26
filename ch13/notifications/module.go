@@ -5,6 +5,8 @@ import (
 
 	"eda-in-golang/customers/customerspb"
 	"eda-in-golang/internal/am"
+	"eda-in-golang/internal/amotel"
+	"eda-in-golang/internal/amprom"
 	"eda-in-golang/internal/jetstream"
 	pg "eda-in-golang/internal/postgres"
 	"eda-in-golang/internal/registry"
@@ -35,7 +37,8 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	inboxStore := pg.NewInboxStore("notifications.inbox", svc.DB())
 	messageSubscriber := am.NewMessageSubscriber(
 		jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger()),
-		am.OtelMessageContextExtractor(),
+		amotel.OtelMessageContextExtractor(),
+		amprom.ReceivedMessagesCounter("notifications"),
 		tm.InboxHandler(inboxStore),
 	)
 	customers := postgres.NewCustomerCacheRepository(

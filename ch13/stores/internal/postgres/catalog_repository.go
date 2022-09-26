@@ -27,7 +27,7 @@ func NewCatalogRepository(tableName string, db postgres.DB) CatalogRepository {
 }
 
 func (r CatalogRepository) AddProduct(ctx context.Context, productID, storeID, name, description, sku string, price float64) error {
-	const query = `INSERT INTO %s (id, store_id, NAME, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)`
+	const query = `INSERT INTO %s (id, store_id, name, description, sku, price) VALUES ($1, $2, $3, $4, $5, $6)`
 
 	ctx, span := tracer.Start(ctx, "AddProduct")
 	defer span.End()
