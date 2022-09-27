@@ -7,6 +7,7 @@ import (
 	"eda-in-golang/depot/depotpb"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/registry"
 	"eda-in-golang/ordering/internal/application"
 	"eda-in-golang/ordering/internal/application/commands"
 	"eda-in-golang/ordering/internal/domain"
@@ -18,10 +19,10 @@ type integrationHandlers[T ddd.Event] struct {
 
 var _ ddd.EventHandler[ddd.Event] = (*integrationHandlers[ddd.Event])(nil)
 
-func NewIntegrationEventHandlers(app application.App) ddd.EventHandler[ddd.Event] {
-	return integrationHandlers[ddd.Event]{
+func NewIntegrationEventHandlers(reg registry.Registry, app application.App, mws ...am.MessageHandlerMiddleware) am.MessageHandler {
+	return am.NewEventHandler(reg, integrationHandlers[ddd.Event]{
 		app: app,
-	}
+	}, mws...)
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) (err error) {

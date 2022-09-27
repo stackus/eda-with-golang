@@ -5,10 +5,7 @@ import (
 	"database/sql"
 
 	"eda-in-golang/internal/am"
-	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
-	"eda-in-golang/internal/registry"
-	"eda-in-golang/internal/tm"
 )
 
 func RegisterCommandHandlersTx(container di.Container) error {
@@ -25,12 +22,7 @@ func RegisterCommandHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		return am.NewCommandHandler(
-			di.Get(ctx, "registry").(registry.Registry),
-			di.Get(ctx, "replyPublisher").(am.ReplyPublisher),
-			di.Get(ctx, "commandHandlers").(ddd.CommandHandler[ddd.Command]),
-			tm.InboxHandler(di.Get(ctx, "inboxStore").(tm.InboxStore)),
-		).HandleMessage(ctx, msg)
+		return di.Get(ctx, "commandHandlers").(am.MessageHandler).HandleMessage(ctx, msg)
 	})
 
 	subscriber := container.Get("messageSubscriber").(am.MessageSubscriber)

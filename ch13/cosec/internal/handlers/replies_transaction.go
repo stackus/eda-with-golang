@@ -4,12 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"eda-in-golang/cosec/internal/models"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/di"
-	"eda-in-golang/internal/registry"
-	"eda-in-golang/internal/sec"
-	"eda-in-golang/internal/tm"
 )
 
 func RegisterReplyHandlersTx(container di.Container) error {
@@ -26,11 +22,7 @@ func RegisterReplyHandlersTx(container di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(*sql.Tx))
 
-		return am.NewReplyHandler(
-			di.Get(ctx, "registry").(registry.Registry),
-			di.Get(ctx, "orchestrator").(sec.Orchestrator[*models.CreateOrderData]),
-			tm.InboxHandler(di.Get(ctx, "inboxStore").(tm.InboxStore)),
-		).HandleMessage(ctx, msg)
+		return di.Get(ctx, "replyHandlers").(am.MessageHandler).HandleMessage(ctx, msg)
 	})
 
 	subscriber := container.Get("messageSubscriber").(am.MessageSubscriber)

@@ -5,6 +5,7 @@ import (
 
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/registry"
 	"eda-in-golang/payments/internal/application"
 	"eda-in-golang/payments/paymentspb"
 )
@@ -13,10 +14,10 @@ type commandHandlers struct {
 	app application.App
 }
 
-func NewCommandHandlers(app application.App) ddd.CommandHandler[ddd.Command] {
-	return commandHandlers{
+func NewCommandHandlers(reg registry.Registry, app application.App, replyPublisher am.ReplyPublisher, mws ...am.MessageHandlerMiddleware) am.MessageHandler {
+	return am.NewCommandHandler(reg, replyPublisher, commandHandlers{
 		app: app,
-	}
+	}, mws...)
 }
 
 func RegisterCommandHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) error {

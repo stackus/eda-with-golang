@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/rs/zerolog"
-
 	"eda-in-golang/customers/customerspb"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/amotel"
@@ -15,6 +13,7 @@ import (
 	pg "eda-in-golang/internal/postgres"
 	"eda-in-golang/internal/registry"
 	"eda-in-golang/internal/system"
+	"eda-in-golang/internal/tm"
 	"eda-in-golang/ordering/orderingpb"
 	"eda-in-golang/search/internal/application"
 	"eda-in-golang/search/internal/grpc"
@@ -46,18 +45,13 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		}
 		return reg, nil
 	})
-	container.AddSingleton("logger", func(c di.Container) (any, error) {
-		return svc.Logger(), nil
-	})
-	container.AddSingleton("stream", func(c di.Container) (any, error) {
-		return jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), c.Get("logger").(zerolog.Logger)), nil
-	})
+	stream := jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger())
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		return svc.DB().Begin()
 	})
 	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
 		return am.NewMessageSubscriber(
-			c.Get("stream").(am.MessageStream),
+			stream,
 			amotel.OtelMessageContextExtractor(),
 			amprom.ReceivedMessagesCounter("search"),
 		), nil
@@ -99,10 +93,12 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
 		return handlers.NewIntegrationEventHandlers(
+			c.Get("registry").(registry.Registry),
 			c.Get("orders").(application.OrderRepository),
 			c.Get("customers").(application.CustomerCacheRepository),
 			c.Get("stores").(application.StoreCacheRepository),
 			c.Get("products").(application.ProductCacheRepository),
+			tm.InboxHandler(c.Get("inboxStore").(tm.InboxStore)),
 		), nil
 	})
 

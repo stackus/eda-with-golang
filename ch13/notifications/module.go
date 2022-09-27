@@ -39,7 +39,6 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger()),
 		amotel.OtelMessageContextExtractor(),
 		amprom.ReceivedMessagesCounter("notifications"),
-		tm.InboxHandler(inboxStore),
 	)
 	customers := postgres.NewCustomerCacheRepository(
 		"notifications.customers_cache",
@@ -49,9 +48,9 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 
 	// setup application
 	app := application.New(customers)
-	integrationEventHandlers := am.NewEventHandler(
-		reg,
-		handlers.NewIntegrationEventHandlers(app, customers),
+	integrationEventHandlers := handlers.NewIntegrationEventHandlers(
+		reg, app, customers,
+		tm.InboxHandler(inboxStore),
 	)
 
 	// setup Driver adapters

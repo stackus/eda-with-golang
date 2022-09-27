@@ -44,40 +44,27 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		}
 		return reg, nil
 	})
-	container.AddSingleton("logger", func(c di.Container) (any, error) {
-		return svc.Logger(), nil
-	})
-	container.AddSingleton("stream", func(c di.Container) (any, error) {
-		return jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), c.Get("logger").(zerolog.Logger)), nil
-	})
+	stream := jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger())
 	container.AddSingleton("domainDispatcher", func(c di.Container) (any, error) {
 		return ddd.NewEventDispatcher[ddd.Event](), nil
-	})
-	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
-		return tm.NewOutboxProcessor(
-			c.Get("stream").(am.MessageStream),
-			pg.NewOutboxStore("payments.outbox", svc.DB()),
-		), nil
 	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		return svc.DB().Begin()
 	})
-	container.AddSingleton("sentCounter", func(c di.Container) (any, error) {
-		return amprom.SentMessagesCounter("payments"), nil
-	})
+	sentCounter := amprom.SentMessagesCounter("payments")
 	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("payments.outbox", tx)
 		return am.NewMessagePublisher(
-			c.Get("stream").(am.MessageStream),
+			stream,
 			amotel.OtelMessageContextInjector(),
-			c.Get("sentCounter").(am.MessagePublisherMiddleware),
+			sentCounter,
 			tm.OutboxPublisher(outboxStore),
 		), nil
 	})
 	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
 		return am.NewMessageSubscriber(
-			c.Get("stream").(am.MessageStream),
+			stream,
 			amotel.OtelMessageContextExtractor(),
 			amprom.ReceivedMessagesCounter("payments"),
 		), nil
@@ -117,13 +104,24 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		return handlers.NewDomainEventHandlers(c.Get("eventPublisher").(am.EventPublisher)), nil
 	})
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
-		return handlers.NewIntegrationHandlers(
+		return handlers.NewIntegrationEventHandlers(
+			c.Get("registry").(registry.Registry),
 			c.Get("app").(application.App),
+			tm.InboxHandler(c.Get("inboxStore").(tm.InboxStore)),
 		), nil
 	})
 	container.AddScoped("commandHandlers", func(c di.Container) (any, error) {
-		return handlers.NewCommandHandlers(c.Get("app").(application.App)), nil
+		return handlers.NewCommandHandlers(
+			c.Get("registry").(registry.Registry),
+			c.Get("app").(application.App),
+			c.Get("replyPublisher").(am.ReplyPublisher),
+			tm.InboxHandler(c.Get("inboxStore").(tm.InboxStore)),
+		), nil
 	})
+	outboxProcessor := tm.NewOutboxProcessor(
+		stream,
+		pg.NewOutboxStore("payments.outbox", svc.DB()),
+	)
 
 	// setup Driver adapters
 	if err = grpc.RegisterServerTx(container, svc.RPC()); err != nil {
@@ -142,15 +140,12 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	if err = handlers.RegisterCommandHandlersTx(container); err != nil {
 		return err
 	}
-	startOutboxProcessor(ctx, container)
+	startOutboxProcessor(ctx, outboxProcessor, svc.Logger())
 
 	return
 }
 
-func startOutboxProcessor(ctx context.Context, container di.Container) {
-	outboxProcessor := container.Get("outboxProcessor").(tm.OutboxProcessor)
-	logger := container.Get("logger").(zerolog.Logger)
-
+func startOutboxProcessor(ctx context.Context, outboxProcessor tm.OutboxProcessor, logger zerolog.Logger) {
 	go func() {
 		err := outboxProcessor.Start(ctx)
 		if err != nil {

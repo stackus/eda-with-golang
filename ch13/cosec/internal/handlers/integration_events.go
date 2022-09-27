@@ -6,6 +6,7 @@ import (
 	"eda-in-golang/cosec/internal/models"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/registry"
 	"eda-in-golang/internal/sec"
 	"eda-in-golang/ordering/orderingpb"
 )
@@ -16,10 +17,10 @@ type integrationHandlers[T ddd.Event] struct {
 
 var _ ddd.EventHandler[ddd.Event] = (*integrationHandlers[ddd.Event])(nil)
 
-func NewIntegrationEventHandlers(saga sec.Orchestrator[*models.CreateOrderData]) ddd.EventHandler[ddd.Event] {
-	return integrationHandlers[ddd.Event]{
-		orchestrator: saga,
-	}
+func NewIntegrationEventHandlers(reg registry.Registry, orchestrator sec.Orchestrator[*models.CreateOrderData], mws ...am.MessageHandlerMiddleware) am.MessageHandler {
+	return am.NewEventHandler(reg, integrationHandlers[ddd.Event]{
+		orchestrator: orchestrator,
+	}, mws...)
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) (err error) {

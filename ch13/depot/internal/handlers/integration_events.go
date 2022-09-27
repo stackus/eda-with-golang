@@ -6,6 +6,7 @@ import (
 	"eda-in-golang/depot/internal/domain"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/registry"
 	"eda-in-golang/stores/storespb"
 )
 
@@ -16,11 +17,11 @@ type integrationHandlers[T ddd.Event] struct {
 
 var _ ddd.EventHandler[ddd.Event] = (*integrationHandlers[ddd.Event])(nil)
 
-func NewIntegrationEventHandlers(stores domain.StoreCacheRepository, products domain.ProductCacheRepository) ddd.EventHandler[ddd.Event] {
-	return integrationHandlers[ddd.Event]{
+func NewIntegrationEventHandlers(reg registry.Registry, stores domain.StoreCacheRepository, products domain.ProductCacheRepository, mws ...am.MessageHandlerMiddleware) am.MessageHandler {
+	return am.NewEventHandler(reg, integrationHandlers[ddd.Event]{
 		stores:   stores,
 		products: products,
-	}
+	}, mws...)
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers am.MessageHandler) (err error) {

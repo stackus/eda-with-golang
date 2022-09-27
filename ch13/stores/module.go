@@ -47,40 +47,27 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		}
 		return reg, nil
 	})
-	container.AddSingleton("logger", func(c di.Container) (any, error) {
-		return svc.Logger(), nil
-	})
-	container.AddSingleton("stream", func(c di.Container) (any, error) {
-		return jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), c.Get("logger").(zerolog.Logger)), nil
-	})
+	stream := jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger())
 	container.AddSingleton("domainDispatcher", func(c di.Container) (any, error) {
 		return ddd.NewEventDispatcher[ddd.Event](), nil
-	})
-	container.AddSingleton("outboxProcessor", func(c di.Container) (any, error) {
-		return tm.NewOutboxProcessor(
-			c.Get("stream").(am.MessageStream),
-			pg.NewOutboxStore("stores.outbox", svc.DB()),
-		), nil
 	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		return svc.DB().Begin()
 	})
-	container.AddSingleton("sentCounter", func(c di.Container) (any, error) {
-		return amprom.SentMessagesCounter("stores"), nil
-	})
+	sentCounter := amprom.SentMessagesCounter("stores")
 	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(*sql.Tx)
 		outboxStore := pg.NewOutboxStore("stores.outbox", tx)
 		return am.NewMessagePublisher(
-			c.Get("stream").(am.MessageStream),
+			stream,
 			amotel.OtelMessageContextInjector(),
-			c.Get("sentCounter").(am.MessagePublisherMiddleware),
+			sentCounter,
 			tm.OutboxPublisher(outboxStore),
 		), nil
 	})
 	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
 		return am.NewMessageSubscriber(
-			c.Get("stream").(am.MessageStream),
+			stream,
 			amotel.OtelMessageContextExtractor(),
 			amprom.ReceivedMessagesCounter("stores"),
 		), nil
@@ -143,6 +130,10 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
 		return handlers.NewDomainEventHandlers(c.Get("eventPublisher").(am.EventPublisher)), nil
 	})
+	outboxProcessor := tm.NewOutboxProcessor(
+		stream,
+		pg.NewOutboxStore("stores.outbox", svc.DB()),
+	)
 
 	// setup Driver adapters
 	if err = grpc.RegisterServerTx(container, svc.RPC()); err != nil {
@@ -160,7 +151,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	if err = storespb.RegisterAsyncAPI(svc.Mux()); err != nil {
 		return err
 	}
-	startOutboxProcessor(ctx, container)
+	startOutboxProcessor(ctx, outboxProcessor, svc.Logger())
 
 	return nil
 }
@@ -225,10 +216,7 @@ func registrations(reg registry.Registry) (err error) {
 
 	return
 }
-func startOutboxProcessor(ctx context.Context, container di.Container) {
-	outboxProcessor := container.Get("outboxProcessor").(tm.OutboxProcessor)
-	logger := container.Get("logger").(zerolog.Logger)
-
+func startOutboxProcessor(ctx context.Context, outboxProcessor tm.OutboxProcessor, logger zerolog.Logger) {
 	go func() {
 		err := outboxProcessor.Start(ctx)
 		if err != nil {
