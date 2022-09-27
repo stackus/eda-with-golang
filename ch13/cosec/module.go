@@ -58,15 +58,11 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	stream := jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger())
 	container.AddScoped(constants.DatabaseTransactionKey, func(c di.Container) (any, error) {
-		tx, err := svc.DB().Begin()
-		if err != nil {
-			return nil, err
-		}
-		return postgresotel.Trace(tx), nil
+		return svc.DB().Begin()
 	})
 	sentCounter := amprom.SentMessagesCounter(constants.ServiceName)
 	container.AddScoped(constants.MessagePublisherKey, func(c di.Container) (any, error) {
-		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		outboxStore := pg.NewOutboxStore(constants.OutboxTableName, tx)
 		return am.NewMessagePublisher(
 			stream,
@@ -82,26 +78,14 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 			amprom.ReceivedMessagesCounter(constants.ServiceName),
 		), nil
 	})
-	// container.AddScoped(constants.EventPublisherKey, func(c di.Container) (any, error) {
-	// 	return am.NewEventPublisher(
-	// 		c.Get(constants.RegistryKey).(registry.Registry),
-	// 		c.Get(constants.MessagePublisherKey).(am.MessagePublisher),
-	// 	), nil
-	// })
 	container.AddScoped(constants.CommandPublisherKey, func(c di.Container) (any, error) {
 		return am.NewCommandPublisher(
 			c.Get(constants.RegistryKey).(registry.Registry),
 			c.Get(constants.MessagePublisherKey).(am.MessagePublisher),
 		), nil
 	})
-	// container.AddScoped(constants.ReplyPublisherKey, func(c di.Container) (any, error) {
-	// 	return am.NewReplyPublisher(
-	// 		c.Get(constants.RegistryKey).(registry.Registry),
-	// 		c.Get(constants.MessagePublisherKey).(am.MessagePublisher),
-	// 	), nil
-	// })
 	container.AddScoped(constants.InboxStoreKey, func(c di.Container) (any, error) {
-		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		return pg.NewInboxStore(constants.InboxTableName, tx), nil
 	})
 	container.AddScoped(constants.SagaStoreKey, func(c di.Container) (any, error) {
@@ -110,7 +94,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 			reg,
 			pg.NewSagaStore(
 				constants.SagasTableName,
-				c.Get(constants.DatabaseTransactionKey).(*sql.Tx),
+				postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx)),
 				reg,
 			),
 		), nil

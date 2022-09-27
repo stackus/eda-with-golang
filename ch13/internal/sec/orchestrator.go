@@ -2,9 +2,11 @@ package sec
 
 import (
 	"context"
+	"time"
 
 	"github.com/stackus/errors"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
@@ -58,9 +60,18 @@ func (o orchestrator[T]) ReplyTopic() string {
 	return o.saga.ReplyTopic()
 }
 
-func (o orchestrator[T]) HandleReply(ctx context.Context, reply ddd.Reply) error {
-	ctx, span := tracer.Start(ctx, reply.ReplyName())
-	defer span.End()
+func (o orchestrator[T]) HandleReply(ctx context.Context, reply ddd.Reply) (err error) {
+	span := trace.SpanFromContext(ctx)
+	defer func(started time.Time) {
+		attrs := []attribute.KeyValue{
+			attribute.String("Reply", reply.ReplyName()),
+			attribute.Float64("Took", time.Since(started).Seconds()),
+		}
+		if err != nil {
+			attrs = append(attrs, attribute.String("Error", err.Error()))
+		}
+		span.AddEvent("Handled Reply", trace.WithAttributes(attrs...))
+	}(time.Now())
 
 	sagaID, sagaName := o.getSagaInfoFromReply(reply)
 	if sagaID == "" || sagaName == "" || sagaName != o.saga.Name() {

@@ -28,9 +28,6 @@ func NewCreateStoreHandler(stores domain.StoreRepository, publisher ddd.EventPub
 }
 
 func (h CreateStoreHandler) CreateStore(ctx context.Context, cmd CreateStore) error {
-	ctx, span := tracer.Start(ctx, "CreateStore")
-	defer span.End()
-
 	store, err := h.stores.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

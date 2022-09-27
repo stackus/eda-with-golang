@@ -2,6 +2,10 @@ package handlers
 
 import (
 	"context"
+	"time"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"eda-in-golang/baskets/basketspb"
 	"eda-in-golang/depot/depotpb"
@@ -40,7 +44,19 @@ func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers 
 	return
 }
 
-func (h integrationHandlers[T]) HandleEvent(ctx context.Context, event T) error {
+func (h integrationHandlers[T]) HandleEvent(ctx context.Context, event T) (err error) {
+	span := trace.SpanFromContext(ctx)
+	defer func(started time.Time) {
+		attrs := []attribute.KeyValue{
+			attribute.String("Event", event.EventName()),
+			attribute.Float64("Took", time.Since(started).Seconds()),
+		}
+		if err != nil {
+			attrs = append(attrs, attribute.String("Error", err.Error()))
+		}
+		span.AddEvent("Handled Integration Event", trace.WithAttributes(attrs...))
+	}(time.Now())
+
 	switch event.EventName() {
 	case basketspb.BasketCheckedOutEvent:
 		return h.onBasketCheckedOut(ctx, event)

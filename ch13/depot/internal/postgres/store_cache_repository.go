@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
 
 	"eda-in-golang/depot/internal/domain"
@@ -30,17 +28,9 @@ func NewStoreCacheRepository(tableName string, db postgres.DB, fallback domain.S
 }
 
 func (r StoreCacheRepository) Add(ctx context.Context, storeID, name, location string) error {
-	const query = "INSERT INTO %s (id, NAME, location) VALUES ($1, $2, $3)"
+	const query = "INSERT INTO %s (id, NAME, location) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
 
 	_, err := r.db.ExecContext(ctx, r.table(query), storeID, name, location)
-	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			if pgErr.Code == pgerrcode.UniqueViolation {
-				return nil
-			}
-		}
-	}
 
 	return err
 }

@@ -24,9 +24,6 @@ func NewEnableParticipationHandler(stores domain.StoreRepository, publisher ddd.
 }
 
 func (h EnableParticipationHandler) EnableParticipation(ctx context.Context, cmd EnableParticipation) error {
-	ctx, span := tracer.Start(ctx, "EnableParticipation")
-	defer span.End()
-
 	store, err := h.stores.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

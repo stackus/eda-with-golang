@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
 
 	"eda-in-golang/internal/postgres"
@@ -31,17 +29,9 @@ func NewCustomerCacheRepository(tableName string, db postgres.DB, fallback appli
 }
 
 func (r CustomerCacheRepository) Add(ctx context.Context, customerID, name, smsNumber string) error {
-	const query = "INSERT INTO %s (id, NAME, sms_number) VALUES ($1, $2, $3)"
+	const query = "INSERT INTO %s (id, NAME, sms_number) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
 
 	_, err := r.db.ExecContext(ctx, r.table(query), customerID, name, smsNumber)
-	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			if pgErr.Code == pgerrcode.UniqueViolation {
-				return nil
-			}
-		}
-	}
 
 	return err
 }

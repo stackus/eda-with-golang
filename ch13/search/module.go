@@ -49,11 +49,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	stream := jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger())
 	container.AddScoped(constants.DatabaseTransactionKey, func(c di.Container) (any, error) {
-		tx, err := svc.DB().Begin()
-		if err != nil {
-			return nil, err
-		}
-		return postgresotel.Trace(tx), nil
+		return svc.DB().Begin()
 	})
 	container.AddSingleton(constants.MessageSubscriberKey, func(c di.Container) (any, error) {
 		return am.NewMessageSubscriber(
@@ -63,32 +59,35 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		), nil
 	})
 	container.AddScoped(constants.InboxStoreKey, func(c di.Container) (any, error) {
-		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		return pg.NewInboxStore(constants.InboxTableName, tx), nil
 	})
 	container.AddScoped(constants.CustomersRepoKey, func(c di.Container) (any, error) {
 		return postgres.NewCustomerCacheRepository(
 			constants.CustomersCacheTableName,
-			c.Get(constants.DatabaseTransactionKey).(*sql.Tx),
+			postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx)),
 			grpc.NewCustomerRepository(svc.Config().Rpc.Service(constants.CustomersServiceName)),
 		), nil
 	})
 	container.AddScoped(constants.StoresRepoKey, func(c di.Container) (any, error) {
 		return postgres.NewStoreCacheRepository(
 			constants.StoresCacheTableName,
-			c.Get(constants.DatabaseTransactionKey).(*sql.Tx),
+			postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx)),
 			grpc.NewStoreRepository(svc.Config().Rpc.Service(constants.StoresServiceName)),
 		), nil
 	})
 	container.AddScoped(constants.ProductsRepoKey, func(c di.Container) (any, error) {
 		return postgres.NewProductCacheRepository(
 			constants.ProductsCacheTableName,
-			c.Get(constants.DatabaseTransactionKey).(*sql.Tx),
+			postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx)),
 			grpc.NewProductRepository(svc.Config().Rpc.Service(constants.StoresServiceName)),
 		), nil
 	})
 	container.AddScoped(constants.OrdersRepoKey, func(c di.Container) (any, error) {
-		return postgres.NewOrderRepository(constants.OrdersTableName, c.Get(constants.DatabaseTransactionKey).(*sql.Tx)), nil
+		return postgres.NewOrderRepository(
+			constants.OrdersTableName,
+			postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx)),
+		), nil
 	})
 
 	// setup application

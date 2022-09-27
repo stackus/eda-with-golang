@@ -56,15 +56,11 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		return ddd.NewEventDispatcher[ddd.Event](), nil
 	})
 	container.AddScoped(constants.DatabaseTransactionKey, func(c di.Container) (any, error) {
-		tx, err := svc.DB().Begin()
-		if err != nil {
-			return nil, err
-		}
-		return postgresotel.Trace(tx), nil
+		return svc.DB().Begin()
 	})
 	sentCounter := amprom.SentMessagesCounter(constants.ServiceName)
 	container.AddScoped(constants.MessagePublisherKey, func(c di.Container) (any, error) {
-		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		outboxStore := pg.NewOutboxStore(constants.OutboxTableName, tx)
 		return am.NewMessagePublisher(
 			stream,
@@ -87,11 +83,11 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		), nil
 	})
 	container.AddScoped(constants.InboxStoreKey, func(c di.Container) (any, error) {
-		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		return pg.NewInboxStore(constants.InboxTableName, tx), nil
 	})
 	container.AddScoped(constants.BasketsRepoKey, func(c di.Container) (any, error) {
-		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		reg := c.Get(constants.RegistryKey).(registry.Registry)
 		return es.NewAggregateRepository[*domain.Basket](
 			domain.BasketAggregate,
@@ -105,14 +101,14 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	container.AddScoped(constants.StoresRepoKey, func(c di.Container) (any, error) {
 		return postgres.NewStoreCacheRepository(
 			constants.StoresCacheTableName,
-			c.Get(constants.DatabaseTransactionKey).(*sql.Tx),
+			postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx)),
 			grpc.NewStoreRepository(svc.Config().Rpc.Service(constants.StoresServiceName)),
 		), nil
 	})
 	container.AddScoped(constants.ProductsRepoKey, func(c di.Container) (any, error) {
 		return postgres.NewProductCacheRepository(
 			constants.ProductsCacheTableName,
-			c.Get(constants.DatabaseTransactionKey).(*sql.Tx),
+			postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx)),
 			grpc.NewProductRepository(svc.Config().Rpc.Service(constants.StoresServiceName)),
 		), nil
 	})

@@ -25,9 +25,6 @@ func NewRebrandStoreHandler(stores domain.StoreRepository, publisher ddd.EventPu
 }
 
 func (h RebrandStoreHandler) RebrandStore(ctx context.Context, cmd RebrandStore) error {
-	ctx, span := tracer.Start(ctx, "RebrandStore")
-	defer span.End()
-
 	store, err := h.stores.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

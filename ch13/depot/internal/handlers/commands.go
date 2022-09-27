@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"eda-in-golang/depot/depotpb"
 	"eda-in-golang/depot/internal/application"
@@ -33,9 +36,18 @@ func RegisterCommandHandlers(subscriber am.MessageSubscriber, handlers am.Messag
 	return err
 }
 
-func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {
-	ctx, span := tracer.Start(ctx, cmd.CommandName())
-	defer span.End()
+func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (reply ddd.Reply, err error) {
+	span := trace.SpanFromContext(ctx)
+	defer func(started time.Time) {
+		attrs := []attribute.KeyValue{
+			attribute.String("Command", cmd.CommandName()),
+			attribute.Float64("Took", time.Since(started).Seconds()),
+		}
+		if err != nil {
+			attrs = append(attrs, attribute.String("Error", err.Error()))
+		}
+		span.AddEvent("Handled Command", trace.WithAttributes(attrs...))
+	}(time.Now())
 
 	switch cmd.CommandName() {
 	case depotpb.CreateShoppingListCommand:

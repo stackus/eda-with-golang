@@ -26,9 +26,6 @@ func NewRebrandProductHandler(products domain.ProductRepository, publisher ddd.E
 }
 
 func (h RebrandProductHandler) RebrandProduct(ctx context.Context, cmd RebrandProduct) error {
-	ctx, span := tracer.Start(ctx, "RebrandProduct")
-	defer span.End()
-
 	product, err := h.products.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

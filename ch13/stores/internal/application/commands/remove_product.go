@@ -24,9 +24,6 @@ func NewRemoveProductHandler(products domain.ProductRepository, publisher ddd.Ev
 }
 
 func (h RemoveProductHandler) RemoveProduct(ctx context.Context, cmd RemoveProduct) error {
-	ctx, span := tracer.Start(ctx, "RemoveProduct")
-	defer span.End()
-
 	product, err := h.products.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

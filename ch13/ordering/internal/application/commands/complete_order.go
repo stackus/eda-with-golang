@@ -25,9 +25,6 @@ func NewCompleteOrderHandler(orders domain.OrderRepository, publisher ddd.EventP
 }
 
 func (h CompleteOrderHandler) CompleteOrder(ctx context.Context, cmd CompleteOrder) error {
-	ctx, span := tracer.Start(ctx, "CompleteOrder")
-	defer span.End()
-
 	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err

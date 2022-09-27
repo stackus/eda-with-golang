@@ -69,9 +69,6 @@ func New(baskets domain.BasketRepository, stores domain.StoreRepository, product
 }
 
 func (a Application) StartBasket(ctx context.Context, start StartBasket) error {
-	ctx, span := tracer.Start(ctx, "StartBasket")
-	defer span.End()
-
 	basket, err := a.baskets.Load(ctx, start.ID)
 	if err != nil {
 		return err
@@ -90,9 +87,6 @@ func (a Application) StartBasket(ctx context.Context, start StartBasket) error {
 }
 
 func (a Application) CancelBasket(ctx context.Context, cancel CancelBasket) error {
-	ctx, span := tracer.Start(ctx, "CancelBasket")
-	defer span.End()
-
 	basket, err := a.baskets.Load(ctx, cancel.ID)
 	if err != nil {
 		return err
@@ -111,9 +105,6 @@ func (a Application) CancelBasket(ctx context.Context, cancel CancelBasket) erro
 }
 
 func (a Application) CheckoutBasket(ctx context.Context, checkout CheckoutBasket) error {
-	ctx, span := tracer.Start(ctx, "CheckoutBasket")
-	defer span.End()
-
 	basket, err := a.baskets.Load(ctx, checkout.ID)
 	if err != nil {
 		return err
@@ -132,9 +123,6 @@ func (a Application) CheckoutBasket(ctx context.Context, checkout CheckoutBasket
 }
 
 func (a Application) AddItem(ctx context.Context, add AddItem) error {
-	ctx, span := tracer.Start(ctx, "AddItem")
-	defer span.End()
-
 	basket, err := a.baskets.Load(ctx, add.ID)
 	if err != nil {
 		return err
@@ -163,9 +151,6 @@ func (a Application) AddItem(ctx context.Context, add AddItem) error {
 }
 
 func (a Application) RemoveItem(ctx context.Context, remove RemoveItem) error {
-	ctx, span := tracer.Start(ctx, "RemoveItem")
-	defer span.End()
-
 	product, err := a.products.Find(ctx, remove.ProductID)
 	if err != nil {
 		return err
@@ -189,8 +174,5 @@ func (a Application) RemoveItem(ctx context.Context, remove RemoveItem) error {
 }
 
 func (a Application) GetBasket(ctx context.Context, get GetBasket) (*domain.Basket, error) {
-	ctx, span := tracer.Start(ctx, "GetBasket")
-	defer span.End()
-
 	return a.baskets.Load(ctx, get.ID)
 }

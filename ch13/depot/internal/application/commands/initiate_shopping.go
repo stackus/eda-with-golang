@@ -24,9 +24,6 @@ func NewInitiateShoppingHandler(lists domain.ShoppingListRepository, publisher d
 }
 
 func (h InitiateShoppingHandler) InitiateShopping(ctx context.Context, cmd InitiateShopping) error {
-	ctx, span := tracer.Start(ctx, "InitiateShopping")
-	defer span.End()
-
 	list, err := h.shoppingLists.Find(ctx, cmd.ID)
 	if err != nil {
 		return err

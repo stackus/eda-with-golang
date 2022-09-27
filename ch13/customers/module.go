@@ -48,18 +48,17 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		return ddd.NewEventDispatcher[ddd.AggregateEvent](), nil
 	})
 	container.AddScoped(constants.DatabaseTransactionKey, func(c di.Container) (any, error) {
-		tx, err := svc.DB().Begin()
-		if err != nil {
-			return nil, err
-		}
-		return postgresotel.Trace(tx), nil
+		return svc.DB().Begin()
 	})
 	container.AddScoped(constants.CustomersRepoKey, func(c di.Container) (any, error) {
-		return postgres.NewCustomerRepository(constants.CustomersTableName, c.Get(constants.DatabaseTransactionKey).(*sql.Tx)), nil
+		return postgres.NewCustomerRepository(
+			constants.CustomersTableName,
+			postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx)),
+		), nil
 	})
 	sentCounter := amprom.SentMessagesCounter(constants.ServiceName)
 	container.AddScoped(constants.MessagePublisherKey, func(c di.Container) (any, error) {
-		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		outboxStore := pg.NewOutboxStore(constants.OutboxTableName, tx)
 		return am.NewMessagePublisher(
 			stream,
@@ -88,7 +87,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		), nil
 	})
 	container.AddScoped(constants.InboxStoreKey, func(c di.Container) (any, error) {
-		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		return pg.NewInboxStore(constants.InboxTableName, tx), nil
 	})
 
