@@ -8,7 +8,6 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
-	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/baskets/internal/domain"
 	"eda-in-golang/internal/postgres"
@@ -33,16 +32,7 @@ func NewStoreCacheRepository(tableName string, db postgres.DB, fallback domain.S
 func (r StoreCacheRepository) Add(ctx context.Context, storeID, name string) error {
 	const query = "INSERT INTO %s (id, NAME) VALUES ($1, $2)"
 
-	ctx, span := tracer.Start(ctx, "Add")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Exec", tableQuery),
-	)
-
-	_, err := r.db.ExecContext(ctx, tableQuery, storeID, name)
+	_, err := r.db.ExecContext(ctx, r.table(query), storeID, name)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -58,16 +48,7 @@ func (r StoreCacheRepository) Add(ctx context.Context, storeID, name string) err
 func (r StoreCacheRepository) Rename(ctx context.Context, storeID, name string) error {
 	const query = "UPDATE %s SET NAME = $2 WHERE id = $1"
 
-	ctx, span := tracer.Start(ctx, "Rename")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Exec", tableQuery),
-	)
-
-	_, err := r.db.ExecContext(ctx, tableQuery, storeID, name)
+	_, err := r.db.ExecContext(ctx, r.table(query), storeID, name)
 
 	return err
 }
@@ -75,20 +56,11 @@ func (r StoreCacheRepository) Rename(ctx context.Context, storeID, name string) 
 func (r StoreCacheRepository) Find(ctx context.Context, storeID string) (*domain.Store, error) {
 	const query = "SELECT name FROM %s WHERE id = $1 LIMIT 1"
 
-	ctx, span := tracer.Start(ctx, "Find")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Query", tableQuery),
-	)
-
 	store := &domain.Store{
 		ID: storeID,
 	}
 
-	err := r.db.QueryRowContext(ctx, tableQuery, storeID).Scan(&store.Name)
+	err := r.db.QueryRowContext(ctx, r.table(query), storeID).Scan(&store.Name)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.Wrap(err, "scanning store")

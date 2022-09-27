@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"strconv"
 
+	"go.opentelemetry.io/otel/propagation"
+
 	"eda-in-golang/internal/ddd"
 )
 
 type MetadataCarrier ddd.Metadata
+
+var _ propagation.TextMapCarrier = (*MetadataCarrier)(nil)
 
 func (mc MetadataCarrier) Get(key string) string {
 	switch v := ddd.Metadata(mc).Get(key).(type) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
@@ -13,9 +14,16 @@ import (
 func OtelMessageContextExtractor() am.MessageHandlerMiddleware {
 	return func(next am.MessageHandler) am.MessageHandler {
 		return am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) error {
-			var span trace.Span
-			ctx = propagator.Extract(ctx, MetadataCarrier(msg.Metadata()))
-			ctx, span = tracer.Start(ctx, fmt.Sprintf("Receive(%s)", msg.MessageName()), trace.WithSpanKind(trace.SpanKindConsumer))
+			eCtx := propagator.Extract(ctx, MetadataCarrier(msg.Metadata()))
+			spanCtx := trace.SpanContextFromContext(eCtx)
+			bags := baggage.FromContext(eCtx)
+
+			ctx = baggage.ContextWithBaggage(ctx, bags)
+			ctx, span := tracer.Start(
+				trace.ContextWithRemoteSpanContext(ctx, spanCtx),
+				fmt.Sprintf("Receive(%s)", msg.MessageName()),
+				trace.WithSpanKind(trace.SpanKindConsumer),
+			)
 			defer span.End()
 
 			err := next.HandleMessage(ctx, msg)
