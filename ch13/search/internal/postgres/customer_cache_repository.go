@@ -8,7 +8,6 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/stackus/errors"
-	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/internal/postgres"
 	"eda-in-golang/search/internal/application"
@@ -32,18 +31,9 @@ func NewCustomerCacheRepository(tableName string, db postgres.DB, fallback appli
 }
 
 func (r CustomerCacheRepository) Add(ctx context.Context, customerID, name string) error {
-	const query = "INSERT INTO %s (id, name) VALUES ($1, $2)"
+	const query = "INSERT INTO %s (id, NAME) VALUES ($1, $2)"
 
-	ctx, span := tracer.Start(ctx, "Add")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Exec", tableQuery),
-	)
-
-	_, err := r.db.ExecContext(ctx, tableQuery, customerID, name)
+	_, err := r.db.ExecContext(ctx, r.table(query), customerID, name)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -59,20 +49,11 @@ func (r CustomerCacheRepository) Add(ctx context.Context, customerID, name strin
 func (r CustomerCacheRepository) Find(ctx context.Context, customerID string) (*models.Customer, error) {
 	const query = `SELECT name FROM %s WHERE id = $1 LIMIT 1`
 
-	ctx, span := tracer.Start(ctx, "Find")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Query", tableQuery),
-	)
-
 	customer := &models.Customer{
 		ID: customerID,
 	}
 
-	err := r.db.QueryRowContext(ctx, tableQuery, customerID).Scan(&customer.Name)
+	err := r.db.QueryRowContext(ctx, r.table(query), customerID).Scan(&customer.Name)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.Wrap(err, "scanning customer")

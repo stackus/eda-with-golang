@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"eda-in-golang/cosec/internal/constants"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/di"
 )
@@ -20,12 +21,12 @@ func RegisterIntegrationEventHandlersTx(container di.Container) error {
 			} else {
 				err = tx.Commit()
 			}
-		}(di.Get(ctx, "tx").(*sql.Tx))
+		}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
-		return di.Get(ctx, "integrationEventHandlers").(am.MessageHandler).HandleMessage(ctx, msg)
+		return di.Get(ctx, constants.IntegrationEventHandlersKey).(am.MessageHandler).HandleMessage(ctx, msg)
 	})
 
-	subscriber := container.Get("messageSubscriber").(am.MessageSubscriber)
+	subscriber := container.Get(constants.MessageSubscriberKey).(am.MessageSubscriber)
 
 	return RegisterIntegrationEventHandlers(subscriber, rawMsgHandler)
 }

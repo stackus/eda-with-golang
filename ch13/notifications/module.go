@@ -9,10 +9,12 @@ import (
 	"eda-in-golang/internal/amprom"
 	"eda-in-golang/internal/jetstream"
 	pg "eda-in-golang/internal/postgres"
+	"eda-in-golang/internal/postgresotel"
 	"eda-in-golang/internal/registry"
 	"eda-in-golang/internal/system"
 	"eda-in-golang/internal/tm"
 	"eda-in-golang/notifications/internal/application"
+	"eda-in-golang/notifications/internal/constants"
 	"eda-in-golang/notifications/internal/grpc"
 	"eda-in-golang/notifications/internal/handlers"
 	"eda-in-golang/notifications/internal/postgres"
@@ -34,16 +36,16 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	if err = orderingpb.Registrations(reg); err != nil {
 		return err
 	}
-	inboxStore := pg.NewInboxStore("notifications.inbox", svc.DB())
+	inboxStore := pg.NewInboxStore(constants.InboxTableName, svc.DB())
 	messageSubscriber := am.NewMessageSubscriber(
 		jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger()),
 		amotel.OtelMessageContextExtractor(),
-		amprom.ReceivedMessagesCounter("notifications"),
+		amprom.ReceivedMessagesCounter(constants.ServiceName),
 	)
 	customers := postgres.NewCustomerCacheRepository(
-		"notifications.customers_cache",
-		svc.DB(),
-		grpc.NewCustomerRepository(svc.Config().Rpc.Service("CUSTOMERS")),
+		constants.CustomersCacheTableName,
+		postgresotel.Trace(svc.DB()),
+		grpc.NewCustomerRepository(svc.Config().Rpc.Service(constants.CustomersServiceName)),
 	)
 
 	// setup application

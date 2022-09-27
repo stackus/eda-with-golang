@@ -2,9 +2,14 @@ package handlers
 
 import (
 	"context"
+	"time"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
+	"eda-in-golang/stores/internal/constants"
 	"eda-in-golang/stores/internal/domain"
 )
 
@@ -32,19 +37,28 @@ func RegisterCatalogHandlers(subscriber ddd.EventSubscriber[ddd.Event], handlers
 
 func RegisterCatalogHandlersTx(container di.Container) {
 	handlers := ddd.EventHandlerFunc[ddd.Event](func(ctx context.Context, event ddd.Event) error {
-		catalogHandlers := di.Get(ctx, "catalogHandlers").(ddd.EventHandler[ddd.Event])
+		catalogHandlers := di.Get(ctx, constants.CatalogHandlersKey).(ddd.EventHandler[ddd.Event])
 
 		return catalogHandlers.HandleEvent(ctx, event)
 	})
 
-	subscriber := container.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event])
+	subscriber := container.Get(constants.DomainDispatcherKey).(*ddd.EventDispatcher[ddd.Event])
 
 	RegisterCatalogHandlers(subscriber, handlers)
 }
 
-func (h catalogHandlers[T]) HandleEvent(ctx context.Context, event T) error {
-	ctx, span := tracer.Start(ctx, event.EventName())
-	defer span.End()
+func (h catalogHandlers[T]) HandleEvent(ctx context.Context, event T) (err error) {
+	span := trace.SpanFromContext(ctx)
+	defer func(started time.Time) {
+		attrs := []attribute.KeyValue{
+			attribute.String("Event", event.EventName()),
+			attribute.Float64("Took", time.Since(started).Seconds()),
+		}
+		if err != nil {
+			attrs = append(attrs, attribute.String("Error", err.Error()))
+		}
+		span.AddEvent("Handled Catalog Event", trace.WithAttributes(attrs...))
+	}(time.Now())
 
 	switch event.EventName() {
 	case domain.ProductAddedEvent:

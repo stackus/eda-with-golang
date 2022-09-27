@@ -2,6 +2,10 @@ package handlers
 
 import (
 	"context"
+	"time"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"eda-in-golang/customers/customerspb"
 	"eda-in-golang/customers/internal/domain"
@@ -30,9 +34,18 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.AggregateEve
 	)
 }
 
-func (h domainHandlers[T]) HandleEvent(ctx context.Context, event T) error {
-	ctx, span := tracer.Start(ctx, event.EventName())
-	defer span.End()
+func (h domainHandlers[T]) HandleEvent(ctx context.Context, event T) (err error) {
+	span := trace.SpanFromContext(ctx)
+	defer func(started time.Time) {
+		attrs := []attribute.KeyValue{
+			attribute.String("Event", event.EventName()),
+			attribute.Float64("Took", time.Since(started).Seconds()),
+		}
+		if err != nil {
+			attrs = append(attrs, attribute.String("Error", err.Error()))
+		}
+		span.AddEvent("Handled Domain Event", trace.WithAttributes(attrs...))
+	}(time.Now())
 
 	switch event.EventName() {
 	case domain.CustomerRegisteredEvent:

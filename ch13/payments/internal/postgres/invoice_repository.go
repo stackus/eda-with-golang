@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/stackus/errors"
-	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/internal/postgres"
 	"eda-in-golang/payments/internal/application"
@@ -29,20 +28,11 @@ func NewInvoiceRepository(tableName string, db postgres.DB) InvoiceRepository {
 func (r InvoiceRepository) Find(ctx context.Context, invoiceID string) (*models.Invoice, error) {
 	const query = "SELECT order_id, amount, status FROM %s WHERE id = $1 LIMIT 1"
 
-	ctx, span := tracer.Start(ctx, "Find")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Query", tableQuery),
-	)
-
 	invoice := &models.Invoice{
 		ID: invoiceID,
 	}
 	var status string
-	err := r.db.QueryRowContext(ctx, tableQuery, invoiceID).Scan(&invoice.OrderID, &invoice.Amount, &status)
+	err := r.db.QueryRowContext(ctx, r.table(query), invoiceID).Scan(&invoice.OrderID, &invoice.Amount, &status)
 	if err != nil {
 		return nil, errors.Wrap(err, "scanning invoice")
 	}
@@ -58,16 +48,7 @@ func (r InvoiceRepository) Find(ctx context.Context, invoiceID string) (*models.
 func (r InvoiceRepository) Save(ctx context.Context, invoice *models.Invoice) error {
 	const query = "INSERT INTO %s (id, order_id, amount, status) VALUES ($1, $2, $3, $4)"
 
-	ctx, span := tracer.Start(ctx, "Save")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Exec", tableQuery),
-	)
-
-	_, err := r.db.ExecContext(ctx, tableQuery, invoice.ID, invoice.OrderID, invoice.Amount, invoice.Status.String())
+	_, err := r.db.ExecContext(ctx, r.table(query), invoice.ID, invoice.OrderID, invoice.Amount, invoice.Status.String())
 
 	return err
 }
@@ -75,16 +56,7 @@ func (r InvoiceRepository) Save(ctx context.Context, invoice *models.Invoice) er
 func (r InvoiceRepository) Update(ctx context.Context, invoice *models.Invoice) error {
 	const query = "UPDATE %s SET amount = $2, status = $3 WHERE id = $1"
 
-	ctx, span := tracer.Start(ctx, "Update")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Exec", tableQuery),
-	)
-
-	_, err := r.db.ExecContext(ctx, tableQuery, invoice.ID, invoice.Amount, invoice.Status.String())
+	_, err := r.db.ExecContext(ctx, r.table(query), invoice.ID, invoice.Amount, invoice.Status.String())
 
 	return err
 }

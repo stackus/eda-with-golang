@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/stackus/errors"
-	"go.opentelemetry.io/otel/attribute"
 
 	"eda-in-golang/depot/internal/domain"
 	"eda-in-golang/internal/postgres"
@@ -29,21 +28,12 @@ func NewShoppingListRepository(tableName string, db postgres.DB) ShoppingListRep
 func (r ShoppingListRepository) Find(ctx context.Context, id string) (*domain.ShoppingList, error) {
 	const query = "SELECT order_id, stops, assigned_bot_id, status FROM %s WHERE id = $1 LIMIT 1"
 
-	ctx, span := tracer.Start(ctx, "Find")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Query", tableQuery),
-	)
-
 	shoppingList := domain.NewShoppingList(id)
 
 	var stops []byte
 	var status string
 
-	err := r.db.QueryRowContext(ctx, tableQuery, id).Scan(&shoppingList.OrderID, &stops, &shoppingList.AssignedBotID, &status)
+	err := r.db.QueryRowContext(ctx, r.table(query), id).Scan(&shoppingList.OrderID, &stops, &shoppingList.AssignedBotID, &status)
 	if err != nil {
 		return nil, errors.ErrInternalServerError.Err(err)
 	}
@@ -64,21 +54,12 @@ func (r ShoppingListRepository) Find(ctx context.Context, id string) (*domain.Sh
 func (r ShoppingListRepository) Save(ctx context.Context, list *domain.ShoppingList) error {
 	const query = "INSERT INTO %s (id, order_id, stops, assigned_bot_id, status) VALUES ($1, $2, $3, $4, $5)"
 
-	ctx, span := tracer.Start(ctx, "Save")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Exec", tableQuery),
-	)
-
 	stops, err := json.Marshal(list.Stops)
 	if err != nil {
 		return errors.ErrInternalServerError.Err(err)
 	}
 
-	_, err = r.db.ExecContext(ctx, tableQuery, list.ID(), list.OrderID, stops, list.AssignedBotID, list.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), list.ID(), list.OrderID, stops, list.AssignedBotID, list.Status.String())
 
 	return errors.ErrInternalServerError.Err(err)
 }
@@ -86,21 +67,12 @@ func (r ShoppingListRepository) Save(ctx context.Context, list *domain.ShoppingL
 func (r ShoppingListRepository) Update(ctx context.Context, list *domain.ShoppingList) error {
 	const query = "UPDATE %s SET stops = $2, assigned_bot_id = $3, status = $4 WHERE id = $1"
 
-	ctx, span := tracer.Start(ctx, "Update")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Exec", tableQuery),
-	)
-
 	stops, err := json.Marshal(list.Stops)
 	if err != nil {
 		return errors.ErrInternalServerError.Err(err)
 	}
 
-	_, err = r.db.ExecContext(ctx, tableQuery, list.ID(), stops, list.AssignedBotID, list.Status.String())
+	_, err = r.db.ExecContext(ctx, r.table(query), list.ID(), stops, list.AssignedBotID, list.Status.String())
 
 	return errors.ErrInternalServerError.Err(err)
 }

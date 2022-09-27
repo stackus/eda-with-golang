@@ -8,6 +8,7 @@ import (
 
 	"eda-in-golang/internal/di"
 	"eda-in-golang/search/internal/application"
+	"eda-in-golang/search/internal/constants"
 	"eda-in-golang/search/searchpb"
 )
 
@@ -29,9 +30,9 @@ func (s serverTx) SearchOrders(ctx context.Context, request *searchpb.SearchOrde
 	ctx = s.c.Scoped(ctx)
 	defer func(tx *sql.Tx) {
 		err = s.closeTx(tx, err)
-	}(di.Get(ctx, "tx").(*sql.Tx))
+	}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
-	next := server{app: di.Get(ctx, "app").(application.Application)}
+	next := server{app: di.Get(ctx, constants.ApplicationKey).(application.Application)}
 
 	return next.SearchOrders(ctx, request)
 }
@@ -40,9 +41,9 @@ func (s serverTx) GetOrder(ctx context.Context, request *searchpb.GetOrderReques
 	ctx = s.c.Scoped(ctx)
 	defer func(tx *sql.Tx) {
 		err = s.closeTx(tx, err)
-	}(di.Get(ctx, "tx").(*sql.Tx))
+	}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
-	next := server{app: di.Get(ctx, "app").(application.Application)}
+	next := server{app: di.Get(ctx, constants.ApplicationKey).(application.Application)}
 
 	return next.GetOrder(ctx, request)
 }

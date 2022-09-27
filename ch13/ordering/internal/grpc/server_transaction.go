@@ -8,6 +8,7 @@ import (
 
 	"eda-in-golang/internal/di"
 	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/constants"
 	"eda-in-golang/ordering/orderingpb"
 )
 
@@ -29,9 +30,9 @@ func (s serverTx) CreateOrder(ctx context.Context, request *orderingpb.CreateOrd
 	ctx = s.c.Scoped(ctx)
 	defer func(tx *sql.Tx) {
 		err = s.closeTx(tx, err)
-	}(di.Get(ctx, "tx").(*sql.Tx))
+	}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
-	next := server{app: di.Get(ctx, "app").(application.App)}
+	next := server{app: di.Get(ctx, constants.ApplicationKey).(application.App)}
 
 	return next.CreateOrder(ctx, request)
 }
@@ -40,9 +41,9 @@ func (s serverTx) GetOrder(ctx context.Context, request *orderingpb.GetOrderRequ
 	ctx = s.c.Scoped(ctx)
 	defer func(tx *sql.Tx) {
 		err = s.closeTx(tx, err)
-	}(di.Get(ctx, "tx").(*sql.Tx))
+	}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
-	next := server{app: di.Get(ctx, "app").(application.App)}
+	next := server{app: di.Get(ctx, constants.ApplicationKey).(application.App)}
 
 	return next.GetOrder(ctx, request)
 }
@@ -51,9 +52,9 @@ func (s serverTx) CancelOrder(ctx context.Context, request *orderingpb.CancelOrd
 	ctx = s.c.Scoped(ctx)
 	defer func(tx *sql.Tx) {
 		err = s.closeTx(tx, err)
-	}(di.Get(ctx, "tx").(*sql.Tx))
+	}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
-	next := server{app: di.Get(ctx, "app").(application.App)}
+	next := server{app: di.Get(ctx, constants.ApplicationKey).(application.App)}
 
 	return next.CancelOrder(ctx, request)
 }
@@ -62,9 +63,9 @@ func (s serverTx) ReadyOrder(ctx context.Context, request *orderingpb.ReadyOrder
 	ctx = s.c.Scoped(ctx)
 	defer func(tx *sql.Tx) {
 		err = s.closeTx(tx, err)
-	}(di.Get(ctx, "tx").(*sql.Tx))
+	}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
-	next := server{app: di.Get(ctx, "app").(application.App)}
+	next := server{app: di.Get(ctx, constants.ApplicationKey).(application.App)}
 
 	return next.ReadyOrder(ctx, request)
 }
@@ -73,9 +74,9 @@ func (s serverTx) CompleteOrder(ctx context.Context, request *orderingpb.Complet
 	ctx = s.c.Scoped(ctx)
 	defer func(tx *sql.Tx) {
 		err = s.closeTx(tx, err)
-	}(di.Get(ctx, "tx").(*sql.Tx))
+	}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
-	next := server{app: di.Get(ctx, "app").(application.App)}
+	next := server{app: di.Get(ctx, constants.ApplicationKey).(application.App)}
 
 	return next.CompleteOrder(ctx, request)
 }

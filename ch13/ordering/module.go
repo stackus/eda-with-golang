@@ -16,11 +16,13 @@ import (
 	"eda-in-golang/internal/es"
 	"eda-in-golang/internal/jetstream"
 	pg "eda-in-golang/internal/postgres"
+	"eda-in-golang/internal/postgresotel"
 	"eda-in-golang/internal/registry"
 	"eda-in-golang/internal/registry/serdes"
 	"eda-in-golang/internal/system"
 	"eda-in-golang/internal/tm"
 	"eda-in-golang/ordering/internal/application"
+	"eda-in-golang/ordering/internal/constants"
 	"eda-in-golang/ordering/internal/domain"
 	"eda-in-golang/ordering/internal/grpc"
 	"eda-in-golang/ordering/internal/handlers"
@@ -37,7 +39,7 @@ func (Module) Startup(ctx context.Context, mono system.Service) (err error) {
 func Root(ctx context.Context, svc system.Service) (err error) {
 	container := di.New()
 	// setup Driven adapters
-	container.AddSingleton("registry", func(c di.Container) (any, error) {
+	container.AddSingleton(constants.RegistryKey, func(c di.Container) (any, error) {
 		reg := registry.New()
 		if err := registrations(reg); err != nil {
 			return nil, err
@@ -54,16 +56,20 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		return reg, nil
 	})
 	stream := jetstream.NewStream(svc.Config().Nats.Stream, svc.JS(), svc.Logger())
-	container.AddSingleton("domainDispatcher", func(c di.Container) (any, error) {
+	container.AddSingleton(constants.DomainDispatcherKey, func(c di.Container) (any, error) {
 		return ddd.NewEventDispatcher[ddd.Event](), nil
 	})
-	container.AddScoped("tx", func(c di.Container) (any, error) {
-		return svc.DB().Begin()
+	container.AddScoped(constants.DatabaseTransactionKey, func(c di.Container) (any, error) {
+		tx, err := svc.DB().Begin()
+		if err != nil {
+			return nil, err
+		}
+		return postgresotel.Trace(tx), nil
 	})
-	sentCounter := amprom.SentMessagesCounter("ordering")
-	container.AddScoped("messagePublisher", func(c di.Container) (any, error) {
-		tx := c.Get("tx").(*sql.Tx)
-		outboxStore := pg.NewOutboxStore("ordering.outbox", tx)
+	sentCounter := amprom.SentMessagesCounter(constants.ServiceName)
+	container.AddScoped(constants.MessagePublisherKey, func(c di.Container) (any, error) {
+		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		outboxStore := pg.NewOutboxStore(constants.OutboxTableName, tx)
 		return am.NewMessagePublisher(
 			stream,
 			amotel.OtelMessageContextInjector(),
@@ -71,73 +77,70 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 			tm.OutboxPublisher(outboxStore),
 		), nil
 	})
-	container.AddSingleton("messageSubscriber", func(c di.Container) (any, error) {
+	container.AddSingleton(constants.MessageSubscriberKey, func(c di.Container) (any, error) {
 		return am.NewMessageSubscriber(
 			stream,
 			amotel.OtelMessageContextExtractor(),
-			amprom.ReceivedMessagesCounter("ordering"),
+			amprom.ReceivedMessagesCounter(constants.ServiceName),
 		), nil
 	})
-	container.AddScoped("eventPublisher", func(c di.Container) (any, error) {
+	container.AddScoped(constants.EventPublisherKey, func(c di.Container) (any, error) {
 		return am.NewEventPublisher(
-			c.Get("registry").(registry.Registry),
-			c.Get("messagePublisher").(am.MessagePublisher),
+			c.Get(constants.RegistryKey).(registry.Registry),
+			c.Get(constants.MessagePublisherKey).(am.MessagePublisher),
 		), nil
 	})
-	container.AddScoped("replyPublisher", func(c di.Container) (any, error) {
+	container.AddScoped(constants.ReplyPublisherKey, func(c di.Container) (any, error) {
 		return am.NewReplyPublisher(
-			c.Get("registry").(registry.Registry),
-			c.Get("messagePublisher").(am.MessagePublisher),
+			c.Get(constants.RegistryKey).(registry.Registry),
+			c.Get(constants.MessagePublisherKey).(am.MessagePublisher),
 		), nil
 	})
-	container.AddScoped("inboxStore", func(c di.Container) (any, error) {
-		tx := c.Get("tx").(*sql.Tx)
-		return pg.NewInboxStore("ordering.inbox", tx), nil
+	container.AddScoped(constants.InboxStoreKey, func(c di.Container) (any, error) {
+		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		return pg.NewInboxStore(constants.InboxTableName, tx), nil
 	})
-	container.AddScoped("aggregateStore", func(c di.Container) (any, error) {
-		tx := c.Get("tx").(*sql.Tx)
-		reg := c.Get("registry").(registry.Registry)
-		return es.AggregateStoreWithMiddleware(
-			pg.NewEventStore("ordering.events", tx, reg),
-			pg.NewSnapshotStore("ordering.snapshots", tx, reg),
-		), nil
-	})
-	container.AddScoped("orders", func(c di.Container) (any, error) {
+	container.AddScoped(constants.OrdersRepoKey, func(c di.Container) (any, error) {
+		tx := c.Get(constants.DatabaseTransactionKey).(*sql.Tx)
+		reg := c.Get(constants.RegistryKey).(registry.Registry)
 		return es.NewAggregateRepository[*domain.Order](
 			domain.OrderAggregate,
-			c.Get("registry").(registry.Registry),
-			c.Get("aggregateStore").(es.AggregateStore),
+			c.Get(constants.RegistryKey).(registry.Registry),
+			es.AggregateStoreWithMiddleware(
+				pg.NewEventStore(constants.EventsTableName, tx, reg),
+				pg.NewSnapshotStore(constants.SnapshotsTableName, tx, reg),
+			),
 		), nil
 	})
 
 	// setup application
-	container.AddScoped("app", func(c di.Container) (any, error) {
+	container.AddScoped(constants.ApplicationKey, func(c di.Container) (any, error) {
 		return application.New(
-			c.Get("orders").(domain.OrderRepository),
-			c.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]),
+			c.Get(constants.OrdersRepoKey).(domain.OrderRepository),
+			c.Get(constants.DomainDispatcherKey).(*ddd.EventDispatcher[ddd.Event]),
 		), nil
 	})
-	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
-		return handlers.NewDomainEventHandlers(c.Get("eventPublisher").(am.EventPublisher)), nil
+	container.AddScoped(constants.DomainEventHandlersKey, func(c di.Container) (any, error) {
+		return handlers.NewDomainEventHandlers(c.Get(constants.EventPublisherKey).(am.EventPublisher)), nil
 	})
-	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
+	container.AddScoped(constants.IntegrationEventHandlersKey, func(c di.Container) (any, error) {
 		return handlers.NewIntegrationEventHandlers(
-			c.Get("registry").(registry.Registry),
-			c.Get("app").(application.App),
-			tm.InboxHandler(c.Get("inboxStore").(tm.InboxStore)),
+			c.Get(constants.RegistryKey).(registry.Registry),
+			c.Get(constants.ApplicationKey).(application.App),
+			tm.InboxHandler(c.Get(constants.InboxStoreKey).(tm.InboxStore)),
 		), nil
 	})
-	container.AddScoped("commandHandlers", func(c di.Container) (any, error) {
+	container.AddScoped(constants.CommandHandlersKey, func(c di.Container) (any, error) {
 		return handlers.NewCommandHandlers(
-			c.Get("registry").(registry.Registry),
-			c.Get("app").(application.App),
-			c.Get("replyPublisher").(am.ReplyPublisher),
-			tm.InboxHandler(c.Get("inboxStore").(tm.InboxStore)),
+			c.Get(constants.RegistryKey).(registry.Registry),
+			c.Get(constants.ApplicationKey).(application.App),
+			c.Get(constants.ReplyPublisherKey).(am.ReplyPublisher),
+			tm.InboxHandler(c.Get(constants.InboxStoreKey).(tm.InboxStore)),
 		), nil
 	})
 	outboxProcessor := tm.NewOutboxProcessor(
 		stream,
-		pg.NewOutboxStore("ordering.outbox", svc.DB()),
+		pg.NewOutboxStore(constants.OutboxTableName, svc.DB()),
 	)
 
 	// setup Driver adapters

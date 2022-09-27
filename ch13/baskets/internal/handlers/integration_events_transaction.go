@@ -21,7 +21,7 @@ func RegisterIntegrationEventHandlersTx(container di.Container) error {
 			} else {
 				err = tx.Commit()
 			}
-		}(di.Get(ctx, "tx").(*sql.Tx))
+		}(di.Get(ctx, constants.DatabaseTransactionKey).(*sql.Tx))
 
 		return di.Get(ctx, constants.IntegrationEventHandlersKey).(am.MessageHandler).HandleMessage(ctx, msg)
 	})

@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"go.opentelemetry.io/otel/attribute"
-
 	"eda-in-golang/internal/postgres"
 	"eda-in-golang/payments/internal/application"
 	"eda-in-golang/payments/internal/models"
@@ -28,16 +26,7 @@ func NewPaymentRepository(tableName string, db postgres.DB) PaymentRepository {
 func (r PaymentRepository) Save(ctx context.Context, payment *models.Payment) error {
 	const query = "INSERT INTO %s (id, customer_id, amount) VALUES ($1, $2, $3)"
 
-	ctx, span := tracer.Start(ctx, "Save")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Exec", tableQuery),
-	)
-
-	_, err := r.db.ExecContext(ctx, tableQuery, payment.ID, payment.CustomerID, payment.Amount)
+	_, err := r.db.ExecContext(ctx, r.table(query), payment.ID, payment.CustomerID, payment.Amount)
 
 	return err
 }
@@ -45,20 +34,11 @@ func (r PaymentRepository) Save(ctx context.Context, payment *models.Payment) er
 func (r PaymentRepository) Find(ctx context.Context, paymentID string) (*models.Payment, error) {
 	const query = "SELECT customer_id, amount FROM %s WHERE id = $1 LIMIT 1"
 
-	ctx, span := tracer.Start(ctx, "Find")
-	defer span.End()
-
-	tableQuery := r.table(query)
-
-	span.SetAttributes(
-		attribute.String("Query", tableQuery),
-	)
-
 	payment := &models.Payment{
 		ID: paymentID,
 	}
 
-	err := r.db.QueryRowContext(ctx, tableQuery, paymentID).Scan(&payment.CustomerID, &payment.Amount)
+	err := r.db.QueryRowContext(ctx, r.table(query), paymentID).Scan(&payment.CustomerID, &payment.Amount)
 
 	return payment, err
 }
