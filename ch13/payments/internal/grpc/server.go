@@ -5,9 +5,11 @@ import (
 
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 
+	"eda-in-golang/internal/errorsotel"
 	"eda-in-golang/payments/internal/application"
 	"eda-in-golang/payments/paymentspb"
 )
@@ -39,6 +41,11 @@ func (s server) AuthorizePayment(ctx context.Context, request *paymentspb.Author
 		CustomerID: request.GetCustomerId(),
 		Amount:     request.GetAmount(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
+
 	return &paymentspb.AuthorizePaymentResponse{Id: id}, err
 }
 
@@ -53,6 +60,11 @@ func (s server) ConfirmPayment(ctx context.Context, request *paymentspb.ConfirmP
 	err := s.app.ConfirmPayment(ctx, application.ConfirmPayment{
 		ID: request.GetId(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
+
 	return &paymentspb.ConfirmPaymentResponse{}, err
 }
 
@@ -71,6 +83,11 @@ func (s server) CreateInvoice(ctx context.Context, request *paymentspb.CreateInv
 		OrderID: request.GetOrderId(),
 		Amount:  request.GetAmount(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
+
 	return &paymentspb.CreateInvoiceResponse{
 		Id: id,
 	}, err
@@ -87,6 +104,11 @@ func (s server) AdjustInvoice(ctx context.Context, request *paymentspb.AdjustInv
 		ID:     request.GetId(),
 		Amount: request.GetAmount(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
+
 	return &paymentspb.AdjustInvoiceResponse{}, err
 }
 
@@ -100,6 +122,11 @@ func (s server) PayInvoice(ctx context.Context, request *paymentspb.PayInvoiceRe
 	err := s.app.PayInvoice(ctx, application.PayInvoice{
 		ID: request.GetId(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
+
 	return &paymentspb.PayInvoiceResponse{}, err
 }
 
@@ -113,5 +140,10 @@ func (s server) CancelInvoice(ctx context.Context, request *paymentspb.CancelInv
 	err := s.app.CancelInvoice(ctx, application.CancelInvoice{
 		ID: request.GetId(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
+
 	return &paymentspb.CancelInvoiceResponse{}, err
 }

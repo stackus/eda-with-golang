@@ -2,7 +2,6 @@ package amotel
 
 import (
 	"context"
-	"fmt"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -16,14 +15,15 @@ func OtelMessageContextInjector() am.MessagePublisherMiddleware {
 		return am.MessagePublisherFunc(func(ctx context.Context, topicName string, msg am.Message) error {
 			var span trace.Span
 			ctx, span = tracer.Start(ctx,
-				fmt.Sprintf("Send(%s)", msg.MessageName()),
+				msg.MessageName(),
 				trace.WithSpanKind(trace.SpanKindProducer),
 				trace.WithAttributes(
+					attribute.String("MessageID", msg.ID()),
 					attribute.String("Subject", msg.Subject()),
 				),
 			)
-			propagator.Inject(ctx, MetadataCarrier(msg.Metadata()))
 			defer span.End()
+			propagator.Inject(ctx, MetadataCarrier(msg.Metadata()))
 
 			err := next.Publish(ctx, topicName, msg)
 			if err != nil {

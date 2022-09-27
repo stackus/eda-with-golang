@@ -9,6 +9,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 
+	"eda-in-golang/internal/errorsotel"
 	"eda-in-golang/stores/storespb"
 
 	"eda-in-golang/stores/internal/application"
@@ -44,7 +45,7 @@ func (s server) CreateStore(ctx context.Context, request *storespb.CreateStoreRe
 		Location: request.GetLocation(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -65,7 +66,7 @@ func (s server) EnableParticipation(ctx context.Context, request *storespb.Enabl
 		ID: request.GetId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (s server) DisableParticipation(ctx context.Context, request *storespb.Disa
 		ID: request.GetId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -104,7 +105,7 @@ func (s server) RebrandStore(ctx context.Context, request *storespb.RebrandStore
 		Name: request.GetName(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -120,7 +121,7 @@ func (s server) GetStore(ctx context.Context, request *storespb.GetStoreRequest)
 
 	store, err := s.app.GetStore(ctx, queries.GetStore{ID: request.GetId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (s server) GetStores(ctx context.Context, request *storespb.GetStoresReques
 
 	stores, err := s.app.GetStores(ctx, queries.GetStores{})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -153,7 +154,7 @@ func (s server) GetParticipatingStores(ctx context.Context, request *storespb.Ge
 
 	stores, err := s.app.GetParticipatingStores(ctx, queries.GetParticipatingStores{})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func (s server) AddProduct(ctx context.Context, request *storespb.AddProductRequ
 		Price:       request.GetPrice(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -207,7 +208,7 @@ func (s server) RebrandProduct(ctx context.Context, request *storespb.RebrandPro
 		Description: request.GetDescription(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -226,7 +227,7 @@ func (s server) IncreaseProductPrice(ctx context.Context, request *storespb.Incr
 		Price: request.GetPrice(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -245,7 +246,7 @@ func (s server) DecreaseProductPrice(ctx context.Context, request *storespb.Decr
 		Price: request.GetPrice(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -263,7 +264,7 @@ func (s server) RemoveProduct(ctx context.Context, request *storespb.RemoveProdu
 		ID: request.GetId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -281,7 +282,7 @@ func (s server) GetProduct(ctx context.Context, request *storespb.GetProductRequ
 		ID: request.GetId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -298,7 +299,7 @@ func (s server) GetCatalog(ctx context.Context, request *storespb.GetCatalogRequ
 
 	products, err := s.app.GetCatalog(ctx, queries.GetCatalog{StoreID: request.GetStoreId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}

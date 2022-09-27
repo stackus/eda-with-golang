@@ -5,12 +5,14 @@ import (
 
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 
 	"eda-in-golang/baskets/basketspb"
 	"eda-in-golang/baskets/internal/application"
 	"eda-in-golang/baskets/internal/domain"
+	"eda-in-golang/internal/errorsotel"
 )
 
 type server struct {
@@ -39,6 +41,10 @@ func (s server) StartBasket(ctx context.Context, request *basketspb.StartBasketR
 		ID:         basketID,
 		CustomerID: request.GetCustomerId(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
 
 	return &basketspb.StartBasketResponse{Id: basketID}, err
 }
@@ -53,6 +59,10 @@ func (s server) CancelBasket(ctx context.Context, request *basketspb.CancelBaske
 	err := s.app.CancelBasket(ctx, application.CancelBasket{
 		ID: request.GetId(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
 
 	return &basketspb.CancelBasketResponse{}, err
 }
@@ -69,6 +79,10 @@ func (s server) CheckoutBasket(ctx context.Context, request *basketspb.CheckoutB
 		ID:        request.GetId(),
 		PaymentID: request.GetPaymentId(),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
 
 	return &basketspb.CheckoutBasketResponse{}, err
 }
@@ -86,6 +100,10 @@ func (s server) AddItem(ctx context.Context, request *basketspb.AddItemRequest) 
 		ProductID: request.GetProductId(),
 		Quantity:  int(request.GetQuantity()),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
 
 	return &basketspb.AddItemResponse{}, err
 }
@@ -103,6 +121,10 @@ func (s server) RemoveItem(ctx context.Context, request *basketspb.RemoveItemReq
 		ProductID: request.GetProductId(),
 		Quantity:  int(request.GetQuantity()),
 	})
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
+	}
 
 	return &basketspb.RemoveItemResponse{}, err
 }
@@ -118,6 +140,8 @@ func (s server) GetBasket(ctx context.Context, request *basketspb.GetBasketReque
 		ID: request.GetId(),
 	})
 	if err != nil {
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 

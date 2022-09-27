@@ -2,7 +2,6 @@ package amotel
 
 import (
 	"context"
-	"fmt"
 
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/codes"
@@ -21,7 +20,7 @@ func OtelMessageContextExtractor() am.MessageHandlerMiddleware {
 			ctx = baggage.ContextWithBaggage(ctx, bags)
 			ctx, span := tracer.Start(
 				trace.ContextWithRemoteSpanContext(ctx, spanCtx),
-				fmt.Sprintf("Receive(%s)", msg.MessageName()),
+				msg.MessageName(),
 				trace.WithSpanKind(trace.SpanKindConsumer),
 			)
 			defer span.End()

@@ -10,6 +10,7 @@ import (
 	"eda-in-golang/baskets/internal/domain"
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/errorsotel"
 	"eda-in-golang/internal/registry"
 	"eda-in-golang/stores/storespb"
 )
@@ -51,15 +52,20 @@ func RegisterIntegrationEventHandlers(subscriber am.MessageSubscriber, handlers 
 func (h integrationHandlers[T]) HandleEvent(ctx context.Context, event T) (err error) {
 	span := trace.SpanFromContext(ctx)
 	defer func(started time.Time) {
-		attrs := []attribute.KeyValue{
-			attribute.String("Event", event.EventName()),
-			attribute.Float64("Took", time.Since(started).Seconds()),
-		}
 		if err != nil {
-			attrs = append(attrs, attribute.String("Error", err.Error()))
+			span.AddEvent(
+				"Encountered an error handling integration event",
+				trace.WithAttributes(errorsotel.ErrAttrs(err)...),
+			)
 		}
-		span.AddEvent("Handled Integration Event", trace.WithAttributes(attrs...))
+		span.AddEvent("Handled integration event", trace.WithAttributes(
+			attribute.Int64("TookMS", time.Since(started).Milliseconds()),
+		))
 	}(time.Now())
+
+	span.AddEvent("Handling integration event", trace.WithAttributes(
+		attribute.String("Event", event.EventName()),
+	))
 
 	switch event.EventName() {
 	case storespb.StoreCreatedEvent:

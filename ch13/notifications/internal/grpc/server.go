@@ -8,6 +8,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 
+	"eda-in-golang/internal/errorsotel"
 	"eda-in-golang/notifications/internal/application"
 	"eda-in-golang/notifications/notificationspb"
 )
@@ -38,7 +39,7 @@ func (s server) NotifyOrderCreated(ctx context.Context, request *notificationspb
 		CustomerID: request.GetCustomerId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -59,7 +60,7 @@ func (s server) NotifyOrderCanceled(ctx context.Context, request *notificationsp
 		CustomerID: request.GetCustomerId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -80,7 +81,7 @@ func (s server) NotifyOrderReady(ctx context.Context, request *notificationspb.N
 		CustomerID: request.GetCustomerId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 

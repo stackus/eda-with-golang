@@ -9,6 +9,7 @@ import (
 
 	"eda-in-golang/internal/ddd"
 	"eda-in-golang/internal/di"
+	"eda-in-golang/internal/errorsotel"
 	"eda-in-golang/stores/internal/constants"
 	"eda-in-golang/stores/internal/domain"
 )
@@ -49,15 +50,20 @@ func RegisterMallHandlersTx(container di.Container) {
 func (h mallHandlers[T]) HandleEvent(ctx context.Context, event T) (err error) {
 	span := trace.SpanFromContext(ctx)
 	defer func(started time.Time) {
-		attrs := []attribute.KeyValue{
-			attribute.String("Event", event.EventName()),
-			attribute.Float64("Took", time.Since(started).Seconds()),
-		}
 		if err != nil {
-			attrs = append(attrs, attribute.String("Error", err.Error()))
+			span.AddEvent(
+				"Encountered an error handling mall event",
+				trace.WithAttributes(errorsotel.ErrAttrs(err)...),
+			)
 		}
-		span.AddEvent("Handled Mall Event", trace.WithAttributes(attrs...))
+		span.AddEvent("Handled mall event", trace.WithAttributes(
+			attribute.Int64("TookMS", time.Since(started).Milliseconds()),
+		))
 	}(time.Now())
+
+	span.AddEvent("Handling mall event", trace.WithAttributes(
+		attribute.String("Event", event.EventName()),
+	))
 
 	switch event.EventName() {
 	case domain.StoreCreatedEvent:

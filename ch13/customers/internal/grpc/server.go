@@ -12,6 +12,7 @@ import (
 	"eda-in-golang/customers/customerspb"
 	"eda-in-golang/customers/internal/application"
 	"eda-in-golang/customers/internal/domain"
+	"eda-in-golang/internal/errorsotel"
 )
 
 type server struct {
@@ -43,7 +44,7 @@ func (s server) RegisterCustomer(ctx context.Context, request *customerspb.Regis
 		SmsNumber: request.GetSmsNumber(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -61,7 +62,7 @@ func (s server) AuthorizeCustomer(ctx context.Context, request *customerspb.Auth
 		ID: request.GetId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -79,7 +80,7 @@ func (s server) GetCustomer(ctx context.Context, request *customerspb.GetCustome
 		ID: request.GetId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -98,7 +99,7 @@ func (s server) EnableCustomer(ctx context.Context, request *customerspb.EnableC
 
 	err = s.app.EnableCustomer(ctx, application.EnableCustomer{ID: request.GetId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -114,7 +115,7 @@ func (s server) DisableCustomer(ctx context.Context, request *customerspb.Disabl
 
 	err = s.app.DisableCustomer(ctx, application.DisableCustomer{ID: request.GetId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 

@@ -9,6 +9,7 @@ import (
 
 	"eda-in-golang/internal/am"
 	"eda-in-golang/internal/ddd"
+	"eda-in-golang/internal/errorsotel"
 	"eda-in-golang/internal/registry"
 	"eda-in-golang/ordering/internal/application"
 	"eda-in-golang/ordering/internal/application/commands"
@@ -36,15 +37,20 @@ func RegisterCommandHandlers(subscriber am.MessageSubscriber, handlers am.Messag
 func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (reply ddd.Reply, err error) {
 	span := trace.SpanFromContext(ctx)
 	defer func(started time.Time) {
-		attrs := []attribute.KeyValue{
-			attribute.String("Command", cmd.CommandName()),
-			attribute.Float64("Took", time.Since(started).Seconds()),
-		}
 		if err != nil {
-			attrs = append(attrs, attribute.String("Error", err.Error()))
+			span.AddEvent(
+				"Encountered an error handling command",
+				trace.WithAttributes(errorsotel.ErrAttrs(err)...),
+			)
 		}
-		span.AddEvent("Handled Command", trace.WithAttributes(attrs...))
+		span.AddEvent("Handled command", trace.WithAttributes(
+			attribute.Int64("TookMS", time.Since(started).Milliseconds()),
+		))
 	}(time.Now())
+
+	span.AddEvent("Handling command", trace.WithAttributes(
+		attribute.String("Command", cmd.CommandName()),
+	))
 
 	switch cmd.CommandName() {
 	case orderingpb.RejectOrderCommand:

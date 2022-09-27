@@ -9,6 +9,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 
+	"eda-in-golang/internal/errorsotel"
 	"eda-in-golang/ordering/internal/application"
 	"eda-in-golang/ordering/internal/application/commands"
 	"eda-in-golang/ordering/internal/application/queries"
@@ -51,7 +52,7 @@ func (s server) CreateOrder(ctx context.Context, request *orderingpb.CreateOrder
 		Items:      items,
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -67,7 +68,7 @@ func (s server) CancelOrder(ctx context.Context, request *orderingpb.CancelOrder
 
 	err := s.app.CancelOrder(ctx, commands.CancelOrder{ID: request.GetId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -83,7 +84,7 @@ func (s server) ReadyOrder(ctx context.Context, request *orderingpb.ReadyOrderRe
 
 	err := s.app.ReadyOrder(ctx, commands.ReadyOrder{ID: request.GetId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -99,7 +100,7 @@ func (s server) CompleteOrder(ctx context.Context, request *orderingpb.CompleteO
 
 	err := s.app.CompleteOrder(ctx, commands.CompleteOrder{ID: request.GetId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -115,7 +116,7 @@ func (s server) GetOrder(ctx context.Context, request *orderingpb.GetOrderReques
 
 	order, err := s.app.GetOrder(ctx, queries.GetOrder{ID: request.GetId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}

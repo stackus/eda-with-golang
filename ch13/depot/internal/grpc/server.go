@@ -12,6 +12,7 @@ import (
 	"eda-in-golang/depot/depotpb"
 	"eda-in-golang/depot/internal/application"
 	"eda-in-golang/depot/internal/application/commands"
+	"eda-in-golang/internal/errorsotel"
 )
 
 type server struct {
@@ -47,7 +48,7 @@ func (s server) CreateShoppingList(ctx context.Context, request *depotpb.CreateS
 		Items:   items,
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -65,7 +66,7 @@ func (s server) CancelShoppingList(ctx context.Context, request *depotpb.CancelS
 		ID: request.GetId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -84,7 +85,7 @@ func (s server) AssignShoppingList(ctx context.Context, request *depotpb.AssignS
 		BotID: request.GetBotId(),
 	})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
@@ -100,7 +101,7 @@ func (s server) CompleteShoppingList(ctx context.Context, request *depotpb.Compl
 
 	err := s.app.CompleteShoppingList(ctx, commands.CompleteShoppingList{ID: request.GetId()})
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithAttributes(errorsotel.ErrAttrs(err)...))
 		span.SetStatus(codes.Error, err.Error())
 	}
 
