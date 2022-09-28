@@ -54,9 +54,39 @@ type AddProductOK struct {
 	Payload *models.StorespbAddProductResponse
 }
 
+// IsSuccess returns true when this add product o k response has a 2xx status code
+func (o *AddProductOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this add product o k response has a 3xx status code
+func (o *AddProductOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this add product o k response has a 4xx status code
+func (o *AddProductOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this add product o k response has a 5xx status code
+func (o *AddProductOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this add product o k response a status code equal to that given
+func (o *AddProductOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *AddProductOK) Error() string {
 	return fmt.Sprintf("[POST /api/stores/{storeId}/products][%d] addProductOK  %+v", 200, o.Payload)
 }
+
+func (o *AddProductOK) String() string {
+	return fmt.Sprintf("[POST /api/stores/{storeId}/products][%d] addProductOK  %+v", 200, o.Payload)
+}
+
 func (o *AddProductOK) GetPayload() *models.StorespbAddProductResponse {
 	return o.Payload
 }
@@ -95,9 +125,39 @@ func (o *AddProductDefault) Code() int {
 	return o._statusCode
 }
 
+// IsSuccess returns true when this add product default response has a 2xx status code
+func (o *AddProductDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this add product default response has a 3xx status code
+func (o *AddProductDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this add product default response has a 4xx status code
+func (o *AddProductDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this add product default response has a 5xx status code
+func (o *AddProductDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this add product default response a status code equal to that given
+func (o *AddProductDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 func (o *AddProductDefault) Error() string {
 	return fmt.Sprintf("[POST /api/stores/{storeId}/products][%d] addProduct default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *AddProductDefault) String() string {
+	return fmt.Sprintf("[POST /api/stores/{storeId}/products][%d] addProduct default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *AddProductDefault) GetPayload() *models.RPCStatus {
 	return o.Payload
 }

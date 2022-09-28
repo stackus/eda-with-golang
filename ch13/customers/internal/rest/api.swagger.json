@@ -19,8 +19,8 @@
   "paths": {
     "/api/customers": {
       "post": {
-        "summary": "Create a new customer",
-        "operationId": "createCustomer",
+        "summary": "Register a new customer",
+        "operationId": "registerCustomer",
         "responses": {
           "200": {
             "description": "A successful response.",

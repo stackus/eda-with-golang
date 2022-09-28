@@ -54,9 +54,39 @@ type RebrandStoreOK struct {
 	Payload models.StorespbRebrandStoreResponse
 }
 
+// IsSuccess returns true when this rebrand store o k response has a 2xx status code
+func (o *RebrandStoreOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this rebrand store o k response has a 3xx status code
+func (o *RebrandStoreOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this rebrand store o k response has a 4xx status code
+func (o *RebrandStoreOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this rebrand store o k response has a 5xx status code
+func (o *RebrandStoreOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this rebrand store o k response a status code equal to that given
+func (o *RebrandStoreOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *RebrandStoreOK) Error() string {
 	return fmt.Sprintf("[PUT /api/stores/{id}/rebrand][%d] rebrandStoreOK  %+v", 200, o.Payload)
 }
+
+func (o *RebrandStoreOK) String() string {
+	return fmt.Sprintf("[PUT /api/stores/{id}/rebrand][%d] rebrandStoreOK  %+v", 200, o.Payload)
+}
+
 func (o *RebrandStoreOK) GetPayload() models.StorespbRebrandStoreResponse {
 	return o.Payload
 }
@@ -93,9 +123,39 @@ func (o *RebrandStoreDefault) Code() int {
 	return o._statusCode
 }
 
+// IsSuccess returns true when this rebrand store default response has a 2xx status code
+func (o *RebrandStoreDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this rebrand store default response has a 3xx status code
+func (o *RebrandStoreDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this rebrand store default response has a 4xx status code
+func (o *RebrandStoreDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this rebrand store default response has a 5xx status code
+func (o *RebrandStoreDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this rebrand store default response a status code equal to that given
+func (o *RebrandStoreDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 func (o *RebrandStoreDefault) Error() string {
 	return fmt.Sprintf("[PUT /api/stores/{id}/rebrand][%d] rebrandStore default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *RebrandStoreDefault) String() string {
+	return fmt.Sprintf("[PUT /api/stores/{id}/rebrand][%d] rebrandStore default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *RebrandStoreDefault) GetPayload() *models.RPCStatus {
 	return o.Payload
 }

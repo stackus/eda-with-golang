@@ -54,9 +54,39 @@ type DisableCustomerOK struct {
 	Payload models.CustomerspbDisableCustomerResponse
 }
 
+// IsSuccess returns true when this disable customer o k response has a 2xx status code
+func (o *DisableCustomerOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this disable customer o k response has a 3xx status code
+func (o *DisableCustomerOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this disable customer o k response has a 4xx status code
+func (o *DisableCustomerOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this disable customer o k response has a 5xx status code
+func (o *DisableCustomerOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this disable customer o k response a status code equal to that given
+func (o *DisableCustomerOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *DisableCustomerOK) Error() string {
 	return fmt.Sprintf("[PUT /api/customers/{id}/disable][%d] disableCustomerOK  %+v", 200, o.Payload)
 }
+
+func (o *DisableCustomerOK) String() string {
+	return fmt.Sprintf("[PUT /api/customers/{id}/disable][%d] disableCustomerOK  %+v", 200, o.Payload)
+}
+
 func (o *DisableCustomerOK) GetPayload() models.CustomerspbDisableCustomerResponse {
 	return o.Payload
 }
@@ -93,9 +123,39 @@ func (o *DisableCustomerDefault) Code() int {
 	return o._statusCode
 }
 
+// IsSuccess returns true when this disable customer default response has a 2xx status code
+func (o *DisableCustomerDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this disable customer default response has a 3xx status code
+func (o *DisableCustomerDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this disable customer default response has a 4xx status code
+func (o *DisableCustomerDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this disable customer default response has a 5xx status code
+func (o *DisableCustomerDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this disable customer default response a status code equal to that given
+func (o *DisableCustomerDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 func (o *DisableCustomerDefault) Error() string {
 	return fmt.Sprintf("[PUT /api/customers/{id}/disable][%d] DisableCustomer default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *DisableCustomerDefault) String() string {
+	return fmt.Sprintf("[PUT /api/customers/{id}/disable][%d] DisableCustomer default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *DisableCustomerDefault) GetPayload() *models.RPCStatus {
 	return o.Payload
 }

@@ -32,11 +32,11 @@ type ClientService interface {
 
 	ChangeSmsNumber(params *ChangeSmsNumberParams, opts ...ClientOption) (*ChangeSmsNumberOK, error)
 
-	CreateCustomer(params *CreateCustomerParams, opts ...ClientOption) (*CreateCustomerOK, error)
-
 	EnableCustomer(params *EnableCustomerParams, opts ...ClientOption) (*EnableCustomerOK, error)
 
 	GetCustomer(params *GetCustomerParams, opts ...ClientOption) (*GetCustomerOK, error)
+
+	RegisterCustomer(params *RegisterCustomerParams, opts ...ClientOption) (*RegisterCustomerOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -116,43 +116,6 @@ func (a *Client) ChangeSmsNumber(params *ChangeSmsNumberParams, opts ...ClientOp
 }
 
 /*
-  CreateCustomer creates a new customer
-*/
-func (a *Client) CreateCustomer(params *CreateCustomerParams, opts ...ClientOption) (*CreateCustomerOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewCreateCustomerParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "createCustomer",
-		Method:             "POST",
-		PathPattern:        "/api/customers",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &CreateCustomerReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*CreateCustomerOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*CreateCustomerDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
   EnableCustomer enables a customer
 */
 func (a *Client) EnableCustomer(params *EnableCustomerParams, opts ...ClientOption) (*EnableCustomerOK, error) {
@@ -223,6 +186,43 @@ func (a *Client) GetCustomer(params *GetCustomerParams, opts ...ClientOption) (*
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetCustomerDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+  RegisterCustomer registers a new customer
+*/
+func (a *Client) RegisterCustomer(params *RegisterCustomerParams, opts ...ClientOption) (*RegisterCustomerOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRegisterCustomerParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "registerCustomer",
+		Method:             "POST",
+		PathPattern:        "/api/customers",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &RegisterCustomerReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*RegisterCustomerOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*RegisterCustomerDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

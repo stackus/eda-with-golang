@@ -34,7 +34,7 @@ type ClientService interface {
 
 	GetProduct(params *GetProductParams, opts ...ClientOption) (*GetProductOK, error)
 
-	GetStoreProduct(params *GetStoreProductParams, opts ...ClientOption) (*GetStoreProductOK, error)
+	GetStoreProducts(params *GetStoreProductsParams, opts ...ClientOption) (*GetStoreProductsOK, error)
 
 	IncreaseProductPrice(params *IncreaseProductPriceParams, opts ...ClientOption) (*IncreaseProductPriceOK, error)
 
@@ -157,22 +157,22 @@ func (a *Client) GetProduct(params *GetProductParams, opts ...ClientOption) (*Ge
 }
 
 /*
-  GetStoreProduct gets a list of store products
+  GetStoreProducts gets a list of store products
 */
-func (a *Client) GetStoreProduct(params *GetStoreProductParams, opts ...ClientOption) (*GetStoreProductOK, error) {
+func (a *Client) GetStoreProducts(params *GetStoreProductsParams, opts ...ClientOption) (*GetStoreProductsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetStoreProductParams()
+		params = NewGetStoreProductsParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "getStoreProduct",
+		ID:                 "getStoreProducts",
 		Method:             "GET",
 		PathPattern:        "/api/stores/{storeId}/products",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetStoreProductReader{formats: a.formats},
+		Reader:             &GetStoreProductsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -184,12 +184,12 @@ func (a *Client) GetStoreProduct(params *GetStoreProductParams, opts ...ClientOp
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*GetStoreProductOK)
+	success, ok := result.(*GetStoreProductsOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
-	unexpectedSuccess := result.(*GetStoreProductDefault)
+	unexpectedSuccess := result.(*GetStoreProductsDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

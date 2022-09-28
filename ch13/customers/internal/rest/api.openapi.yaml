@@ -9,10 +9,10 @@ openapiOptions:
   method:
     - method: customerspb.CustomersService.RegisterCustomer
       option:
-        operationId: createCustomer
+        operationId: registerCustomer
         tags:
           - Customer
-        summary: Create a new customer
+        summary: Register a new customer
     - method: customerspb.CustomersService.ChangeSmsNumber
       option:
         operationId: changeSmsNumber

@@ -87,7 +87,7 @@ openapiOptions:
         summary: Get a store product
     - method: storespb.StoresService.GetCatalog
       option:
-        operationId: getStoreProduct
+        operationId: getStoreProducts
         tags:
           - Product
         summary: Get a list of store products

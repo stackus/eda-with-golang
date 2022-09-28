@@ -54,9 +54,39 @@ type RemoveItemOK struct {
 	Payload models.BasketspbRemoveItemResponse
 }
 
+// IsSuccess returns true when this remove item o k response has a 2xx status code
+func (o *RemoveItemOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this remove item o k response has a 3xx status code
+func (o *RemoveItemOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this remove item o k response has a 4xx status code
+func (o *RemoveItemOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this remove item o k response has a 5xx status code
+func (o *RemoveItemOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this remove item o k response a status code equal to that given
+func (o *RemoveItemOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *RemoveItemOK) Error() string {
 	return fmt.Sprintf("[PUT /api/baskets/{id}/removeItem][%d] removeItemOK  %+v", 200, o.Payload)
 }
+
+func (o *RemoveItemOK) String() string {
+	return fmt.Sprintf("[PUT /api/baskets/{id}/removeItem][%d] removeItemOK  %+v", 200, o.Payload)
+}
+
 func (o *RemoveItemOK) GetPayload() models.BasketspbRemoveItemResponse {
 	return o.Payload
 }
@@ -93,9 +123,39 @@ func (o *RemoveItemDefault) Code() int {
 	return o._statusCode
 }
 
+// IsSuccess returns true when this remove item default response has a 2xx status code
+func (o *RemoveItemDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this remove item default response has a 3xx status code
+func (o *RemoveItemDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this remove item default response has a 4xx status code
+func (o *RemoveItemDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this remove item default response has a 5xx status code
+func (o *RemoveItemDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this remove item default response a status code equal to that given
+func (o *RemoveItemDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 func (o *RemoveItemDefault) Error() string {
 	return fmt.Sprintf("[PUT /api/baskets/{id}/removeItem][%d] removeItem default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *RemoveItemDefault) String() string {
+	return fmt.Sprintf("[PUT /api/baskets/{id}/removeItem][%d] removeItem default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *RemoveItemDefault) GetPayload() *models.RPCStatus {
 	return o.Payload
 }

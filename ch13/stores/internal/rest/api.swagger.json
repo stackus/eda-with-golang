@@ -436,7 +436,7 @@
     "/api/stores/{storeId}/products": {
       "get": {
         "summary": "Get a list of store products",
-        "operationId": "getStoreProduct",
+        "operationId": "getStoreProducts",
         "responses": {
           "200": {
             "description": "A successful response.",

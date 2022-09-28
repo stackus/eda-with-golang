@@ -54,9 +54,39 @@ type CreateOrderOK struct {
 	Payload *models.OrderingpbCreateOrderResponse
 }
 
+// IsSuccess returns true when this create order o k response has a 2xx status code
+func (o *CreateOrderOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this create order o k response has a 3xx status code
+func (o *CreateOrderOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this create order o k response has a 4xx status code
+func (o *CreateOrderOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this create order o k response has a 5xx status code
+func (o *CreateOrderOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this create order o k response a status code equal to that given
+func (o *CreateOrderOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *CreateOrderOK) Error() string {
 	return fmt.Sprintf("[POST /api/ordering][%d] createOrderOK  %+v", 200, o.Payload)
 }
+
+func (o *CreateOrderOK) String() string {
+	return fmt.Sprintf("[POST /api/ordering][%d] createOrderOK  %+v", 200, o.Payload)
+}
+
 func (o *CreateOrderOK) GetPayload() *models.OrderingpbCreateOrderResponse {
 	return o.Payload
 }
@@ -95,9 +125,39 @@ func (o *CreateOrderDefault) Code() int {
 	return o._statusCode
 }
 
+// IsSuccess returns true when this create order default response has a 2xx status code
+func (o *CreateOrderDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this create order default response has a 3xx status code
+func (o *CreateOrderDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this create order default response has a 4xx status code
+func (o *CreateOrderDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this create order default response has a 5xx status code
+func (o *CreateOrderDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this create order default response a status code equal to that given
+func (o *CreateOrderDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 func (o *CreateOrderDefault) Error() string {
 	return fmt.Sprintf("[POST /api/ordering][%d] createOrder default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *CreateOrderDefault) String() string {
+	return fmt.Sprintf("[POST /api/ordering][%d] createOrder default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *CreateOrderDefault) GetPayload() *models.RPCStatus {
 	return o.Payload
 }

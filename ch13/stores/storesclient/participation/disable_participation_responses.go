@@ -54,9 +54,39 @@ type DisableParticipationOK struct {
 	Payload models.StorespbDisableParticipationResponse
 }
 
+// IsSuccess returns true when this disable participation o k response has a 2xx status code
+func (o *DisableParticipationOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this disable participation o k response has a 3xx status code
+func (o *DisableParticipationOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this disable participation o k response has a 4xx status code
+func (o *DisableParticipationOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this disable participation o k response has a 5xx status code
+func (o *DisableParticipationOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this disable participation o k response a status code equal to that given
+func (o *DisableParticipationOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *DisableParticipationOK) Error() string {
 	return fmt.Sprintf("[DELETE /api/stores/{id}/participating][%d] disableParticipationOK  %+v", 200, o.Payload)
 }
+
+func (o *DisableParticipationOK) String() string {
+	return fmt.Sprintf("[DELETE /api/stores/{id}/participating][%d] disableParticipationOK  %+v", 200, o.Payload)
+}
+
 func (o *DisableParticipationOK) GetPayload() models.StorespbDisableParticipationResponse {
 	return o.Payload
 }
@@ -93,9 +123,39 @@ func (o *DisableParticipationDefault) Code() int {
 	return o._statusCode
 }
 
+// IsSuccess returns true when this disable participation default response has a 2xx status code
+func (o *DisableParticipationDefault) IsSuccess() bool {
+	return o._statusCode/100 == 2
+}
+
+// IsRedirect returns true when this disable participation default response has a 3xx status code
+func (o *DisableParticipationDefault) IsRedirect() bool {
+	return o._statusCode/100 == 3
+}
+
+// IsClientError returns true when this disable participation default response has a 4xx status code
+func (o *DisableParticipationDefault) IsClientError() bool {
+	return o._statusCode/100 == 4
+}
+
+// IsServerError returns true when this disable participation default response has a 5xx status code
+func (o *DisableParticipationDefault) IsServerError() bool {
+	return o._statusCode/100 == 5
+}
+
+// IsCode returns true when this disable participation default response a status code equal to that given
+func (o *DisableParticipationDefault) IsCode(code int) bool {
+	return o._statusCode == code
+}
+
 func (o *DisableParticipationDefault) Error() string {
 	return fmt.Sprintf("[DELETE /api/stores/{id}/participating][%d] disableParticipation default  %+v", o._statusCode, o.Payload)
 }
+
+func (o *DisableParticipationDefault) String() string {
+	return fmt.Sprintf("[DELETE /api/stores/{id}/participating][%d] disableParticipation default  %+v", o._statusCode, o.Payload)
+}
+
 func (o *DisableParticipationDefault) GetPayload() *models.RPCStatus {
 	return o.Payload
 }

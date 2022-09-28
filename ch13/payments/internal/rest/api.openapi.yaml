@@ -3,7 +3,7 @@ openapiOptions:
     - file: paymentspb/api.proto
       option:
         info:
-          title: Payments API
+          title: Payments
           version: "1.0.0"
         basePath: /
   method:
