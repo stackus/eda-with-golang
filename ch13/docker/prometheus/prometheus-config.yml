@@ -5,47 +5,47 @@ scrape_configs:
   - job_name: baskets
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'baskets:8080'
   - job_name: cosec
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'cosec:8080'
   - job_name: customers
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'customers:8080'
   - job_name: depot
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'depot:8080'
   - job_name: notifications
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'notifications:8080'
   - job_name: ordering
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'ordering:8080'
   - job_name: payments
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'payments:8080'
   - job_name: search
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'search:8080'
   - job_name: stores
     scrape_interval: 10s
     static_configs:
-      -targets:
+      - targets:
         - 'stores:8080'
   - job_name: otel
     static_configs:

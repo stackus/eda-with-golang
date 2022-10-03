@@ -159,7 +159,9 @@ func (s *System) initRpc() {
 			serverErrorUnaryInterceptor(),
 		),
 		// If there are streaming endpoints also add
-		// grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+		// grpc.StreamInterceptor(
+		// 	otelgrpc.StreamServerInterceptor(),
+		// ),
 	)
 	reflection.Register(s.rpc)
 }

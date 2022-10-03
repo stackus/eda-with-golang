@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog"
 
 	"eda-in-golang/customers/customerspb"
@@ -90,13 +92,18 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 		tx := postgresotel.Trace(c.Get(constants.DatabaseTransactionKey).(*sql.Tx))
 		return pg.NewInboxStore(constants.InboxTableName, tx), nil
 	})
+	// Prometheus counters
+	customersRegistered := promauto.NewCounter(prometheus.CounterOpts{
+		Namespace: constants.ServiceName,
+		Name:      "customers_registered_count",
+	})
 
 	// setup application
 	container.AddScoped(constants.ApplicationKey, func(c di.Container) (any, error) {
-		return application.New(
+		return application.NewInstrumentedApp(application.New(
 			c.Get(constants.CustomersRepoKey).(domain.CustomerRepository),
 			c.Get(constants.DomainDispatcherKey).(*ddd.EventDispatcher[ddd.AggregateEvent]),
-		), nil
+		), customersRegistered), nil
 	})
 	container.AddScoped(constants.DomainEventHandlersKey, func(c di.Container) (any, error) {
 		return handlers.NewDomainEventHandlers(c.Get(constants.EventPublisherKey).(am.EventPublisher)), nil

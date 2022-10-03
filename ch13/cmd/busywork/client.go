@@ -69,43 +69,44 @@ func (c *busyworkClient) work(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// [Client X] is considering ...
-	var options = []string{
-		"registering a new account",
-		"setting up a new store",
-		"adding new inventory",
-		"rebranding the store",
-		"updating product lines",
-		"browsing for new things",
-		"buying some items",
-	}
-
-	option := rand.Intn(7)
-	c.log.Println("is considering", options[option])
-	switch option {
+	first := rand.Intn(2)
+	switch first {
 	case 0:
-		return c.registerCustomer(ctx)
+		var options = []string{
+			"browsing for new things",
+			"buying some items",
+		}
+		second := rand.Intn(4)
+		c.log.Println("is considering", options[second])
+		switch second {
+		case 0, 1, 2:
+			return c.justBrowsing(ctx)
+		case 3:
+			return c.buyingItems(ctx)
+		}
 	case 1:
-		return c.setupAStore(ctx)
-	case 2:
-		return c.addNewInventory(ctx)
-	case 3:
-		return c.rebrandStore(ctx)
-	case 4:
-		return c.rebrandProduct(ctx)
-	case 5:
-		return c.justBrowsing(ctx)
-	case 6:
-		return c.buyingItems(ctx)
+		var options = []string{
+			"registering a new account",
+			"setting up a new store",
+			"adding new inventory",
+			"rebranding the store",
+			"updating product lines",
+		}
+		second := rand.Intn(10)
+		c.log.Println("is considering", options[second])
+		switch second {
+		case 0, 5, 6, 7:
+			return c.registerCustomer(ctx)
+		case 1:
+			return c.setupAStore(ctx)
+		case 2, 8, 9:
+			return c.addNewInventory(ctx)
+		case 3:
+			return c.rebrandStore(ctx)
+		case 4:
+			return c.rebrandProduct(ctx)
+		}
 	}
-
-	// Register
-	// Create Store
-	// Add Items to Store
-	// Rebrand Stores
-	// Rebrand Products
-	// Start a Basket, Add Items, Cancel Basket
-	// Start a Basket, Add Items, Remove Items, Checkout Basket
 
 	return nil
 }
