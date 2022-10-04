@@ -16,6 +16,7 @@ func SentMessagesCounter(serviceName string) am.MessagePublisherMiddleware {
 		Name:      "sent_messages_count",
 		Help:      fmt.Sprintf("The total number of messages sent by %s", serviceName),
 	}, []string{"message"})
+
 	return func(next am.MessagePublisher) am.MessagePublisher {
 		return am.MessagePublisherFunc(func(ctx context.Context, topicName string, msg am.Message) (err error) {
 			defer func() {

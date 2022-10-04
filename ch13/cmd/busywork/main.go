@@ -29,6 +29,8 @@ func main() {
 }
 
 func run() error {
+	flag.Parse()
+
 	tp, err := initOpenTelemetry()
 	if err != nil {
 		return err

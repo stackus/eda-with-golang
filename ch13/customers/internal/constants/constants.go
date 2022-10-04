@@ -40,3 +40,8 @@ const (
 
 	CustomersTableName = ServiceName + ".customers"
 )
+
+// Metric Names
+const (
+	CustomersRegisteredCount = "customers_registered_count"
+)

@@ -116,16 +116,13 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	// Prometheus counters
 	basketsStarted := promauto.NewCounter(prometheus.CounterOpts{
-		Namespace: constants.ServiceName,
-		Name:      "baskets_started_count",
+		Name: constants.BasketsStartedCount,
 	})
 	basketsCheckedOut := promauto.NewCounter(prometheus.CounterOpts{
-		Namespace: constants.ServiceName,
-		Name:      "baskets_checked_out_count",
+		Name: constants.BasketsCheckedOutCount,
 	})
 	basketsCanceled := promauto.NewCounter(prometheus.CounterOpts{
-		Namespace: constants.ServiceName,
-		Name:      "baskets_canceled_count",
+		Name: constants.BaksetsCanceledCount,
 	})
 
 	// setup application

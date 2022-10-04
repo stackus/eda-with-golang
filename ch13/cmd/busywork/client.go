@@ -72,38 +72,32 @@ func (c *busyworkClient) work(ctx context.Context) error {
 	first := rand.Intn(2)
 	switch first {
 	case 0:
-		var options = []string{
-			"browsing for new things",
-			"buying some items",
-		}
 		second := rand.Intn(4)
-		c.log.Println("is considering", options[second])
 		switch second {
 		case 0, 1, 2:
+			c.log.Println("is considering browsing for new things")
 			return c.justBrowsing(ctx)
 		case 3:
+			c.log.Println("is considering buying some things")
 			return c.buyingItems(ctx)
 		}
 	case 1:
-		var options = []string{
-			"registering a new account",
-			"setting up a new store",
-			"adding new inventory",
-			"rebranding the store",
-			"updating product lines",
-		}
 		second := rand.Intn(10)
-		c.log.Println("is considering", options[second])
 		switch second {
 		case 0, 5, 6, 7:
+			c.log.Println("is considering registering a new account")
 			return c.registerCustomer(ctx)
 		case 1:
+			c.log.Println("is considering setting up a new store")
 			return c.setupAStore(ctx)
 		case 2, 8, 9:
+			c.log.Println("is considering adding new inventory")
 			return c.addNewInventory(ctx)
 		case 3:
+			c.log.Println("is considering rebranding a store")
 			return c.rebrandStore(ctx)
 		case 4:
+			c.log.Println("is considering updating product branding")
 			return c.rebrandProduct(ctx)
 		}
 	}

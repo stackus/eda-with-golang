@@ -23,6 +23,7 @@ func ReceivedMessagesCounter(serviceName string) am.MessageHandlerMiddleware {
 		Name:      "received_messages_latency_seconds",
 		Buckets:   []float64{0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5},
 	}, []string{"message", "handled"})
+
 	return func(next am.MessageHandler) am.MessageHandler {
 		return am.MessageHandlerFunc(func(ctx context.Context, msg am.IncomingMessage) (err error) {
 			defer func(started time.Time) {

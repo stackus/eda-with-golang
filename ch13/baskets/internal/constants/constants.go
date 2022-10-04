@@ -43,3 +43,10 @@ const (
 	StoresCacheTableName   = ServiceName + ".stores_cache"
 	ProductsCacheTableName = ServiceName + ".products_cache"
 )
+
+// Metric Names
+const (
+	BasketsStartedCount    = "baskets_started_count"
+	BasketsCheckedOutCount = "baskets_checked_out_count"
+	BaksetsCanceledCount   = "baskets_canceled_count"
+)

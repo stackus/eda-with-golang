@@ -94,8 +94,7 @@ func Root(ctx context.Context, svc system.Service) (err error) {
 	})
 	// Prometheus counters
 	customersRegistered := promauto.NewCounter(prometheus.CounterOpts{
-		Namespace: constants.ServiceName,
-		Name:      "customers_registered_count",
+		Name: constants.CustomersRegisteredCount,
 	})
 
 	// setup application

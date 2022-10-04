@@ -285,21 +285,21 @@ services:
       - /var/lib/nats/data
     volumes:
       - 'jsdata:/var/lib/nats/data'
-#  pact:
-#    container_name: pact
-#    hostname: pact
-#    image: pactfoundation/pact-broker:2
-#    ports:
-#      - "9292:9292"
-#    depends_on:
-#      - postgres
-#    environment:
-#      PACT_BROKER_DATABASE_URL: 'postgres://pactuser:pactpass@postgres/pactdb'
-#      PACT_BROKER_BASIC_AUTH_USERNAME: pactuser
-#      PACT_BROKER_BASIC_AUTH_PASSWORD: pactpass
-#      PACT_BROKER_ALLOW_PUBLIC_READ: 'true'
-#      PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES: 5
-#      PACT_BROKER_BASE_URL: 'http://localhost:9292 http://pact-broker:9292'
+  pact:
+    container_name: pact
+    hostname: pact
+    image: pactfoundation/pact-broker:2
+    ports:
+      - "9292:9292"
+    depends_on:
+      - postgres
+    environment:
+      PACT_BROKER_DATABASE_URL: 'postgres://pactuser:pactpass@postgres/pactdb'
+      PACT_BROKER_BASIC_AUTH_USERNAME: pactuser
+      PACT_BROKER_BASIC_AUTH_PASSWORD: pactpass
+      PACT_BROKER_ALLOW_PUBLIC_READ: 'true'
+      PACT_BROKER_DATABASE_CONNECT_MAX_RETRIES: 5
+      PACT_BROKER_BASE_URL: 'http://localhost:9292 http://pact-broker:9292'
   collector:
     container_name: collector
     hostname: collector
@@ -329,13 +329,7 @@ services:
     hostname: prometheus
     image: prom/prometheus:v2.37.1
     command: [
-      #      - --web.console.templates=/etc/prometheus/consoles
-      #      - --web.console.libraries=/etc/prometheus/console_libraries
-      #      - --storage.tsdb.retention.time=1h
       "--config.file=/etc/prometheus/prometheus-config.yml",
-      #      - --storage.tsdb.path=/prometheus
-      #      - --web.enable-lifecycle
-      #      - --web.route-prefix=/
     ]
     volumes:
       - ./docker/prometheus/prometheus-config.yml:/etc/prometheus/prometheus-config.yml
