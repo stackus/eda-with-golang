@@ -8,20 +8,20 @@ participant Producer as prod
 queue "Message Broker" as b
 participant Consumer as con
 
-prod -> b : Notification    <b>(1)</b>
-prod -> b : Notification    <b>(2)</b>
-b -->> con : Notification    <b>(1)</b>
+prod -> b : <b>1<sup>st</sup></b> Notification
+prod -> b : <b>2<sup>nd</sup></b> Notification
+b -->> con : <b>1<sup>st</sup></b> Notification
 
-con -> prod ++ : Callback       <b>(1)</b>
-prod -> b : Notification    <b>(3)</b>
-b -->> con : Notification    <b>(2)</b>
+con -> prod ++ : <b>1<sup>st</sup></b> Callback
+prod -> b : <b>3<sup>rd</sup></b> Notification
+b -->> con : <b>2<sup>nd</sup></b> Notification
 prod -> con --
 
-con -> prod ++ : Callback       <b>(2)</b>
-b -->> con : Notification    <b>(3)</b>
+con -> prod ++ : <b>2<sup>nd</sup></b> Callback
+b -->> con : <b>3<sup>rd</sup></b> Notification
 prod -> con --
 
-con -> prod ++  : Callback       <b>(3)</b>
+con -> prod ++  : <b>3<sup>rd</sup></b> Callback
 |||
 prod -> con --
 
